@@ -1,5 +1,8 @@
 package com.example.tiktokproject.model.pojo;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +12,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Component
+@Getter
+@Setter
+@NoArgsConstructor
 public class User {
 
     private int id;

@@ -1,12 +1,16 @@
 package com.example.tiktokproject.controller;
+
 import com.example.tiktokproject.model.dto.UserLoginResponseWithEmailDTO;
 import com.example.tiktokproject.model.dto.UserLoginWithEmailDTO;
 import com.example.tiktokproject.model.dto.UserLoginWithPhoneDTO;
 import com.example.tiktokproject.model.dto.UserLoginResponseWithPhoneDTO;
+import com.example.tiktokproject.model.dto.*;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,23 +35,28 @@ public class UserController {
         String phone = user.getPhone();
         String password = user.getPassword();
         User u = userService.loginWithPhone(phone, password);
-        session.setAttribute(LOGGED,true);
-        session.setAttribute(LOGGED_FROM,request.getRemoteAddr());
-        UserLoginResponseWithPhoneDTO dto = modelMapper.map(u,UserLoginResponseWithPhoneDTO.class);
+        session.setAttribute(LOGGED, true);
+        session.setAttribute(LOGGED_FROM, request.getRemoteAddr());
+        UserLoginResponseWithPhoneDTO dto = modelMapper.map(u, UserLoginResponseWithPhoneDTO.class);
         return dto;
     }
 
     @PostMapping("/loginWithEmail")
-    public UserLoginResponseWithEmailDTO login(@RequestBody UserLoginWithEmailDTO user, HttpSession session, HttpServletRequest request){
+    public UserLoginResponseWithEmailDTO login(@RequestBody UserLoginWithEmailDTO user, HttpSession session, HttpServletRequest request) {
         String email = user.getEmail();
         String password = user.getPassword();
         User u = userService.loginWithEmail(email, password);
-        session.setAttribute(LOGGED,true);
-        session.setAttribute(LOGGED_FROM,request.getRemoteAddr());
-        UserLoginResponseWithEmailDTO dto = modelMapper.map(u,UserLoginResponseWithEmailDTO.class);
+        session.setAttribute(LOGGED, true);
+        session.setAttribute(LOGGED_FROM, request.getRemoteAddr());
+        UserLoginResponseWithEmailDTO dto = modelMapper.map(u, UserLoginResponseWithEmailDTO.class);
         return dto;
     }
 
-
+    @PostMapping("/registerWithEmail")
+    public ResponseEntity<UserRegisterResponseWithEmailDTO> registerWithEmail(@RequestBody UserRegisterRequestWithEmailDTO userDTO) {
+        User user = userService.registerWithEmail(userDTO);
+        UserRegisterResponseWithEmailDTO returnUserToResponse = modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
+        return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
+    }
 
 }

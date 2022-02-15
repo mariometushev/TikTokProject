@@ -17,7 +17,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {BadRequestException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorDTO handlerBadRequest(Exception e){
+    public ErrorDTO handlerBadRequest(Exception e) {
         ErrorDTO dto = new ErrorDTO();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -27,24 +27,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {UnauthorizedException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
-    public ErrorDTO handlerUnauthorizedException(Exception e){
+    public ErrorDTO handlerUnauthorizedException(Exception e) {
         ErrorDTO dto = new ErrorDTO();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.UNAUTHORIZED.value());
         return dto;
     }
 
-
     @ExceptionHandler(value = {NotFoundUserException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public ErrorDTO handlerNotFoundUser(Exception e){
+    public ErrorDTO handlerNotFoundUser(Exception e) {
         ErrorDTO dto = new ErrorDTO();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.NOT_FOUND.value());
         return dto;
     }
-
-
-
 }
