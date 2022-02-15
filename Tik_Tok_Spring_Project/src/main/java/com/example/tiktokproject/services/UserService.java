@@ -1,15 +1,16 @@
 package com.example.tiktokproject.services;
 
 import com.example.tiktokproject.exceptions.BadRequestException;
-import com.example.tiktokproject.exceptions.NotFoundUserException;
+import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
+import com.example.tiktokproject.model.dto.UserRegisterRequestWithEmailDTO;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.UserRepository;
-import com.example.tiktokproject.model.dto.UserRegisterRequestWithEmailDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -32,11 +33,11 @@ public class UserService {
             throw new BadRequestException("Password is mandatory");
         }
         if (!passwordEncoder.matches(password, userRepository.findPasswordByPhone_number(phone))){
-            throw new NotFoundUserException("Wrong email or password!");
+            throw new NotFoundException("Wrong email or password!");
         }
         User u = userRepository.findByPhone_number(phone);
         if (u == null){
-            throw new NotFoundUserException("Wrong phone number or password!");
+            throw new NotFoundException("Wrong phone number or password!");
         }
         return u;
     }
@@ -52,11 +53,11 @@ public class UserService {
             throw new BadRequestException("Email is mandatory!");
         }
         if (!passwordEncoder.matches(password, userRepository.findPasswordByEmail(email))){
-            throw new NotFoundUserException("Wrong email or password!");
+            throw new NotFoundException("Wrong email or password!");
         }
         User u = userRepository.findByEmail(email);
         if (u == null){
-            throw new NotFoundUserException("Wrong email or password!");
+            throw new NotFoundException("Wrong email or password!");
         }
         return u;
     }
