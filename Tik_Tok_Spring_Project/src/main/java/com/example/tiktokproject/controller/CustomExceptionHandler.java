@@ -1,8 +1,9 @@
 package com.example.tiktokproject.controller;
 
+import com.example.tiktokproject.exceptions.BadRequestException;
+import com.example.tiktokproject.exceptions.NotFoundUserException;
+import com.example.tiktokproject.exceptions.UnauthorizedException;
 import com.example.tiktokproject.model.dto.ErrorDTO;
-import com.example.tiktokproject.model.exceptions.BadRequestException;
-import com.example.tiktokproject.model.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +31,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorDTO dto = new ErrorDTO();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.UNAUTHORIZED.value());
+        return dto;
+    }
+
+
+    @ExceptionHandler(value = {NotFoundUserException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDTO handlerNotFoundUser(Exception e){
+        ErrorDTO dto = new ErrorDTO();
+        dto.setMsg(e.getMessage());
+        dto.setStatus(HttpStatus.NOT_FOUND.value());
         return dto;
     }
 

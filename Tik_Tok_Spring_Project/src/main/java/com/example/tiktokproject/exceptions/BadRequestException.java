@@ -1,4 +1,4 @@
-package com.example.tiktokproject.model.exceptions;
+package com.example.tiktokproject.exceptions;
 
 public class BadRequestException extends RuntimeException {
 
