@@ -9,5 +9,4 @@ public class TikTokProjectApplication {
     public static void main(String[] args) {
         SpringApplication.run(TikTokProjectApplication.class, args);
     }
-
 }
