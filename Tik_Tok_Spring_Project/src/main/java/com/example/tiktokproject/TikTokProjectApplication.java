@@ -11,8 +11,10 @@ public class TikTokProjectApplication {
     public static void main(String[] args) {
         SpringApplication.run(TikTokProjectApplication.class, args);
     }
+
     @Bean
     public ModelMapper modelMapper(){
-        return modelMapper();
+        return new ModelMapper();
     }
+
 }
