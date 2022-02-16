@@ -3,7 +3,7 @@ package com.example.tiktokproject.services;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
-import com.example.tiktokproject.model.dto.UserRegisterRequestWithEmailDTO;
+import com.example.tiktokproject.model.dto.*;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -25,7 +25,9 @@ public class UserService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public User loginWithPhone(String phone, String password) {
+    public UserLoginResponseWithPhoneDTO loginWithPhone(UserLoginWithPhoneDTO user) {
+        String phone = user.getPhone();
+        String password = user.getPassword();
         if (phone == null || phone.isBlank()){
             throw new BadRequestException("Password is mandatory");
         }
@@ -33,16 +35,19 @@ public class UserService {
             throw new BadRequestException("Password is mandatory");
         }
         if (!passwordEncoder.matches(password, userRepository.findPasswordByPhone_number(phone))){
-            throw new NotFoundException("Wrong email or password!");
+            throw new NotFoundException("Wrong phone number or password!");
         }
         User u = userRepository.findByPhone_number(phone);
         if (u == null){
             throw new NotFoundException("Wrong phone number or password!");
         }
-        return u;
+        UserLoginResponseWithPhoneDTO dto = modelMapper.map(u, UserLoginResponseWithPhoneDTO.class);
+        return dto;
     }
 
-    public User loginWithEmail(String email, String password) {
+    public UserLoginResponseWithEmailDTO loginWithEmail(UserLoginWithEmailDTO user) {
+        String email = user.getEmail();
+        String password = user.getPassword();
         if (password == null || password.isBlank()){
             throw new BadRequestException("Password is mandatory!");
         }
@@ -59,7 +64,8 @@ public class UserService {
         if (u == null){
             throw new NotFoundException("Wrong email or password!");
         }
-        return u;
+        UserLoginResponseWithEmailDTO dto = modelMapper.map(u, UserLoginResponseWithEmailDTO.class);
+        return dto;
     }
 
     public User registerWithEmail(UserRegisterRequestWithEmailDTO userEmailDTO) {

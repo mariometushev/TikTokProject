@@ -1,5 +1,6 @@
 package com.example.tiktokproject.controller;
 
+import com.example.tiktokproject.exceptions.UnauthorizedException;
 import com.example.tiktokproject.model.dto.UserLoginResponseWithEmailDTO;
 import com.example.tiktokproject.model.dto.UserLoginWithEmailDTO;
 import com.example.tiktokproject.model.dto.UserLoginWithPhoneDTO;
@@ -24,6 +25,7 @@ public class UserController {
 
     public static final String LOGGED = "logged";
     public static final String LOGGED_FROM = "logged_from";
+    public static final String USER_ID = "user_id";
 
     @Autowired
     private UserService userService;
@@ -32,24 +34,25 @@ public class UserController {
 
     @PostMapping("/loginWithPhone")
     public UserLoginResponseWithPhoneDTO login(@RequestBody UserLoginWithPhoneDTO user, HttpSession session, HttpServletRequest request) {
-        String phone = user.getPhone();
-        String password = user.getPassword();
-        User u = userService.loginWithPhone(phone, password);
+        UserLoginResponseWithPhoneDTO dto = userService.loginWithPhone(user);
         session.setAttribute(LOGGED, true);
         session.setAttribute(LOGGED_FROM, request.getRemoteAddr());
-        UserLoginResponseWithPhoneDTO dto = modelMapper.map(u, UserLoginResponseWithPhoneDTO.class);
+        session.setAttribute(USER_ID, dto.getId());
         return dto;
     }
 
     @PostMapping("/loginWithEmail")
     public UserLoginResponseWithEmailDTO login(@RequestBody UserLoginWithEmailDTO user, HttpSession session, HttpServletRequest request) {
-        String email = user.getEmail();
-        String password = user.getPassword();
-        User u = userService.loginWithEmail(email, password);
+        UserLoginResponseWithEmailDTO dto = userService.loginWithEmail(user);
         session.setAttribute(LOGGED, true);
         session.setAttribute(LOGGED_FROM, request.getRemoteAddr());
-        UserLoginResponseWithEmailDTO dto = modelMapper.map(u, UserLoginResponseWithEmailDTO.class);
+        session.setAttribute(USER_ID, dto.getId());
         return dto;
+    }
+
+    @PostMapping("/logout")
+    public void logOut(HttpSession session){
+        session.invalidate();
     }
 
     @PostMapping("/registerWithEmail")
@@ -57,6 +60,14 @@ public class UserController {
         User user = userService.registerWithEmail(userDTO);
         UserRegisterResponseWithEmailDTO returnUserToResponse = modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
         return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
+    }
+
+    private void validateLogin(HttpSession session, HttpServletRequest request){
+        if (session.isNew() ||
+                (!(Boolean) session.getAttribute(LOGGED)) ||
+                (!request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM)))){
+                throw new UnauthorizedException("You have to login!");
+        }
     }
 
 }
