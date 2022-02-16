@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -34,15 +35,14 @@ public class UserService {
         if (password == null || password.isBlank()) {
             throw new BadRequestException("Password is mandatory");
         }
-        if (!passwordEncoder.matches(password, userRepository.findPasswordByPhone_number(phone).getPassword())) {
+        if (userRepository.findByPhone_number(phone).isPresent()) {
             throw new NotFoundException("Wrong phone number or password!");
         }
-        User u = userRepository.findByPhone_number(phone);
-        if (u == null) {
+        if (!passwordEncoder.matches(password, userRepository.findByPhone_number(phone).get().getPassword())) {
             throw new NotFoundException("Wrong phone number or password!");
         }
-        UserLoginResponseWithPhoneDTO dto = modelMapper.map(u, UserLoginResponseWithPhoneDTO.class);
-        return dto;
+        User u = userRepository.findByPhone_number(phone).get();
+        return modelMapper.map(u, UserLoginResponseWithPhoneDTO.class);
     }
 
     public UserLoginResponseWithEmailDTO loginWithEmail(UserLoginWithEmailDTO user) {
@@ -57,13 +57,13 @@ public class UserService {
         if (email.isBlank()) {
             throw new BadRequestException("Email is mandatory!");
         }
-        if (!passwordEncoder.matches(password, userRepository.findPasswordByEmail(email).getPassword())) {
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new NotFoundException("Wrong email or password!");
         }
-        User u = userRepository.findByEmail(email);//Optional
-        if (u == null) {
+        if (!passwordEncoder.matches(password, userRepository.findByEmail(email).get().getPassword())) {
             throw new NotFoundException("Wrong email or password!");
         }
+        User u = userRepository.findByEmail(email).get();
         return modelMapper.map(u, UserLoginResponseWithEmailDTO.class);
     }
 
