@@ -28,17 +28,17 @@ public class UserService {
     public UserLoginResponseWithPhoneDTO loginWithPhone(UserLoginWithPhoneDTO user) {
         String phone = user.getPhone();
         String password = user.getPassword();
-        if (phone == null || phone.isBlank()){
+        if (phone == null || phone.isBlank()) {
             throw new BadRequestException("Password is mandatory");
         }
-        if (password == null || password.isBlank()){
+        if (password == null || password.isBlank()) {
             throw new BadRequestException("Password is mandatory");
         }
-        if (!passwordEncoder.matches(password, userRepository.findPasswordByPhone_number(phone))){
+        if (!passwordEncoder.matches(password, userRepository.findPasswordByPhone_number(phone))) {
             throw new NotFoundException("Wrong phone number or password!");
         }
         User u = userRepository.findByPhone_number(phone);
-        if (u == null){
+        if (u == null) {
             throw new NotFoundException("Wrong phone number or password!");
         }
         UserLoginResponseWithPhoneDTO dto = modelMapper.map(u, UserLoginResponseWithPhoneDTO.class);
@@ -48,32 +48,30 @@ public class UserService {
     public UserLoginResponseWithEmailDTO loginWithEmail(UserLoginWithEmailDTO user) {
         String email = user.getEmail();
         String password = user.getPassword();
-        if (password == null || password.isBlank()){
+        if (password == null || password.isBlank()) {
             throw new BadRequestException("Password is mandatory!");
         }
-        if (email.matches("^(.+)@(.+)$")){
+        if (email.matches("^(.+)@(.+)$")) {
             throw new BadRequestException("The email is not valid!");
         }
-        if (email.isBlank()){
+        if (email.isBlank()) {
             throw new BadRequestException("Email is mandatory!");
         }
-        if (!passwordEncoder.matches(password, userRepository.findPasswordByEmail(email))){
+        if (!passwordEncoder.matches(password, userRepository.findPasswordByEmail(email))) {
             throw new NotFoundException("Wrong email or password!");
         }
         User u = userRepository.findByEmail(email);
-        if (u == null){
+        if (u == null) {
             throw new NotFoundException("Wrong email or password!");
         }
-        UserLoginResponseWithEmailDTO dto = modelMapper.map(u, UserLoginResponseWithEmailDTO.class);
-        return dto;
+        return modelMapper.map(u, UserLoginResponseWithEmailDTO.class);
     }
 
-    public User registerWithEmail(UserRegisterRequestWithEmailDTO userEmailDTO) {
-        if (userEmailDTO.getEmail().matches("^(.+)@(.+)$") && userRepository.findByEmail(userEmailDTO.getEmail()) != null) {
+    public UserRegisterResponseWithEmailDTO registerWithEmail(UserRegisterRequestWithEmailDTO userEmailDTO) {
+        if (checkForValidEmail(userEmailDTO.getEmail()) && userRepository.findByEmail(userEmailDTO.getEmail()) != null) {
             throw new BadRequestException("User with this email already exist");
         }
-        boolean checkEmailPass = checkForValidPassword(userEmailDTO.getPassword());
-        if (checkEmailPass) {
+        if (checkForValidPassword(userEmailDTO.getPassword())) {
             throw new BadRequestException("Password must contain at least one digit from [0-9]," +
                     " one lower case letter, one upper case letter, one special symbol and length more than seven symbols");
         }
@@ -87,11 +85,14 @@ public class UserService {
         u.setPassword(passwordEncoder.encode(userEmailDTO.getPassword()));
         u.setRole_id(1);
         u.setRegister_date(LocalDateTime.now());
-        return u;
+        return modelMapper.map(u, UserRegisterResponseWithEmailDTO.class);
     }
 
     private boolean checkForValidPassword(String password) {
         return !password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}");
     }
 
+    private boolean checkForValidEmail(String email) {
+        return !email.matches("^(.+)@(.+)$");
+    }
 }
