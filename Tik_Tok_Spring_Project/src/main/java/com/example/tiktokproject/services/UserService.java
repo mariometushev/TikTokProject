@@ -68,8 +68,11 @@ public class UserService {
     }
 
     public UserRegisterResponseWithEmailDTO registerWithEmail(UserRegisterRequestWithEmailDTO userEmailDTO) {
-        if (checkForValidEmail(userEmailDTO.getEmail()) && userRepository.findByEmail(userEmailDTO.getEmail()) != null) {
+        if(userRepository.findByEmail(userEmailDTO.getEmail()) != null){
             throw new BadRequestException("User with this email already exist");
+        }
+        if (checkForValidEmail(userEmailDTO.getEmail())) {
+            throw new BadRequestException("Invalid email address");
         }
         if (checkForValidPassword(userEmailDTO.getPassword())) {
             throw new BadRequestException("Password must contain at least one digit from [0-9]," +
