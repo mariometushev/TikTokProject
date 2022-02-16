@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserLoginWithPhoneDTO {
 
-    private String phone_number;
+    private String phoneNumber;
     private String password;
 }

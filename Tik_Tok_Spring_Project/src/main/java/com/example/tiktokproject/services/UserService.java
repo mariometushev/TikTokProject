@@ -25,7 +25,7 @@ public class UserService {
     private ModelMapper modelMapper;
 
     public UserLoginResponseWithPhoneDTO loginWithPhone(UserLoginWithPhoneDTO user) {
-        String phone = user.getPhone_number();
+        String phone = user.getPhoneNumber();
         String password = user.getPassword();
         if (phone == null || phone.isBlank()) {
             throw new BadRequestException("Phone number is mandatory");
