@@ -28,8 +28,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private ModelMapper modelMapper;
 
     @PostMapping("/loginWithPhone")
     public UserLoginResponseWithPhoneDTO login(@RequestBody UserLoginWithPhoneDTO user, HttpSession session, HttpServletRequest request) {
@@ -57,6 +55,12 @@ public class UserController {
     @PostMapping("/registerWithEmail")
     public ResponseEntity<UserRegisterResponseWithEmailDTO> registerWithEmail(@RequestBody UserRegisterRequestWithEmailDTO userDTO) {
         UserRegisterResponseWithEmailDTO returnUserToResponse = userService.registerWithEmail(userDTO);
+        return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/registerWithPhone")
+    public ResponseEntity<UserRegisterResponseWithPhoneDTO> registerWithEmail(@RequestBody UserRegisterResponseWithPhoneDTO userDTO) {
+        UserRegisterResponseWithPhoneDTO returnUserToResponse = userService.registerWithPhone(userDTO);
         return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
     }
 
