@@ -1,0 +1,19 @@
+POST localhost:9999/registerWithEmail
+Content-Type: application/json
+
+{
+  "date_of_birth" : "2000-10-10",
+  "email" : "pesho@abv.bg",
+  "password" : "Pesho@12345",
+  "confirmPassword" : "Pesho@12345"
+}
+###
+POST localhost:9999/registerWithPhone
+Content-Type: application/json
+
+{
+  "date_of_birth" : "2000-10-10",
+  "phoneNumber" : "0888456789",
+  "password" : "Pesho@12345",
+  "confirmPassword" : "Pesho@12345"
+}

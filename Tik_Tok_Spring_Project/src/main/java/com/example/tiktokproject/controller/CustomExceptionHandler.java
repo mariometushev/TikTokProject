@@ -43,4 +43,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         dto.setStatus(HttpStatus.NOT_FOUND.value());
         return dto;
     }
+
+    @ExceptionHandler(value = {Exception.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ErrorDTO globalHandler(Exception e) {
+        ErrorDTO dto = new ErrorDTO();
+        dto.setMsg(e.getMessage());
+        dto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return dto;
+    }
+
 }

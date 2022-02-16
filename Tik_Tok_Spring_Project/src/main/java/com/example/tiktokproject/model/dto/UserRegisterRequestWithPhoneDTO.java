@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class UserRegisterRequestWithPhoneDTO {
 
     private LocalDate date_of_birth;
-    private String phone;
+    private String phoneNumber;
     private String password;
     private String confirmPassword;
 

@@ -25,7 +25,7 @@ public class UserService {
     private ModelMapper modelMapper;
 
     public UserLoginResponseWithPhoneDTO loginWithPhone(UserLoginWithPhoneDTO user) {
-        String phone = user.getPhone();
+        String phone = user.getPhone_number();
         String password = user.getPassword();
         if (phone == null || phone.isBlank()) {
             throw new BadRequestException("Phone number is mandatory");
@@ -33,13 +33,13 @@ public class UserService {
         if (password == null || password.isBlank()) {
             throw new BadRequestException("Password is mandatory");
         }
-        if (userRepository.findByPhone_number(phone).isEmpty()) {
+        if (userRepository.findByPhoneNumber(phone).isEmpty()) {
             throw new NotFoundException("Wrong phone number or password!");
         }
-        if (!passwordEncoder.matches(password, userRepository.findByPhone_number(phone).get().getPassword())) {
+        if (!passwordEncoder.matches(password, userRepository.findByPhoneNumber(phone).get().getPassword())) {
             throw new NotFoundException("Wrong phone number or password!");
         }
-        User u = userRepository.findByPhone_number(phone).get();
+        User u = userRepository.findByPhoneNumber(phone).get();
         return modelMapper.map(u, UserLoginResponseWithPhoneDTO.class);
     }
 
@@ -81,10 +81,10 @@ public class UserService {
     }
 
     public UserRegisterResponseWithPhoneDTO registerWithPhone(UserRegisterRequestWithPhoneDTO userPhoneDTO) {
-        if(userRepository.findByPhone_number(userPhoneDTO.getPhone()).isPresent()){
+        if(userRepository.findByPhoneNumber(userPhoneDTO.getPhoneNumber()).isPresent()){
             throw new BadRequestException("User with this phone already exist");
         }
-        if(userPhoneDTO.getPhone().isBlank()){
+        if(userPhoneDTO.getPhoneNumber().isBlank()){
             throw new BadRequestException("Phone number is mandatory");
         }
         checkForValidPasswordAndDateOfBirth(userPhoneDTO.getPassword(),userPhoneDTO.getConfirmPassword(),userPhoneDTO.getDate_of_birth());

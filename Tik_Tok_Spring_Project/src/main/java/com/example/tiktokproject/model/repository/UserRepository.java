@@ -2,17 +2,14 @@ package com.example.tiktokproject.model.repository;
 
 import com.example.tiktokproject.model.pojo.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-
-    Optional<User> findByPhone_number(String phone);
-
-    Optional<User> findPasswordByEmail(String email);
-
-    Optional<User> findPasswordByPhone_number(String phone);
+    Optional<User> findByPhoneNumber(String phone_number);
 
     Optional<User> findByEmail(String userEmail);
 

@@ -12,6 +12,6 @@ import org.springframework.stereotype.Component;
 public class UserLoginResponseWithPhoneDTO {
 
     private int id;
-    private String phone;
+    private String phone_number;
 
 }

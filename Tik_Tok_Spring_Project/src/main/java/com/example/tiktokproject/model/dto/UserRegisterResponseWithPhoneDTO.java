@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class UserRegisterResponseWithPhoneDTO {
 
     private int id;
-    private String phone;
+    private String phoneNumber;
     private int role_id;
 
 }
