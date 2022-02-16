@@ -7,7 +7,6 @@ import com.example.tiktokproject.model.dto.UserLoginWithPhoneDTO;
 import com.example.tiktokproject.model.dto.UserLoginResponseWithPhoneDTO;
 import com.example.tiktokproject.model.dto.*;
 import com.example.tiktokproject.services.UserService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +58,7 @@ public class UserController {
     }
 
     @PostMapping("/registerWithPhone")
-    public ResponseEntity<UserRegisterResponseWithPhoneDTO> registerWithEmail(@RequestBody UserRegisterResponseWithPhoneDTO userDTO) {
+    public ResponseEntity<UserRegisterResponseWithPhoneDTO> registerWithEmail(@RequestBody UserRegisterRequestWithPhoneDTO userDTO) {
         UserRegisterResponseWithPhoneDTO returnUserToResponse = userService.registerWithPhone(userDTO);
         return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
     }
