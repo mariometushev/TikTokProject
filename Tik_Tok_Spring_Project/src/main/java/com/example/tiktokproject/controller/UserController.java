@@ -64,7 +64,7 @@ public class UserController {
         boolean newSession = session.isNew();
         boolean logged = session.getAttribute(LOGGED) != null && ((Boolean) session.getAttribute(LOGGED));
         boolean sameIP = request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM));
-        if (newSession || !logged || sameIP){
+        if (newSession || !logged || !sameIP){
             throw new UnauthorizedException("You have to log!");
         }
     }
