@@ -30,12 +30,10 @@ public class User {
     @Column
     private String name;
     @Column
-    @Pattern(regexp = "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$",message = "Invalid email address")
     private String email;
     @Column(name = "phone_number")
     private String phoneNumber;
     @Column
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}",message = "Weak password")
     private String password;
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;

@@ -50,7 +50,7 @@ public class UserService {
             throw new BadRequestException("Password is mandatory!");
         }
         if (checkForValidEmail(user.getEmail())) {
-            throw new BadRequestException("The email is not valid!");
+            throw new BadRequestException("Invalid email address!");
         }
         if (email.isBlank()) {
             throw new BadRequestException("Email is mandatory!");

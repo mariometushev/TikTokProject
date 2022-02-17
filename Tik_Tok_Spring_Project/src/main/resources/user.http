@@ -4,8 +4,8 @@ Content-Type: application/json
 {
   "dateOfBirth" : "2000-10-10",
   "email" : "mario@gmail.com",
-  "password" : "Pesho@12345",
-  "confirmPassword" : "Pesho@12345"
+  "password" : "Pesho123@@",
+  "confirmPassword" : "Pesho123@@"
 }
 ###
 POST localhost:9999/registerWithPhone
