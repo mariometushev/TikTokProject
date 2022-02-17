@@ -66,13 +66,13 @@ public class UserService {
     }
 
     public UserRegisterResponseWithEmailDTO registerWithEmail(UserRegisterRequestWithEmailDTO userEmailDTO) {
-        if(userRepository.findByEmail(userEmailDTO.getEmail()).isPresent()){
+        if (userRepository.findByEmail(userEmailDTO.getEmail()).isPresent()) {
             throw new BadRequestException("User with this email already exist");
         }
         if (checkForValidEmail(userEmailDTO.getEmail())) {
             throw new BadRequestException("Invalid email address");
         }
-        checkForValidPasswordAndDateOfBirth(userEmailDTO.getPassword(),userEmailDTO.getConfirmPassword(),userEmailDTO.getDateOfBirth());
+        checkForValidPasswordAndDateOfBirth(userEmailDTO.getPassword(), userEmailDTO.getConfirmPassword(), userEmailDTO.getDateOfBirth());
         User u = modelMapper.map(userEmailDTO, User.class);
         u.setPassword(passwordEncoder.encode(userEmailDTO.getPassword()));
         u.setRoleId(1);
@@ -81,18 +81,29 @@ public class UserService {
     }
 
     public UserRegisterResponseWithPhoneDTO registerWithPhone(UserRegisterRequestWithPhoneDTO userPhoneDTO) {
-        if(userRepository.findByPhoneNumber(userPhoneDTO.getPhoneNumber()).isPresent()){
+        if (userRepository.findByPhoneNumber(userPhoneDTO.getPhoneNumber()).isPresent()) {
             throw new BadRequestException("User with this phone already exist");
         }
-        if(userPhoneDTO.getPhoneNumber().isBlank()){
+        if (userPhoneDTO.getPhoneNumber().isBlank()) {
             throw new BadRequestException("Phone number is mandatory");
         }
-        checkForValidPasswordAndDateOfBirth(userPhoneDTO.getPassword(),userPhoneDTO.getConfirmPassword(),userPhoneDTO.getDateOfBirth());
+        checkForValidPasswordAndDateOfBirth(userPhoneDTO.getPassword(), userPhoneDTO.getConfirmPassword(), userPhoneDTO.getDateOfBirth());
         User u = modelMapper.map(userPhoneDTO, User.class);
         u.setPassword(passwordEncoder.encode(userPhoneDTO.getPassword()));
         u.setRoleId(1);
         u.setRegisterDate(LocalDateTime.now());
         return modelMapper.map(u, UserRegisterResponseWithPhoneDTO.class);
+    }
+
+    public UserEditResponseDTO changeUserEmail(UserEditRequestDTO userEmailDTO) {
+        if (userRepository.findById(userEmailDTO.getId()).isEmpty()) {
+            throw new BadRequestException("Wrong user id");
+        }
+        if (userEmailDTO.getEmail().isBlank()) {
+            throw new BadRequestException("Email is mandatory");
+        }
+        User afterChangeEmail = modelMapper.map(userEmailDTO, User.class);
+        return modelMapper.map(afterChangeEmail, UserEditResponseDTO.class);
     }
 
     private boolean checkForValidPassword(String password) {
@@ -103,7 +114,7 @@ public class UserService {
         return !email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$");
     }
 
-    private void checkForValidPasswordAndDateOfBirth(String password,String confirmPassword, LocalDate localDate){
+    private void checkForValidPasswordAndDateOfBirth(String password, String confirmPassword, LocalDate localDate) {
         if (checkForValidPassword(password)) {
             throw new BadRequestException("Password must contain at least one digit from [0-9]," +
                     " one lower case letter, one upper case letter, one special symbol and length more than seven symbols");

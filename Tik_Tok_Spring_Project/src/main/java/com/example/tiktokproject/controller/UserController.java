@@ -6,9 +6,7 @@ import com.example.tiktokproject.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +28,7 @@ public class UserController {
         session.setAttribute(LOGGED, true);
         session.setAttribute(LOGGED_FROM, request.getRemoteAddr());
         session.setAttribute(USER_ID, dto.getId());
-        return new ResponseEntity<>(dto,HttpStatus.OK);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @PostMapping("/loginWithEmail")
@@ -39,34 +37,39 @@ public class UserController {
         session.setAttribute(LOGGED, true);
         session.setAttribute(LOGGED_FROM, request.getRemoteAddr());
         session.setAttribute(USER_ID, dto.getId());
-        return new ResponseEntity<>(dto,HttpStatus.OK);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @PostMapping("/logout")
-    public void logOut(HttpSession session){
+    public void logOut(HttpSession session) {
         session.invalidate();
     }
 
     @PostMapping("/registerWithEmail")
     public ResponseEntity<UserRegisterResponseWithEmailDTO> registerWithEmail(@RequestBody UserRegisterRequestWithEmailDTO userDTO) {
-        UserRegisterResponseWithEmailDTO returnUserToResponse = userService.registerWithEmail(userDTO);
-        return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.registerWithEmail(userDTO), HttpStatus.CREATED);
     }
 
     @PostMapping("/registerWithPhone")
     public ResponseEntity<UserRegisterResponseWithPhoneDTO> registerWithEmail(@RequestBody UserRegisterRequestWithPhoneDTO userDTO) {
-        UserRegisterResponseWithPhoneDTO returnUserToResponse = userService.registerWithPhone(userDTO);
-        return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.registerWithPhone(userDTO), HttpStatus.CREATED);
     }
 
-    private void validateLogin(HttpServletRequest request){
+    @PutMapping("/users/edit")
+    public ResponseEntity<UserEditResponseDTO> changeEmail(@RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
+        validateLogin(request);
+        return new ResponseEntity<>(userService.changeUserEmail(userDTO),HttpStatus.OK);
+    }
+
+    private void validateLogin(HttpServletRequest request) {
         HttpSession session = request.getSession();
         boolean newSession = session.isNew();
         boolean logged = session.getAttribute(LOGGED) != null && ((Boolean) session.getAttribute(LOGGED));
         boolean sameIP = request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM));
-        if (newSession || !logged || !sameIP){
-            throw new UnauthorizedException("You have to log!");
+        if (newSession || !logged || !sameIP) {
+            throw new UnauthorizedException("You have to log");
         }
     }
+
 
 }
