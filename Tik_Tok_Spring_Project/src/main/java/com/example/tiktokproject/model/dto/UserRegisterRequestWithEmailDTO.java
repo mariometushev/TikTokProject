@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UserRegisterRequestWithEmailDTO {
 
-    private LocalDate date_of_birth;
+    private LocalDate dateOfBirth;
     private String email;
     private String password;
     private String confirmPassword;

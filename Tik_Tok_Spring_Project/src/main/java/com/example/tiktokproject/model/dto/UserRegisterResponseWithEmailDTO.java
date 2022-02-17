@@ -13,6 +13,6 @@ public class UserRegisterResponseWithEmailDTO {
 
     private int id;
     private String email;
-    private int role_id;
+    private int roleId;
 
 }

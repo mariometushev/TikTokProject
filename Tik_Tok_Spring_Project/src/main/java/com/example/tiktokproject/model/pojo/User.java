@@ -23,8 +23,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
-    private int role_id;
+    @Column(name = "role_id")
+    private int roleId;
     @Column
     private String username;
     @Column
@@ -35,14 +35,14 @@ public class User {
     private String phoneNumber;
     @Column
     private String password;
-    @Column
-    private LocalDate date_of_birth;
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
     @Column
     private String description;
-    @Column
-    private LocalDateTime register_date;
-    @Column
-    private String photo_url;
+    @Column(name = "register_date")
+    private LocalDateTime registerDate;
+    @Column(name = "photo_url")
+    private String photoUrl;
 
 }
 

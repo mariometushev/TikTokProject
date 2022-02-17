@@ -19,15 +19,15 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
-    private int owner_id;
-    @Column
-    private int parent_id;
-    @Column
-    private int post_id;
+    @Column(name = "owner_id")
+    private int ownerId;
+    @Column(name = "parent_id")
+    private int parentId;
+    @Column(name = "post_id")
+    private int postId;
     @Column
     private String text;
-    @Column
-    private LocalDateTime commented_on;
+    @Column(name = "commented_on")
+    private LocalDateTime commentedOn;
 
 }

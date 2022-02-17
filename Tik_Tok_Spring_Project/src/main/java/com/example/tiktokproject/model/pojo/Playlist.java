@@ -19,11 +19,11 @@ public class Playlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
-    private int owner_id;
+    @Column(name = "owner_id")
+    private int ownerId;
     @Column
     private String name;
-    @Column
-    private LocalDateTime created_time;
+    @Column(name = "created_time")
+    private LocalDateTime createdTime;
 
 }

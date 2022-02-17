@@ -19,19 +19,19 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
-    private int owner_id;
-    @Column
-    private int song_id;
-    @Column
-    private LocalDateTime upload_date;
-    @Column
-    private boolean is_public;
+    @Column(name = "owner_id")
+    private int ownerId;
+    @Column(name = "song_id")
+    private int songId;
+    @Column(name = "upload_date")
+    private LocalDateTime uploadDate;
+    @Column(name = "is_public")
+    private boolean isPublic;
     @Column
     private String description;
     @Column
     private int views;
-    @Column
-    private String video_url;
+    @Column(name = "video_url")
+    private String videoUrl;
 
 }

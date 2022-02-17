@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UserRegisterRequestWithPhoneDTO {
 
-    private LocalDate date_of_birth;
+    private LocalDate dateOfBirth;
     private String phoneNumber;
     private String password;
     private String confirmPassword;

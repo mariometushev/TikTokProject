@@ -14,6 +14,6 @@ public class UserRegisterResponseWithPhoneDTO {
 
     private int id;
     private String phoneNumber;
-    private int role_id;
+    private int roleId;
 
 }
