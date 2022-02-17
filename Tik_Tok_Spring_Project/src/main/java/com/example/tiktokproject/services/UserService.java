@@ -99,8 +99,8 @@ public class UserService {
         if (userRepository.findById(userEmailDTO.getId()).isEmpty()) {
             throw new BadRequestException("Wrong user id");
         }
-        if (userEmailDTO.getEmail().isBlank()) {
-            throw new BadRequestException("Email is mandatory");
+        if (checkForValidEmail(userEmailDTO.getEmail())) {
+            throw new BadRequestException("Invalid email address");
         }
         User afterChangeEmail = modelMapper.map(userEmailDTO, User.class);
         return modelMapper.map(afterChangeEmail, UserEditResponseDTO.class);
