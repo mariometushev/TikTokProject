@@ -100,7 +100,7 @@ public class UserService {
     }
 
     private boolean checkForValidEmail(String email) {
-        return !email.matches("^(.+)@(.+)$");
+        return !email.matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
     }
 
     private void checkForValidPasswordAndDateOfBirth(String password,String confirmPassword, LocalDate localDate){
