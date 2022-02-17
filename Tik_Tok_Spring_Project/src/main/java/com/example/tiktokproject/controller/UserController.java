@@ -29,21 +29,21 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/loginWithPhone")
-    public UserLoginResponseWithPhoneDTO login(@RequestBody UserLoginWithPhoneDTO user, HttpSession session, HttpServletRequest request) {
+    public ResponseEntity<UserLoginResponseWithPhoneDTO> login(@RequestBody UserLoginWithPhoneDTO user, HttpSession session, HttpServletRequest request) {
         UserLoginResponseWithPhoneDTO dto = userService.loginWithPhone(user);
         session.setAttribute(LOGGED, true);
         session.setAttribute(LOGGED_FROM, request.getRemoteAddr());
         session.setAttribute(USER_ID, dto.getId());
-        return dto;
+        return new ResponseEntity<>(dto,HttpStatus.OK);
     }
 
     @PostMapping("/loginWithEmail")
-    public UserLoginResponseWithEmailDTO login(@RequestBody UserLoginWithEmailDTO user, HttpSession session, HttpServletRequest request) {
+    public ResponseEntity<UserLoginResponseWithEmailDTO> login(@RequestBody UserLoginWithEmailDTO user, HttpSession session, HttpServletRequest request) {
         UserLoginResponseWithEmailDTO dto = userService.loginWithEmail(user);
         session.setAttribute(LOGGED, true);
         session.setAttribute(LOGGED_FROM, request.getRemoteAddr());
         session.setAttribute(USER_ID, dto.getId());
-        return dto;
+        return new ResponseEntity<>(dto,HttpStatus.OK);
     }
 
     @PostMapping("/logout")
@@ -63,12 +63,13 @@ public class UserController {
         return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
     }
 
-    private void validateLogin(HttpSession session, HttpServletRequest request){
-        if (session.isNew() ||
-                (!(Boolean) session.getAttribute(LOGGED)) ||
-                (!request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM)))){
-                throw new UnauthorizedException("You have to login!");
-        }
-    }
+//    private void validateLogin(HttpSession session, HttpServletRequest request){
+//        boolean newSession = session.isNew();
+//        boolean logged = session.getAttribute(LOGGED) != null && ((Boolean) session.getAttribute(LOGGED));
+//        boolean sameIP = request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM));
+//        if (newSession || !logged || sameIP){
+//            throw new UnauthorizedException("You have to log!");
+//        }
+//    }
 
 }

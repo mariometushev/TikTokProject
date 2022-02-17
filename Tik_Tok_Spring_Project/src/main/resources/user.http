@@ -19,11 +19,11 @@ Content-Type: application/json
 }
 
 ###
-POST localhost:9999/loginWithPhone
+POST localhost:9999/loginWithEmail
 Content-Type: application/json
 
 {
-  "phoneNumber" : "0887598479",
+  "email" : "tomi@abv.bg",
   "password" : "tomi+123"
 
 }
