@@ -72,11 +72,11 @@ public class UserService {
         if (checkForValidEmail(userEmailDTO.getEmail())) {
             throw new BadRequestException("Invalid email address");
         }
-        checkForValidPasswordAndDateOfBirth(userEmailDTO.getPassword(),userEmailDTO.getConfirmPassword(),userEmailDTO.getDate_of_birth());
+        checkForValidPasswordAndDateOfBirth(userEmailDTO.getPassword(),userEmailDTO.getConfirmPassword(),userEmailDTO.getDateOfBirth());
         User u = modelMapper.map(userEmailDTO, User.class);
         u.setPassword(passwordEncoder.encode(userEmailDTO.getPassword()));
-        u.setRole_id(1);
-        u.setRegister_date(LocalDateTime.now());
+        u.setRoleId(1);
+        u.setRegisterDate(LocalDateTime.now());
         return modelMapper.map(u, UserRegisterResponseWithEmailDTO.class);
     }
 
@@ -87,11 +87,11 @@ public class UserService {
         if(userPhoneDTO.getPhoneNumber().isBlank()){
             throw new BadRequestException("Phone number is mandatory");
         }
-        checkForValidPasswordAndDateOfBirth(userPhoneDTO.getPassword(),userPhoneDTO.getConfirmPassword(),userPhoneDTO.getDate_of_birth());
+        checkForValidPasswordAndDateOfBirth(userPhoneDTO.getPassword(),userPhoneDTO.getConfirmPassword(),userPhoneDTO.getDateOfBirth());
         User u = modelMapper.map(userPhoneDTO, User.class);
         u.setPassword(passwordEncoder.encode(userPhoneDTO.getPassword()));
-        u.setRole_id(1);
-        u.setRegister_date(LocalDateTime.now());
+        u.setRoleId(1);
+        u.setRegisterDate(LocalDateTime.now());
         return modelMapper.map(u, UserRegisterResponseWithPhoneDTO.class);
     }
 
