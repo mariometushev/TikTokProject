@@ -2,8 +2,8 @@ POST localhost:9999/registerWithEmail
 Content-Type: application/json
 
 {
-  "date_of_birth" : "2000-10-10",
-  "email" : "pesho@abv.bg",
+  "dateOfBirth" : "2000-10-10",
+  "email" : "mario@gmail.com",
   "password" : "Pesho@12345",
   "confirmPassword" : "Pesho@12345"
 }
@@ -12,7 +12,7 @@ POST localhost:9999/registerWithPhone
 Content-Type: application/json
 
 {
-  "date_of_birth" : "2000-10-10",
+  "dateOfBirth" : "2000-10-10",
   "phoneNumber" : "0888456789",
   "password" : "Pesho@12345",
   "confirmPassword" : "Pesho@12345"
@@ -24,6 +24,16 @@ Content-Type: application/json
 
 {
   "email" : "tomi@abv.bg",
+  "password" : "Pesho@12345"
+
+}
+
+###
+POST localhost:9999/loginWithPhone
+Content-Type: application/json
+
+{
+  "phoneNumber" : "0897897897",
   "password" : "tomi+123"
 
 }
