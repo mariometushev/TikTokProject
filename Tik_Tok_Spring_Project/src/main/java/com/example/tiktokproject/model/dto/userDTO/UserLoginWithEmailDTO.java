@@ -1,18 +1,15 @@
-package com.example.tiktokproject.model.dto;
+package com.example.tiktokproject.model.dto.userDTO;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
-@Component
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserRegisterResponseWithEmailDTO {
+public class UserLoginWithEmailDTO {
 
-    private int id;
     private String email;
-    private int roleId;
-
+    private String password;
 }

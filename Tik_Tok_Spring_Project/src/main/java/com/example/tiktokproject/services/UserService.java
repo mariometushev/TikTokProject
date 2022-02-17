@@ -3,7 +3,7 @@ package com.example.tiktokproject.services;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
-import com.example.tiktokproject.model.dto.*;
+import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -49,7 +49,7 @@ public class UserService {
         if (password == null || password.isBlank()) {
             throw new BadRequestException("Password is mandatory!");
         }
-        if (email.matches("^(.+)@(.+)$")) {
+        if (checkForValidEmail(user.getEmail())) {
             throw new BadRequestException("The email is not valid!");
         }
         if (email.isBlank()) {

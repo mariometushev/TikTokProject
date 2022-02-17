@@ -3,7 +3,7 @@ package com.example.tiktokproject.controller;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
-import com.example.tiktokproject.model.dto.ErrorDTO;
+import com.example.tiktokproject.model.dto.errorDTO.ErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

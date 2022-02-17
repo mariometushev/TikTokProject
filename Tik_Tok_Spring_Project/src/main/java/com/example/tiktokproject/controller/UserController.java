@@ -1,11 +1,7 @@
 package com.example.tiktokproject.controller;
 
 import com.example.tiktokproject.exceptions.UnauthorizedException;
-import com.example.tiktokproject.model.dto.UserLoginResponseWithEmailDTO;
-import com.example.tiktokproject.model.dto.UserLoginWithEmailDTO;
-import com.example.tiktokproject.model.dto.UserLoginWithPhoneDTO;
-import com.example.tiktokproject.model.dto.UserLoginResponseWithPhoneDTO;
-import com.example.tiktokproject.model.dto.*;
+import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,13 +59,14 @@ public class UserController {
         return new ResponseEntity<>(returnUserToResponse, HttpStatus.CREATED);
     }
 
-//    private void validateLogin(HttpSession session, HttpServletRequest request){
-//        boolean newSession = session.isNew();
-//        boolean logged = session.getAttribute(LOGGED) != null && ((Boolean) session.getAttribute(LOGGED));
-//        boolean sameIP = request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM));
-//        if (newSession || !logged || sameIP){
-//            throw new UnauthorizedException("You have to log!");
-//        }
-//    }
+    private void validateLogin(HttpServletRequest request){
+        HttpSession session = request.getSession();
+        boolean newSession = session.isNew();
+        boolean logged = session.getAttribute(LOGGED) != null && ((Boolean) session.getAttribute(LOGGED));
+        boolean sameIP = request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM));
+        if (newSession || !logged || sameIP){
+            throw new UnauthorizedException("You have to log!");
+        }
+    }
 
 }

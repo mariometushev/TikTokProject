@@ -1,4 +1,4 @@
-package com.example.tiktokproject.model.dto;
+package com.example.tiktokproject.model.dto.userDTO;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @NoArgsConstructor
-@Component
-public class UserLoginWithPhoneDTO {
+public class UserLoginResponseWithPhoneDTO {
 
+    private int id;
     private String phoneNumber;
-    private String password;
+
 }

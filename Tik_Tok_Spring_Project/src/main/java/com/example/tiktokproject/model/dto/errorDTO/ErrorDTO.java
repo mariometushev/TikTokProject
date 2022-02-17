@@ -1,4 +1,4 @@
-package com.example.tiktokproject.model.dto;
+package com.example.tiktokproject.model.dto.errorDTO;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
