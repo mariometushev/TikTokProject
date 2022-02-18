@@ -1,6 +1,7 @@
 package com.example.tiktokproject.controller;
 
 import com.example.tiktokproject.exceptions.BadRequestException;
+import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
 import com.example.tiktokproject.model.dto.errorDTO.ErrorDTO;
@@ -41,6 +42,16 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorDTO dto = new ErrorDTO();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.NOT_FOUND.value());
+        return dto;
+    }
+
+    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorDTO methodArgumentHandler(Exception e) {
+        ErrorDTO dto = new ErrorDTO();
+        dto.setMsg(e.getMessage());
+        dto.setStatus(HttpStatus.BAD_REQUEST.value());
         return dto;
     }
 
