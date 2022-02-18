@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,10 +22,9 @@ public class PostController {
     private SessionManager sessionManager;
 
     @PostMapping("/uploadPost")
-    public ResponseEntity<PostUploadResponseDTO> uploadPost(@RequestBody PostUploadRequestDTO post, HttpServletRequest request){
+    public ResponseEntity<PostUploadResponseDTO> uploadPost(@RequestBody PostUploadRequestDTO post, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request){
         sessionManager.validateLogin(request);
-        postService.uploadPost(post);
-        return null;
+        return new ResponseEntity<>(postService.uploadPost(post, file), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/posts/{id}")

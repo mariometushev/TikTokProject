@@ -16,4 +16,5 @@ public class PostUploadResponseDTO {
     private LocalDateTime uploadDate;
     private boolean isPublic;
     private String description;
+    private String videoUrl;
 }

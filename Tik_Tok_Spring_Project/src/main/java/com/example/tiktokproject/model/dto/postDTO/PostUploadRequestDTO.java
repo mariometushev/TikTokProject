@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class PostUploadRequestDTO {
 
     private int ownerId;
-    private LocalDateTime uploadDate;
     private boolean isPublic;
     private String description;
 }

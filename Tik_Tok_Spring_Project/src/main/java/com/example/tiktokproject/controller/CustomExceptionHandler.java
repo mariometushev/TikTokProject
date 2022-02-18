@@ -1,9 +1,6 @@
 package com.example.tiktokproject.controller;
 
-import com.example.tiktokproject.exceptions.BadRequestException;
-import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
-import com.example.tiktokproject.exceptions.NotFoundException;
-import com.example.tiktokproject.exceptions.UnauthorizedException;
+import com.example.tiktokproject.exceptions.*;
 import com.example.tiktokproject.model.dto.errorDTO.ErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -48,10 +45,20 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorDTO methodArgumentHandler(Exception e) {
+    public ErrorDTO handlerMethodArgumentNotValidException(Exception e) {
         ErrorDTO dto = new ErrorDTO();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.BAD_REQUEST.value());
+        return dto;
+    }
+
+    @ExceptionHandler(value = {IOException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ErrorDTO handlerIOException (Exception e) {
+        ErrorDTO dto = new ErrorDTO();
+        dto.setMsg(e.getMessage());
+        dto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return dto;
     }
 
