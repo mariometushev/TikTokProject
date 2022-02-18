@@ -18,8 +18,8 @@ import javax.validation.constraints.Pattern;
 public class UserLoginWithPhoneDTO {
 
     @NotBlank
+    @NotNull
     private String phoneNumber;
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}")
-    @NotBlank
     private String password;
 }

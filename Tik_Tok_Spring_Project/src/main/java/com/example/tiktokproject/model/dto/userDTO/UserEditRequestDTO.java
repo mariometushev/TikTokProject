@@ -1,7 +1,6 @@
 package com.example.tiktokproject.model.dto.userDTO;
 
 
-import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +19,6 @@ public class UserEditRequestDTO {
     private String oldPassword;
     private String newPassword;
     private String confirmNewPassword;
-    private LocalDate dateOfBirth;
     private String description;
     private String photoUrl;
 

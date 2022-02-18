@@ -3,20 +3,30 @@ package com.example.tiktokproject.services;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
+import com.example.tiktokproject.model.dto.postDTO.PostUploadResponseDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
+import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.UserRepository;
+import org.apache.commons.io.FilenameUtils;
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
 public class UserService {
 
+    private static final long MAX_UPLOAD_SIZE = 250 * 1024 * 1024;
+    private static final String UPLOAD_PHOTO_FOLDER = "photos";
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -55,11 +65,12 @@ public class UserService {
             throw new BadRequestException("User with this email already exist");
         }
         checkForInValidPasswordAndDateOfBirth(userEmailDTO.getPassword(), userEmailDTO.getConfirmPassword(), userEmailDTO.getDateOfBirth());
-        User u = modelMapper.map(userEmailDTO, User.class);
-        u.setPassword(passwordEncoder.encode(userEmailDTO.getPassword()));
-        u.setRoleId(1);
-        u.setRegisterDate(LocalDateTime.now());
-        return modelMapper.map(u, UserRegisterResponseWithEmailDTO.class);
+        User user = modelMapper.map(userEmailDTO, User.class);
+        user.setPassword(passwordEncoder.encode(userEmailDTO.getPassword()));
+        user.setRoleId(1);
+        user.setRegisterDate(LocalDateTime.now());
+        userRepository.save(user);
+        return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
     public UserRegisterResponseWithPhoneDTO registerWithPhone(UserRegisterRequestWithPhoneDTO userPhoneDTO) {
@@ -71,16 +82,85 @@ public class UserService {
         u.setPassword(passwordEncoder.encode(userPhoneDTO.getPassword()));
         u.setRoleId(1);
         u.setRegisterDate(LocalDateTime.now());
+        userRepository.save(u);
         return modelMapper.map(u, UserRegisterResponseWithPhoneDTO.class);
     }
 
-    public UserEditResponseDTO editUser(UserEditRequestDTO userEmailDTO) {
-        // TODO change method logic
-        if (userRepository.findById(userEmailDTO.getId()).isEmpty()) {
+    public UserEditResponseDTO editUser(UserEditRequestDTO userEditDTO) {
+        boolean hasChangePassword = false;
+        if (userRepository.findById(userEditDTO.getId()).isEmpty()) {
             throw new BadRequestException("Wrong user id");
         }
-        User afterChangeEmail = modelMapper.map(userEmailDTO, User.class);
-        return modelMapper.map(afterChangeEmail, UserEditResponseDTO.class);
+        User oldUser = userRepository.findById(userEditDTO.getId()).get();
+        User updatedUser;
+        if (userEditDTO.getEmail() != null) {
+            if (checkForInvalidEmail(userEditDTO.getEmail())) {
+                throw new BadRequestException("Invalid email address");
+            }
+        }
+        if (userEditDTO.getUsername() != null) {
+            if (userRepository.findByUsername(userEditDTO.getUsername()).isPresent()) {
+                throw new BadRequestException("Username already exist");
+            }
+        }
+        if (userEditDTO.getName() != null) {
+            if (userEditDTO.getName().isBlank()) {
+                throw new BadRequestException("Name is mandatory");
+            }
+        }
+        if (userEditDTO.getPhoneNumber() != null) {//TODO phone number check
+            if (userEditDTO.getPhoneNumber().isBlank()) {
+                throw new BadRequestException("Phone number is mandatory");
+            }
+        }
+        if (userEditDTO.getDescription() != null) {
+            if (userEditDTO.getDescription().length() > 150) {
+                throw new BadRequestException("Description is too long");
+            }
+        }
+        if (userEditDTO.getNewPassword() != null) {
+            if (!passwordEncoder.matches(userEditDTO.getOldPassword(), oldUser.getPassword())) {
+                throw new BadRequestException("Wrong old password");
+            }
+            if (passwordEncoder.matches(userEditDTO.getNewPassword(), oldUser.getPassword())) {
+                throw new BadRequestException("New password must be different");
+            }
+            if (!userEditDTO.getNewPassword().equals(userEditDTO.getConfirmNewPassword())) {
+                throw new BadRequestException("Password miss match");
+            }
+            hasChangePassword = true;
+        }
+        modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());//will ignore null fields
+        updatedUser = modelMapper.map(userEditDTO, User.class);
+        if (hasChangePassword) {
+            updatedUser.setPassword(passwordEncoder.encode(userEditDTO.getNewPassword()));
+        }
+        userRepository.save(updatedUser);
+        return modelMapper.map(updatedUser, UserEditResponseDTO.class);
+    }
+
+    public UserEditProfilePictureResponseDTO editProfilePicture(MultipartFile file, int userId) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String fileName = (System.nanoTime()) + "." + extension;
+        if (file.getSize() > MAX_UPLOAD_SIZE) {
+            throw new BadRequestException("Too big photo size. The maximum photo size is 250MB.");
+        }
+        if (!("jpg".equals(extension)) && !("png".equals(extension))) {
+            throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
+        }
+        try {
+            Files.copy(file.getInputStream(), new File(UPLOAD_PHOTO_FOLDER + File.separator + fileName).toPath());
+        } catch (IOException e) {
+            throw new com.example.tiktokproject.exceptions.IOException("Server file system error.");
+        }
+        User oldUser = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Cannot find user with that id"));
+        oldUser.setPhotoUrl(fileName);
+        userRepository.save(oldUser);
+        return modelMapper.map(oldUser, UserEditProfilePictureResponseDTO.class);
+    }
+
+    private boolean checkForInvalidEmail(String email) {
+        return !email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$");
     }
 
     private void checkForInValidPasswordAndDateOfBirth(String password, String confirmPassword, LocalDate localDate) {

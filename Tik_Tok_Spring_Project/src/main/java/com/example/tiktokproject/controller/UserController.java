@@ -1,4 +1,5 @@
 package com.example.tiktokproject.controller;
+
 import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
 import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.services.UserService;
@@ -7,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -21,22 +24,22 @@ public class UserController {
 
     @PostMapping("/loginWithPhone")
     public ResponseEntity<UserLoginResponseWithPhoneDTO> login(@Valid @RequestBody UserLoginWithPhoneDTO user, HttpSession session, HttpServletRequest request, BindingResult result) {
-        if(result.hasErrors()){
+        if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong phone number or password credentials");
         }
         UserLoginResponseWithPhoneDTO dto = userService.loginWithPhone(user);
-        sessionManager.setSession(request,dto.getId());
+        sessionManager.setSession(request, dto.getId());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @PostMapping("/loginWithEmail")
     public ResponseEntity<UserLoginResponseWithEmailDTO> login(@Valid @RequestBody UserLoginWithEmailDTO user, HttpServletRequest request, BindingResult result) {
-        if(result.hasErrors()){
+        if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong email or password credentials");
         }
         // TODO change session logic outside
         UserLoginResponseWithEmailDTO dto = userService.loginWithEmail(user);
-        sessionManager.setSession(request,dto.getId());
+        sessionManager.setSession(request, dto.getId());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -46,16 +49,16 @@ public class UserController {
     }
 
     @PostMapping("/registerWithEmail")
-    public ResponseEntity<UserRegisterResponseWithEmailDTO> register(@Valid @RequestBody UserRegisterRequestWithEmailDTO userDTO,BindingResult result) {
-        if(result.hasErrors()){
+    public ResponseEntity<UserRegisterResponseWithEmailDTO> register(@Valid @RequestBody UserRegisterRequestWithEmailDTO userDTO, BindingResult result) {
+        if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong email or password credentials");
         }
         return new ResponseEntity<>(userService.registerWithEmail(userDTO), HttpStatus.CREATED);
     }
 
     @PostMapping("/registerWithPhone")
-    public ResponseEntity<UserRegisterResponseWithPhoneDTO> register(@Valid @RequestBody UserRegisterRequestWithPhoneDTO userDTO,BindingResult result) {
-        if(result.hasErrors()){
+    public ResponseEntity<UserRegisterResponseWithPhoneDTO> register(@Valid @RequestBody UserRegisterRequestWithPhoneDTO userDTO, BindingResult result) {
+        if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong phone number or password credentials");
         }
         return new ResponseEntity<>(userService.registerWithPhone(userDTO), HttpStatus.CREATED);
@@ -64,14 +67,13 @@ public class UserController {
     @PutMapping("/users/edit")
     public ResponseEntity<UserEditResponseDTO> editUser(@RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        // TODO change method name and logic
-        return new ResponseEntity<>(userService.editUser(userDTO),HttpStatus.OK);
+        return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
     }
 
-//    public ResponseEntity<UserEditResponseDTO> changeEmail(@RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
-//        validator.validateLogin(request);
-//        return new ResponseEntity<UserEditResponseDTO>(userService.changeUserEmail(userDTO),HttpStatus.OK);
-//    }
-
+    @PutMapping("/users/edit/profilePicture")
+    public ResponseEntity<UserEditProfilePictureResponseDTO> editProfilePicture(@RequestParam MultipartFile file, HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        return new ResponseEntity<>(userService.editProfilePicture(file, (Integer) request.getSession().getAttribute(SessionManager.USER_ID)), HttpStatus.ACCEPTED);
+    }
 
 }

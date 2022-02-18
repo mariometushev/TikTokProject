@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
@@ -15,13 +16,13 @@ import java.time.LocalDate;
 @Validated
 public class UserRegisterRequestWithPhoneDTO {
 
+    @NotNull
     private LocalDate dateOfBirth;
     @NotBlank
+    @NotNull
     private String phoneNumber;
-    @NotBlank
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}")
     private String password;
-    @NotBlank
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}")
     private String confirmPassword;
 
