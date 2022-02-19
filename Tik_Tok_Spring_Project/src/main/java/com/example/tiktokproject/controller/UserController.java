@@ -1,6 +1,7 @@
 package com.example.tiktokproject.controller;
 
 import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
+import com.example.tiktokproject.model.dto.postDTO.PostLikedDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.services.UserService;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 public class UserController {
@@ -101,12 +103,10 @@ public class UserController {
     }
 
     @GetMapping("/user/{id}/likedPosts")
-    public void getAllLikedPost(@PathVariable int id, HttpServletRequest request){
+    public ResponseEntity<List<PostLikedDTO>> getAllLikedPost(@PathVariable int id, HttpServletRequest request){
             sessionManager.validateLogin(request);
             sessionManager.validateUserId(request.getSession(), id);
-            
+            return new ResponseEntity<>(userService.getAllLikedPosts(id),HttpStatus.OK);
     }
-
-
 
 }

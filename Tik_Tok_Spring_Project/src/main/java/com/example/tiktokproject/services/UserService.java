@@ -3,10 +3,12 @@ package com.example.tiktokproject.services;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
+import com.example.tiktokproject.model.dto.postDTO.PostLikedDTO;
 import com.example.tiktokproject.model.dto.postDTO.PostWithoutOwnerDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.pojo.User;
+import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
@@ -21,6 +23,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -33,6 +38,8 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private PostRepository postRepository;
 
     public UserLoginResponseWithPhoneDTO loginWithPhone(UserLoginWithPhoneDTO user) {
         String phone = user.getPhoneNumber();
@@ -217,5 +224,17 @@ public class UserService {
         if (localDate.isAfter(LocalDate.now().minusYears(13))) {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
+    }
+
+    public List<PostLikedDTO> getAllLikedPosts(int id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
+        List<Post> postsLiked = postRepository.findPostsByPostLikesContains(user);
+        List<PostLikedDTO> postsLikedList = new ArrayList<>();
+        for (Post post : postsLiked) {
+            PostLikedDTO postLiked = modelMapper.map(post,PostLikedDTO.class);
+            postLiked.setViews(post.getViews());
+            postsLikedList.add(postLiked);
+        }
+        return postsLikedList;
     }
 }
