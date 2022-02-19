@@ -8,8 +8,10 @@ import com.example.tiktokproject.model.dto.postDTO.*;
 import com.example.tiktokproject.model.dto.userDTO.UserWithoutPostDTO;
 import com.example.tiktokproject.model.pojo.Hashtag;
 import com.example.tiktokproject.model.pojo.Post;
+import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.HashtagRepository;
 import com.example.tiktokproject.model.repository.PostRepository;
+import com.example.tiktokproject.model.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -36,6 +40,8 @@ public class PostService {
     private ModelMapper modelMapper;
     @Autowired
     private HashtagRepository hashtagRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public PostUploadResponseDTO uploadPost(PostUploadRequestDTO postDto, MultipartFile file) {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -116,5 +122,15 @@ public class PostService {
         postDto.setLikes(post.getPostLikes().size());
         postDto.setComments(post.getComments().size());
         return postDto;
+    }
+
+    public List<Post> getAllPostsSortByUploadDate(int id) {
+        User u = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
+        List<Post> posts = postRepository
+                .findAllByOwner(u)
+                .stream()
+                .sorted((p1, p2) -> p2.getUploadDate().compareTo(p1.getUploadDate()))
+                .collect(Collectors.toList());
+        return posts;
     }
 }

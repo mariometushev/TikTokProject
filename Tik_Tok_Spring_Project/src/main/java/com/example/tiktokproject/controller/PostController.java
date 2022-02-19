@@ -1,10 +1,8 @@
 package com.example.tiktokproject.controller;
 
 import com.example.tiktokproject.model.dto.postDTO.*;
-import com.example.tiktokproject.model.dto.userDTO.UserWithoutPostDTO;
 import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.services.PostService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 public class PostController {
@@ -46,5 +45,10 @@ public class PostController {
     public ResponseEntity<PostWithOwnerDTO> getById(@PathVariable int id){
         PostWithOwnerDTO postDto = postService.getPost(id);
         return new ResponseEntity<>(postDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{id}/posts")
+    public ResponseEntity<List<Post>> getAllPostsSortByUploadDate(@PathVariable int id){
+            return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(id), HttpStatus.OK);
     }
 }
