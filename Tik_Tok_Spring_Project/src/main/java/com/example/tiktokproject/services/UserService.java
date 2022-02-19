@@ -3,7 +3,9 @@ package com.example.tiktokproject.services;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
+import com.example.tiktokproject.model.dto.postDTO.PostWithoutOwnerDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
+import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
@@ -87,7 +89,7 @@ public class UserService {
     public UserEditResponseDTO editUser(UserEditRequestDTO userEditDTO) {
         boolean hasChangePassword = false;
         if (userRepository.findById(userEditDTO.getId()).isEmpty()) {
-            throw new BadRequestException("Wrong user id");
+            throw new NotFoundException("Wrong user id");
         }
         User oldUser = userRepository.findById(userEditDTO.getId()).get();
         if (userEditDTO.getEmail() != null) {
@@ -158,6 +160,24 @@ public class UserService {
         return modelMapper.map(oldUser, UserEditProfilePictureResponseDTO.class);
     }
 
+    public UserInformationDTO getUserById(int userId) {
+        if(userRepository.findById(userId).isEmpty()){
+            throw new NotFoundException("Wrong user id");
+        }
+        User u = userRepository.findById(userId).get();
+        UserInformationDTO userInformationDTO = new UserInformationDTO();
+        modelMapper.map(u,userInformationDTO);
+        userInformationDTO.setFollowers(u.getFollowers().size());
+        userInformationDTO.setFollowerTo(u.getFollowerTo().size());
+        for(Post p : u.getPosts()){
+            PostWithoutOwnerDTO postDTO = modelMapper.map(p,PostWithoutOwnerDTO.class);
+            postDTO.setComments(p.getComments().size());
+            postDTO.setPostLikes(p.getPostLikes().size());
+            userInformationDTO.addPost(postDTO);
+        }
+        return userInformationDTO;
+    }
+
     private boolean checkForInvalidEmail(String email) {
         return !email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$");
     }
@@ -174,4 +194,7 @@ public class UserService {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
     }
+
+
+
 }

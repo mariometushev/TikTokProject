@@ -71,11 +71,17 @@ public class UserController {
         return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/users/{id}/edit/profilePicture")// TODO get user id and check with session one
+    @PutMapping("/users/{id}/edit/profilePicture")
     public ResponseEntity<UserEditProfilePictureResponseDTO> editProfilePicture(@PathVariable int id, @RequestParam MultipartFile file, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), id);
         return new ResponseEntity<>(userService.editProfilePicture(file, id), HttpStatus.ACCEPTED);
     }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserInformationDTO> getUserById(@PathVariable int id) {
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.ACCEPTED);
+    }
+
 
 }

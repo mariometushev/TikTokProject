@@ -20,26 +20,35 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @Column(name = "owner_id")
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
+
     @Column(name = "song_id")
     @ManyToOne
     @JoinColumn(name = "song_id")
     private Song song;
+
     @Column(name = "upload_date")
     private LocalDateTime uploadDate;
+
     @Column(name = "is_public")
     private boolean isPublic;
+
     @Column
     private String description;
+
     @Column
     private int views;
+
     @Column(name = "video_url")
     private String videoUrl;
+
     @OneToMany(mappedBy = "post")
     private Set<Comment> comments;
+
     @ManyToMany
     @JoinTable(
             name = "posts_have_hashtags",
@@ -47,6 +56,7 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id")
     )
     private Set<Hashtag> hashtags;
+
     @ManyToMany
     @JoinTable(
             name = "posts_in_playlist",
@@ -54,6 +64,7 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "playlist_id")
     )
     private Set<Playlist> playlists;
+
     @ManyToMany
     @JoinTable(
             name = "posts_have_likes",
