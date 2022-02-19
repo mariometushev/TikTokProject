@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Component
 @Getter
@@ -42,6 +43,23 @@ public class User {
     private LocalDateTime registerDate;
     @Column(name = "photo_url")
     private String photoUrl;
+    @OneToMany(mappedBy = "owner")
+    private Set<Playlist> playlists;
+    @OneToMany(mappedBy = "owner")
+    private Set<Post> posts;
+    @ManyToMany(mappedBy = "postLikes")
+    private Set<Post> userLikedPosts;
+    @ManyToMany(mappedBy = "commentLikes")
+    private Set<Comment> userLikedComments;
+    @ManyToMany
+    @JoinTable(
+            name = "followers",
+            joinColumns = @JoinColumn(name = "followed_by_id"),
+            inverseJoinColumns = @JoinColumn(name = "follower_id")
+    )
+    private Set<User> followers;
+    @ManyToMany(mappedBy = "followers")
+    private Set<User> followerTo;
 
 }
 

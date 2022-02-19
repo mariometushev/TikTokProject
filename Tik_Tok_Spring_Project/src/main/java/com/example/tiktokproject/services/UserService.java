@@ -3,14 +3,12 @@ package com.example.tiktokproject.services;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
-import com.example.tiktokproject.model.dto.postDTO.PostUploadResponseDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
-import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
-import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -92,7 +90,6 @@ public class UserService {
             throw new BadRequestException("Wrong user id");
         }
         User oldUser = userRepository.findById(userEditDTO.getId()).get();
-        User updatedUser;
         if (userEditDTO.getEmail() != null) {
             if (checkForInvalidEmail(userEditDTO.getEmail())) {
                 throw new BadRequestException("Invalid email address");
@@ -108,9 +105,9 @@ public class UserService {
                 throw new BadRequestException("Name is mandatory");
             }
         }
-        if (userEditDTO.getPhoneNumber() != null) {//TODO phone number check
-            if (userEditDTO.getPhoneNumber().isBlank()) {
-                throw new BadRequestException("Phone number is mandatory");
+        if (userEditDTO.getPhoneNumber() != null) {
+            if (checkForInvalidPhoneNumber(userEditDTO.getPhoneNumber())) {
+                throw new BadRequestException("Invalid phone number");
             }
         }
         if (userEditDTO.getDescription() != null) {
@@ -119,7 +116,7 @@ public class UserService {
             }
         }
         if (userEditDTO.getNewPassword() != null) {
-            if (!passwordEncoder.matches(userEditDTO.getOldPassword(), oldUser.getPassword())) {
+            if (!passwordEncoder.matches(userEditDTO.getPassword(), oldUser.getPassword())) {
                 throw new BadRequestException("Wrong old password");
             }
             if (passwordEncoder.matches(userEditDTO.getNewPassword(), oldUser.getPassword())) {
@@ -130,13 +127,15 @@ public class UserService {
             }
             hasChangePassword = true;
         }
-        modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());//will ignore null fields
-        updatedUser = modelMapper.map(userEditDTO, User.class);
+        TypeMap<UserEditRequestDTO, User> propertyMapper = modelMapper
+                .createTypeMap(UserEditRequestDTO.class, User.class,
+                        modelMapper.getConfiguration().setSkipNullEnabled(true));
+        propertyMapper.map(userEditDTO, oldUser);
         if (hasChangePassword) {
-            updatedUser.setPassword(passwordEncoder.encode(userEditDTO.getNewPassword()));
+            oldUser.setPassword(passwordEncoder.encode(userEditDTO.getNewPassword()));
         }
-        userRepository.save(updatedUser);
-        return modelMapper.map(updatedUser, UserEditResponseDTO.class);
+        userRepository.save(oldUser);
+        return modelMapper.map(oldUser, UserEditResponseDTO.class);
     }
 
     public UserEditProfilePictureResponseDTO editProfilePicture(MultipartFile file, int userId) {
@@ -161,6 +160,10 @@ public class UserService {
 
     private boolean checkForInvalidEmail(String email) {
         return !email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$");
+    }
+
+    private boolean checkForInvalidPhoneNumber(String phoneNumber) {
+        return !phoneNumber.matches("^[+]3598[7-9][0-9]{7}$");
     }
 
     private void checkForInValidPasswordAndDateOfBirth(String password, String confirmPassword, LocalDate localDate) {

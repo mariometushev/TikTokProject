@@ -16,7 +16,7 @@ public class UserEditRequestDTO {
     private String name;
     private String email;
     private String phoneNumber;
-    private String oldPassword;
+    private String password;
     private String newPassword;
     private String confirmNewPassword;
     private String description;

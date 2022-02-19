@@ -64,16 +64,18 @@ public class UserController {
         return new ResponseEntity<>(userService.registerWithPhone(userDTO), HttpStatus.CREATED);
     }
 
-    @PutMapping("/users/edit")
-    public ResponseEntity<UserEditResponseDTO> editUser(@RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
+    @PutMapping("/users/{id}/edit")
+    public ResponseEntity<UserEditResponseDTO> editUser(@PathVariable int id, @RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
         sessionManager.validateLogin(request);
+        sessionManager.validateUserId(request.getSession(),id);
         return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/users/edit/profilePicture")
-    public ResponseEntity<UserEditProfilePictureResponseDTO> editProfilePicture(@RequestParam MultipartFile file, HttpServletRequest request) {
+    @PutMapping("/users/{id}/edit/profilePicture")// TODO get user id and check with session one
+    public ResponseEntity<UserEditProfilePictureResponseDTO> editProfilePicture(@PathVariable int id, @RequestParam MultipartFile file, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return new ResponseEntity<>(userService.editProfilePicture(file, (Integer) request.getSession().getAttribute(SessionManager.USER_ID)), HttpStatus.ACCEPTED);
+        sessionManager.validateUserId(request.getSession(), id);
+        return new ResponseEntity<>(userService.editProfilePicture(file, id), HttpStatus.ACCEPTED);
     }
 
 }

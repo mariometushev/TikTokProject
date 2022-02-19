@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Component
 @NoArgsConstructor
@@ -20,14 +21,25 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "owner_id")
-    private int ownerId;
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
     @Column(name = "parent_id")
     private int parentId;
     @Column(name = "post_id")
-    private int postId;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
     @Column
     private String text;
     @Column(name = "commented_on")
     private LocalDateTime commentedOn;
+    @ManyToMany
+    @JoinTable(
+            name = "comments_have_likes",
+            joinColumns = @JoinColumn(name = "comment_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> commentLikes;
 
 }

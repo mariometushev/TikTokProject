@@ -21,9 +21,10 @@ public class PostController {
     @Autowired
     private SessionManager sessionManager;
 
-    @PostMapping("/uploadPost")
-    public ResponseEntity<PostUploadResponseDTO> uploadPost(@RequestBody PostUploadRequestDTO post, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request){
+    @PostMapping("users/{id}/uploadPost")
+    public ResponseEntity<PostUploadResponseDTO> uploadPost(@PathVariable int id,@RequestBody PostUploadRequestDTO post, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request){
         sessionManager.validateLogin(request);
+        sessionManager.validateUserId(request.getSession(),id);
         return new ResponseEntity<>(postService.uploadPost(post, file), HttpStatus.CREATED);
     }
 
@@ -34,7 +35,7 @@ public class PostController {
         return HttpStatus.ACCEPTED;
     }
 
-    @PutMapping("/posts/{id}/editPost")
+    @PutMapping("/posts/editPost")
     public ResponseEntity<PostEditResponseDTO> editPost(@RequestBody PostEditRequestDTO postDto, HttpServletRequest request){
         sessionManager.validateLogin(request);
         PostEditResponseDTO dto = postService.editPost(postDto, request.getSession());

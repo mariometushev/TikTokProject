@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Component
 @NoArgsConstructor
@@ -20,5 +21,7 @@ public class Song {
     private int id;
     @Column
     private String title;
+    @OneToMany(mappedBy = "song")
+    private Set<Post> posts;
     
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Component
 @NoArgsConstructor
@@ -20,10 +21,14 @@ public class Playlist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "owner_id")
-    private int ownerId;
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
     @Column
     private String name;
     @Column(name = "created_time")
     private LocalDateTime createdTime;
+    @ManyToMany(mappedBy = "playlists")
+    private Set<Post> posts;
 
 }

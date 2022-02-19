@@ -77,7 +77,7 @@ public class PostService {
         if (postRepository.findById(postId).isEmpty()){
             throw new NotFoundException("No post found!");
         }
-        if (postRepository.findById(postId).get().getOwnerId() != (int) session.getAttribute(SessionManager.USER_ID)){
+        if (postRepository.findById(postId).get().getOwner().getId() != (int) session.getAttribute(SessionManager.USER_ID)){
             throw new UnauthorizedException("You can't delete this post!");
         }
     }

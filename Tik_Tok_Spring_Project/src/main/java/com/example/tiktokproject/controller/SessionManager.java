@@ -1,5 +1,6 @@
 package com.example.tiktokproject.controller;
 
+import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +20,17 @@ public class SessionManager {
         boolean logged = session.getAttribute(LOGGED) != null && ((Boolean) session.getAttribute(LOGGED));
         boolean sameIP = request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM));
         if (newSession || !logged || !sameIP) {
-            throw new UnauthorizedException("You have to log");
+            throw new UnauthorizedException("You have to log in");
         }
     }
 
-    public void setSession(HttpServletRequest request, int userId){
+    public void validateUserId(HttpSession session, int userId) {
+        if ((Integer) session.getAttribute(USER_ID) != userId) {
+            throw new BadRequestException("You have to log in");
+        }
+    }
+
+    public void setSession(HttpServletRequest request, int userId) {
         HttpSession session = request.getSession();
         session.setAttribute(SessionManager.LOGGED, true);
         session.setAttribute(SessionManager.LOGGED_FROM, request.getRemoteAddr());

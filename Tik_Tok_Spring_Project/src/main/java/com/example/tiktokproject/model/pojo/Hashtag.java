@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Component
 @NoArgsConstructor
@@ -20,5 +21,7 @@ public class Hashtag {
     private int id;
     @Column
     private String title;
+    @ManyToMany(mappedBy = "hashtags")
+    private Set<Post> posts;
 
 }
