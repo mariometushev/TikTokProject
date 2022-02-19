@@ -1,10 +1,10 @@
 package com.example.tiktokproject.controller;
 
-import com.example.tiktokproject.model.dto.postDTO.PostEditRequestDTO;
-import com.example.tiktokproject.model.dto.postDTO.PostEditResponseDTO;
-import com.example.tiktokproject.model.dto.postDTO.PostUploadRequestDTO;
-import com.example.tiktokproject.model.dto.postDTO.PostUploadResponseDTO;
+import com.example.tiktokproject.model.dto.postDTO.*;
+import com.example.tiktokproject.model.dto.userDTO.UserWithoutPostDTO;
+import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.services.PostService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,5 +40,11 @@ public class PostController {
         sessionManager.validateLogin(request);
         PostEditResponseDTO dto = postService.editPost(postDto, request.getSession());
         return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/posts/{id}")
+    public ResponseEntity<PostWithOwnerDTO> getById(@PathVariable int id){
+        PostWithOwnerDTO postDto = postService.getPost(id);
+        return new ResponseEntity<>(postDto, HttpStatus.OK);
     }
 }
