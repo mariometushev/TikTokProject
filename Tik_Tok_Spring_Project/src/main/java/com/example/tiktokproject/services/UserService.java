@@ -209,6 +209,18 @@ public class UserService {
         userRepository.save(unfollowedUser);
     }
 
+    public List<PostLikedDTO> getAllLikedPosts(int id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
+        List<Post> postsLiked = postRepository.findPostsByPostLikesContains(user);
+        List<PostLikedDTO> postsLikedList = new ArrayList<>();
+        for (Post post : postsLiked) {
+            PostLikedDTO postLiked = modelMapper.map(post,PostLikedDTO.class);
+            postLiked.setViews(post.getViews());
+            postsLikedList.add(postLiked);
+        }
+        return postsLikedList;
+    }
+
     private boolean checkForInvalidEmail(String email) {
         return !email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$");
     }
@@ -224,17 +236,5 @@ public class UserService {
         if (localDate.isAfter(LocalDate.now().minusYears(13))) {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
-    }
-
-    public List<PostLikedDTO> getAllLikedPosts(int id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
-        List<Post> postsLiked = postRepository.findPostsByPostLikesContains(user);
-        List<PostLikedDTO> postsLikedList = new ArrayList<>();
-        for (Post post : postsLiked) {
-            PostLikedDTO postLiked = modelMapper.map(post,PostLikedDTO.class);
-            postLiked.setViews(post.getViews());
-            postsLikedList.add(postLiked);
-        }
-        return postsLikedList;
     }
 }

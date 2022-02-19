@@ -40,4 +40,8 @@ public class Comment {
     )
     private Set<User> commentLikes;
 
+    public void addUserWhoLike(User u){
+        this.commentLikes.add(u);
+    }
+
 }

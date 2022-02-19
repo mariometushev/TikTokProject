@@ -72,10 +72,19 @@ public class Post {
     private Set<User> postLikes;
 
     public void addLike(User user) {
-        this.getPostLikes().add(user);
+        this.postLikes.add(user);
     }
 
     public void removeLike(User user) {
-        this.getPostLikes().remove(user);
+        this.postLikes.remove(user);
+    }
+
+    public void removeComment(Comment comment) {
+        this.comments.remove(comment);
+    }
+
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
     }
 }
+

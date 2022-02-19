@@ -45,11 +45,11 @@ public class PostService {
 
     public PostUploadResponseDTO uploadPost(PostUploadRequestDTO postDto, MultipartFile file) {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName = (System.nanoTime()+postDto.getOwnerId()) + "." + extension;
-        if (file.getSize() > MAX_UPLOAD_SIZE){
+        String fileName = (System.nanoTime() + postDto.getOwnerId()) + "." + extension;
+        if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big video size. The maximum video size is 250MB.");
         }
-        if (!("mp4".equals(extension))){
+        if (!("mp4".equals(extension))) {
             throw new BadRequestException("Wrong video format.You can upload only .mp4.");
         }
         try {
@@ -63,12 +63,12 @@ public class PostService {
 
         String[] spaces = post.getDescription().split(" ");
         ArrayList<String> hashtags = new ArrayList<>();
-        for(String s : spaces){
-            if(s.matches(HASHTAG_REGEX)){
+        for (String s : spaces) {
+            if (s.matches(HASHTAG_REGEX)) {
                 hashtags.add(s);
             }
         }
-        if (hashtags.size() > 0){
+        if (hashtags.size() > 0) {
             for (String hashtag : hashtags) {
                 Hashtag hash = new Hashtag();
                 hash.setTitle(hashtag);
@@ -81,18 +81,18 @@ public class PostService {
         return modelMapper.map(post, PostUploadResponseDTO.class);
     }
 
-    public void deletePost(int postId, HttpSession session){
+    public void deletePost(int postId, HttpSession session) {
         checkUserPrivileges(postId, session);
         postRepository.deleteById(postRepository.findById(postId).get().getId());
     }
 
     public PostEditResponseDTO editPost(PostEditRequestDTO postDto, HttpSession session) {
-        checkUserPrivileges(postDto.getId(),session);
+        checkUserPrivileges(postDto.getId(), session);
         Post post = postRepository.findById(postDto.getId()).get();
-        if (postDto.isPublic() != post.isPublic()){
+        if (postDto.isPublic() != post.isPublic()) {
             post.setPublic(postDto.isPublic());
         }
-        if (!postDto.getDescription().equals(post.getDescription())){
+        if (!postDto.getDescription().equals(post.getDescription())) {
             post.setDescription(postDto.getDescription());
         }
         postRepository.save(post);
@@ -100,24 +100,15 @@ public class PostService {
     }
 
 
-    private void checkUserPrivileges(int postId, HttpSession session){
-        if (postRepository.findById(postId).isEmpty()){
-            throw new NotFoundException("No post found!");
-        }
-        if (postRepository.findById(postId).get().getOwner().getId() != (int) session.getAttribute(SessionManager.USER_ID)){
-            throw new UnauthorizedException("You can't delete this post!");
-        }
-    }
-
     public PostWithOwnerDTO getPost(int id) {
-        Post post = postRepository.findById(id).orElseThrow( () -> new NotFoundException("Post not found"));
-        if (!post.isPublic()){
+        Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
+        if (!post.isPublic()) {
             throw new UnauthorizedException("This video is private!");
         }
         post.setViews(post.getViews() + 1);
         postRepository.save(post);
         UserWithoutPostDTO userDto = modelMapper.map(post.getOwner(), UserWithoutPostDTO.class);
-        PostWithOwnerDTO postDto = modelMapper.map(post,PostWithOwnerDTO.class);
+        PostWithOwnerDTO postDto = modelMapper.map(post, PostWithOwnerDTO.class);
         postDto.setOwner(userDto);
         postDto.setLikes(post.getPostLikes().size());
         postDto.setComments(post.getComments().size());
@@ -136,19 +127,38 @@ public class PostService {
 
     public void likePost(int postId, User user) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Not found post"));
-        if (post.getPostLikes().contains(user)){
+        if (post.getPostLikes().contains(user)) {
             throw new BadRequestException("You already liked this post.");
         }
+        if (user.getUserLikedPosts().contains(post)) {
+            throw new BadRequestException("You already liked this post");
+        }
         post.addLike(user);
+        user.addLikedPost(post);
+        userRepository.save(user);
         postRepository.save(post);
     }
 
     public void unlikePost(int postId, User user) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Not found post"));
-        if (!post.getPostLikes().contains(user)){
+        if (!post.getPostLikes().contains(user)) {
             throw new BadRequestException("You already unlike this post.");
         }
+        if (!user.getUserLikedPosts().contains(post)) {
+            throw new BadRequestException("You already unliked this post");
+        }
         post.removeLike(user);
+        user.removeLikedPost(post);
+        userRepository.save(user);
         postRepository.save(post);
+    }
+
+    private void checkUserPrivileges(int postId, HttpSession session) {
+        if (postRepository.findById(postId).isEmpty()) {
+            throw new NotFoundException("No post found!");
+        }
+        if (postRepository.findById(postId).get().getOwner().getId() != (int) session.getAttribute(SessionManager.USER_ID)) {
+            throw new UnauthorizedException("You can't delete this post!");
+        }
     }
 }

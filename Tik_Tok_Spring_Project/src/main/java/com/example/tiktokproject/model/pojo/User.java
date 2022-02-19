@@ -44,16 +44,22 @@ public class User {
     private LocalDateTime registerDate;
     @Column(name = "photo_url")
     private String photoUrl;
+
     @OneToMany(mappedBy = "owner")
     private Set<Playlist> playlists;
+
     @OneToMany(mappedBy = "owner")
     private Set<Comment> comments;
+
     @OneToMany(mappedBy = "owner")
     private Set<Post> posts;
+
     @ManyToMany(mappedBy = "postLikes")
     private Set<Post> userLikedPosts;
+
     @ManyToMany(mappedBy = "commentLikes")
     private Set<Comment> userLikedComments;
+
     @ManyToMany
     @JoinTable(
             name = "followers",
@@ -61,6 +67,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "follower_id")
     )
     private Set<User> followers;
+
     @ManyToMany(mappedBy = "followers")
     private Set<User> followerTo;
 
@@ -74,6 +81,22 @@ public class User {
 
     public void addComment(Comment c) {
         this.comments.add(c);
+    }
+
+    public void addLikedComment(Comment c) {
+        this.userLikedComments.add(c);
+    }
+
+    public void removeComment(Comment c) {
+        this.comments.remove(c);
+    }
+
+    public void addLikedPost(Post post) {
+        this.userLikedPosts.add(post);
+    }
+
+    public void removeLikedPost(Post post) {
+        this.userLikedPosts.remove(post);
     }
 }
 
