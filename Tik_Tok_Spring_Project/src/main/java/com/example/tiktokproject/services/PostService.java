@@ -4,10 +4,8 @@ import com.example.tiktokproject.controller.SessionManager;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
-import com.example.tiktokproject.model.dto.postDTO.PostEditRequestDTO;
-import com.example.tiktokproject.model.dto.postDTO.PostEditResponseDTO;
-import com.example.tiktokproject.model.dto.postDTO.PostUploadRequestDTO;
-import com.example.tiktokproject.model.dto.postDTO.PostUploadResponseDTO;
+import com.example.tiktokproject.model.dto.postDTO.*;
+import com.example.tiktokproject.model.dto.userDTO.UserWithoutPostDTO;
 import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.repository.PostRepository;
 import org.apache.commons.io.FilenameUtils;
@@ -82,5 +80,18 @@ public class PostService {
         }
     }
 
-
+    public PostWithOwnerDTO getPost(int id) {
+        Post post = postRepository.findById(id).orElseThrow( () -> new NotFoundException("Post not found"));
+        if (!post.isPublic()){
+            throw new UnauthorizedException("This video is private!");
+        }
+        post.setViews(post.getViews() + 1);
+        postRepository.save(post);
+        UserWithoutPostDTO userDto = modelMapper.map(post.getOwner(), UserWithoutPostDTO.class);
+        PostWithOwnerDTO postDto = modelMapper.map(post,PostWithOwnerDTO.class);
+        postDto.setOwner(userDto);
+        postDto.setLikes(post.getPostLikes().size());
+        postDto.setComments(post.getComments().size());
+        return postDto;
+    }
 }
