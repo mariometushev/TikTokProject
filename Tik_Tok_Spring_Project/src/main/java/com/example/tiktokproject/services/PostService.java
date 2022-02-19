@@ -133,4 +133,22 @@ public class PostService {
                 .collect(Collectors.toList());
         return posts;
     }
+
+    public void likePost(int postId, User user) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Not found post"));
+        if (post.getPostLikes().contains(user)){
+            throw new BadRequestException("You already liked this post.");
+        }
+        post.addLike(user);
+        postRepository.save(post);
+    }
+
+    public void unlikePost(int postId, User user) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Not found post"));
+        if (!post.getPostLikes().contains(user)){
+            throw new BadRequestException("You already unlike this post.");
+        }
+        post.removeLike(user);
+        postRepository.save(post);
+    }
 }

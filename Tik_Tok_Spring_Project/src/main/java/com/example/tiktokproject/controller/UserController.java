@@ -100,6 +100,13 @@ public class UserController {
         return new ResponseEntity<>("Your unfollow request was successful", HttpStatus.ACCEPTED);
     }
 
+    @GetMapping("/user/{id}/likedPosts")
+    public void getAllLikedPost(@PathVariable int id, HttpServletRequest request){
+            sessionManager.validateLogin(request);
+            sessionManager.validateUserId(request.getSession(), id);
+            
+    }
+
 
 
 }
