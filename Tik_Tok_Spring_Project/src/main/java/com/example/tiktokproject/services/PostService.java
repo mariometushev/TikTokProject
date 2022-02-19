@@ -6,7 +6,9 @@ import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
 import com.example.tiktokproject.model.dto.postDTO.*;
 import com.example.tiktokproject.model.dto.userDTO.UserWithoutPostDTO;
+import com.example.tiktokproject.model.pojo.Hashtag;
 import com.example.tiktokproject.model.pojo.Post;
+import com.example.tiktokproject.model.repository.HashtagRepository;
 import com.example.tiktokproject.model.repository.PostRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
@@ -19,17 +21,21 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Service
 public class PostService {
 
     private static final long MAX_UPLOAD_SIZE = 250 * 1024 * 1024;
     private static final String UPLOAD_FOLDER = "uploads";
+    public static final String HASHTAG_REGEX = "#[A-Za-z0-9_]+";
 
     @Autowired
     private PostRepository postRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private HashtagRepository hashtagRepository;
 
     public PostUploadResponseDTO uploadPost(PostUploadRequestDTO postDto, MultipartFile file) {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -48,6 +54,23 @@ public class PostService {
         Post post = modelMapper.map(postDto, Post.class);
         post.setUploadDate(LocalDateTime.now());
         post.setVideoUrl(fileName);
+
+        String[] spaces = post.getDescription().split(" ");
+        ArrayList<String> hashtags = new ArrayList<>();
+        for(String s : spaces){
+            if(s.matches(HASHTAG_REGEX)){
+                hashtags.add(s);
+            }
+        }
+        if (hashtags.size() > 0){
+            for (String hashtag : hashtags) {
+                Hashtag hash = new Hashtag();
+                hash.setTitle(hashtag);
+                hash.addPost(post);
+                hashtagRepository.save(hash);
+            }
+        }
+
         postRepository.save(post);
         return modelMapper.map(post, PostUploadResponseDTO.class);
     }

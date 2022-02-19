@@ -24,4 +24,7 @@ public class Hashtag {
     @ManyToMany(mappedBy = "hashtags")
     private Set<Post> posts;
 
+    public void addPost(Post post) {
+        this.posts.add(post);
+    }
 }
