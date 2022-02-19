@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
+
 import javax.persistence.*;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -46,6 +47,8 @@ public class User {
     @OneToMany(mappedBy = "owner")
     private Set<Playlist> playlists;
     @OneToMany(mappedBy = "owner")
+    private Set<Comment> comments;
+    @OneToMany(mappedBy = "owner")
     private Set<Post> posts;
     @ManyToMany(mappedBy = "postLikes")
     private Set<Post> userLikedPosts;
@@ -67,6 +70,10 @@ public class User {
 
     public void removeFollower(User userWhoWantToUnfollow) {
         this.getFollowers().remove(userWhoWantToUnfollow);
+    }
+
+    public void addComment(Comment c) {
+        this.comments.add(c);
     }
 }
 
