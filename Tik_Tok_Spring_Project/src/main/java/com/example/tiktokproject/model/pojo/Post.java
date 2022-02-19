@@ -21,12 +21,10 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "owner_id")
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    @Column(name = "song_id")
     @ManyToOne
     @JoinColumn(name = "song_id")
     private Song song;

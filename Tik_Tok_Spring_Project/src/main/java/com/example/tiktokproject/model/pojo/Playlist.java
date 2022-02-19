@@ -20,7 +20,6 @@ public class Playlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "owner_id")
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;

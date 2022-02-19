@@ -20,13 +20,11 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "owner_id")
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
     @Column(name = "parent_id")
     private int parentId;
-    @Column(name = "post_id")
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
