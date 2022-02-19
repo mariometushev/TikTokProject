@@ -2,6 +2,7 @@ package com.example.tiktokproject.controller;
 
 import com.example.tiktokproject.model.dto.postDTO.*;
 import com.example.tiktokproject.model.pojo.Post;
+import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.services.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,5 +51,21 @@ public class PostController {
     @GetMapping("/users/{id}/posts")
     public ResponseEntity<List<Post>> getAllPostsSortByUploadDate(@PathVariable int id){
             return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(id), HttpStatus.OK);
+    }
+
+    @PostMapping("/posts/{id}/like")
+    public ResponseEntity<String> likePost(@PathVariable int id, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        User user = sessionManager.getSessionUser(request.getSession());
+        postService.likePost(id,user);
+        return new ResponseEntity<>("Your like request was successful",HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/posts/{id}/unlike")
+    public ResponseEntity<String> unlikePost(@PathVariable int id, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        User user = sessionManager.getSessionUser(request.getSession());
+        postService.unlikePost(id,user);
+        return new ResponseEntity<>("Your unlike request was successful",HttpStatus.ACCEPTED);
     }
 }

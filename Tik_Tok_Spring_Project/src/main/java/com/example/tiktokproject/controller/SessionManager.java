@@ -33,7 +33,7 @@ public class SessionManager {
 
     public void validateUserId(HttpSession session, int userId) {
         if ((Integer) session.getAttribute(USER_ID) != userId) {
-            throw new BadRequestException("You have to log in");
+            throw new UnauthorizedException("You are not owner of this account.");
         }
     }
 

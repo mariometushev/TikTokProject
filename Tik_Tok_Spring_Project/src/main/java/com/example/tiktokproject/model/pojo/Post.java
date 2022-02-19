@@ -70,4 +70,12 @@ public class Post {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> postLikes;
+
+    public void addLike(User user) {
+        this.getPostLikes().add(user);
+    }
+
+    public void removeLike(User user) {
+        this.getPostLikes().remove(user);
+    }
 }
