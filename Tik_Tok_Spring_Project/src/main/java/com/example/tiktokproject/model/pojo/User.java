@@ -61,5 +61,12 @@ public class User {
     @ManyToMany(mappedBy = "followers")
     private Set<User> followerTo;
 
+    public void addFollower(User follower) {
+        this.getFollowers().add(follower);
+    }
+
+    public void removeFollower(User userWhoWantToUnfollow) {
+        this.getFollowers().remove(userWhoWantToUnfollow);
+    }
 }
 

@@ -37,3 +37,6 @@ Content-Type: application/json
   "password" : "tomi+123"
 
 }
+
+###
+GET localhost:9999/users/1

@@ -161,21 +161,45 @@ public class UserService {
     }
 
     public UserInformationDTO getUserById(int userId) {
-        if(userRepository.findById(userId).isEmpty()){
+        if (userRepository.findById(userId).isEmpty()) {
             throw new NotFoundException("Wrong user id");
         }
         User u = userRepository.findById(userId).get();
         UserInformationDTO userInformationDTO = new UserInformationDTO();
-        modelMapper.map(u,userInformationDTO);
+        modelMapper.map(u, userInformationDTO);
         userInformationDTO.setFollowers(u.getFollowers().size());
         userInformationDTO.setFollowerTo(u.getFollowerTo().size());
-        for(Post p : u.getPosts()){
-            PostWithoutOwnerDTO postDTO = modelMapper.map(p,PostWithoutOwnerDTO.class);
+        for (Post p : u.getPosts()) {
+            PostWithoutOwnerDTO postDTO = modelMapper.map(p, PostWithoutOwnerDTO.class);
             postDTO.setComments(p.getComments().size());
             postDTO.setPostLikes(p.getPostLikes().size());
             userInformationDTO.addPost(postDTO);
         }
         return userInformationDTO;
+    }
+
+    public void follow(User follower, int id) {
+        User star = userRepository.findById(id).orElseThrow(() -> new NotFoundException("No such user to follow"));
+        if(follower.getId() == star.getId()){
+            throw new BadRequestException("You can't follow yourself");
+        }
+        if(star.getFollowers().contains(follower)){
+            throw new BadRequestException("You already subscribe to that person");
+        }
+        star.addFollower(follower);
+        userRepository.save(star);
+    }
+
+    public void unfollow(User userWhoWantToUnfollow, int unfollowedUserId) {
+        User unfollowedUser = userRepository.findById(unfollowedUserId).orElseThrow(()->new NotFoundException("No such user to unfollow"));
+        if(userWhoWantToUnfollow.getId() == unfollowedUser.getId()){
+            throw new BadRequestException("You can't unfollow yourself");
+        }
+        if(!unfollowedUser.getFollowers().contains(userWhoWantToUnfollow)){
+            throw new BadRequestException("You are already not follow that person");
+        }
+        unfollowedUser.removeFollower(userWhoWantToUnfollow);
+        userRepository.save(unfollowedUser);
     }
 
     private boolean checkForInvalidEmail(String email) {
@@ -194,7 +218,4 @@ public class UserService {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
     }
-
-
-
 }

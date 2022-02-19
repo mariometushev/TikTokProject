@@ -2,6 +2,7 @@ package com.example.tiktokproject.controller;
 
 import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
 import com.example.tiktokproject.model.dto.userDTO.*;
+import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,7 +68,7 @@ public class UserController {
     @PutMapping("/users/{id}/edit")
     public ResponseEntity<UserEditResponseDTO> editUser(@PathVariable int id, @RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        sessionManager.validateUserId(request.getSession(),id);
+        sessionManager.validateUserId(request.getSession(), id);
         return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
     }
 
@@ -82,6 +83,23 @@ public class UserController {
     public ResponseEntity<UserInformationDTO> getUserById(@PathVariable int id) {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.ACCEPTED);
     }
+
+    @PostMapping("/users/{id}/follow")
+    public ResponseEntity<String> follow(@PathVariable(name = "id") int followedToUserId, HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        User follower = sessionManager.getSessionUser(request.getSession());
+        userService.follow(follower, followedToUserId);
+        return new ResponseEntity<>("Your follow request was successful", HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/users/{id}/unfollow")
+    public ResponseEntity<String> unfollow(@PathVariable(name = "id") int unfollowedUserId, HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        User userWhoWantToUnfollow = sessionManager.getSessionUser(request.getSession());
+        userService.unfollow(userWhoWantToUnfollow, unfollowedUserId);
+        return new ResponseEntity<>("Your unfollow request was successful", HttpStatus.ACCEPTED);
+    }
+
 
 
 }
