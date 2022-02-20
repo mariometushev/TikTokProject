@@ -45,8 +45,8 @@ public class CommentService {
         c.setCommentedOn(LocalDateTime.now());
         commentRepository.save(c);
 
-        commentOwner.addComment(c);
-        p.addComment(c);
+//        commentOwner.addComment(c);
+//        p.addComment(c);
 
         userRepository.save(commentOwner);
         postRepository.save(p);
@@ -91,8 +91,8 @@ public class CommentService {
             throw new UnauthorizedException("You can't delete another user comment");
         }
 
-        commentOwner.removeComment(c);
-        p.removeComment(c);
+//        commentOwner.removeComment(c);
+//        p.removeComment(c);
 
         commentRepository.delete(c);
         userRepository.save(commentOwner);
@@ -109,8 +109,8 @@ public class CommentService {
             throw new BadRequestException("You can't like that comment two times");
         }
 
-        liker.addLikedComment(c);
-        c.addUserWhoLike(liker);
+//        liker.addLikedComment(c);
+//        c.addUserWhoLike(liker);
 
         commentRepository.save(c);
         userRepository.save(liker);
@@ -126,8 +126,8 @@ public class CommentService {
             throw new BadRequestException("You already unlike this comment");
         }
 
-        userWhoWantToUnlike.removeLikedComment(c);
-        c.removeUserWhoLike(userWhoWantToUnlike);
+//        userWhoWantToUnlike.removeLikedComment(c);
+//        c.removeUserWhoLike(userWhoWantToUnlike);
 
         commentRepository.save(c);
         userRepository.save(userWhoWantToUnlike);

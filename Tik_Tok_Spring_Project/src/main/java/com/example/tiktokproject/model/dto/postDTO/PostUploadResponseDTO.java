@@ -17,4 +17,5 @@ public class PostUploadResponseDTO {
     private boolean isPublic;
     private String description;
     private String videoUrl;
+
 }

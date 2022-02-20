@@ -157,9 +157,9 @@ public class UserService {
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big photo size. The maximum photo size is 250MB.");
         }
-        if (!("jpg".equals(extension)) && !("png".equals(extension))) {
-            throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
-        }
+//        if (!("jpg".equals(extension)) && !("png".equals(extension))) {
+//            throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
+//        }
         try {
             Files.copy(file.getInputStream(), new File(UPLOAD_PHOTO_FOLDER + File.separator + fileName).toPath());
         } catch (IOException e) {

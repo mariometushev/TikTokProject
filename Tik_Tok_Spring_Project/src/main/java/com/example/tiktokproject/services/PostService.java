@@ -43,9 +43,10 @@ public class PostService {
     @Autowired
     private UserRepository userRepository;
 
-    public PostUploadResponseDTO uploadPost(PostUploadRequestDTO postDto, MultipartFile file) {
+    public PostUploadResponseDTO uploadPostVideo(int postId, MultipartFile file) {
+        Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName = (System.nanoTime() + postDto.getOwnerId()) + "." + extension;
+        String fileName = System.nanoTime() + postId + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big video size. The maximum video size is 250MB.");
         }
@@ -57,9 +58,22 @@ public class PostService {
         } catch (IOException e) {
             throw new com.example.tiktokproject.exceptions.IOException("Server file system error.");
         }
-        Post post = modelMapper.map(postDto, Post.class);
-        post.setUploadDate(LocalDateTime.now());
-        post.setVideoUrl(fileName);
+        p.setVideoUrl(fileName);
+        postRepository.save(p);
+        return modelMapper.map(p, PostUploadResponseDTO.class);
+    }
+
+    public PostUploadResponseDTO makePost(PostUploadRequestDTO post) {
+        if (post.getDescription().length() > 150) {
+            throw new BadRequestException("Description lenght over 150 symbols");
+        }
+        if (post.getDescription() != null) {
+            if (post.getDescription().isBlank()) {
+                throw new BadRequestException("Only spaces in description is not allowed");
+            }
+        }
+        Post p = modelMapper.map(post, Post.class);
+        p.setUploadDate(LocalDateTime.now());
 
         String[] spaces = post.getDescription().split(" ");
         ArrayList<String> hashtags = new ArrayList<>();
@@ -72,13 +86,13 @@ public class PostService {
             for (String hashtag : hashtags) {
                 Hashtag hash = new Hashtag();
                 hash.setTitle(hashtag);
-                hash.addPost(post);
+//                hash.addPost(p);
                 hashtagRepository.save(hash);
             }
         }
 
-        postRepository.save(post);
-        return modelMapper.map(post, PostUploadResponseDTO.class);
+        postRepository.save(p);
+        return modelMapper.map(p, PostUploadResponseDTO.class);
     }
 
     public void deletePost(int postId, HttpSession session) {

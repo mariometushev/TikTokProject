@@ -21,14 +21,21 @@ public class PostController {
     @Autowired
     private SessionManager sessionManager;
 
-    @PostMapping("users/{id}/uploadPost")
-    public ResponseEntity<PostUploadResponseDTO> uploadPost(@PathVariable int id, @RequestBody PostUploadRequestDTO post, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request) {
+    @PostMapping("users/{uId}/uploadPostVideo/{pId}")
+    public ResponseEntity<PostUploadResponseDTO> uploadPostVideo(@PathVariable int uId, @PathVariable int pId, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        sessionManager.validateUserId(request.getSession(), id);
-        return new ResponseEntity<>(postService.uploadPost(post, file), HttpStatus.CREATED);
+        sessionManager.validateUserId(request.getSession(), uId);
+        return new ResponseEntity<>(postService.uploadPostVideo(pId, file), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/posts/{id}")//TODO user id needed here
+    @PostMapping("users/{id}/makePost")
+    public ResponseEntity<PostUploadResponseDTO> makePost(@PathVariable int id, @RequestBody PostUploadRequestDTO post, HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        sessionManager.validateUserId(request.getSession(), id);
+        return new ResponseEntity<>(postService.makePost(post), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/posts/{id}")
     public ResponseEntity<String> deletePost(@PathVariable(name = "id") int postId, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         postService.deletePost(postId, request.getSession());
