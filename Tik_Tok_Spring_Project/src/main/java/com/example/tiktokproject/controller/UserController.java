@@ -67,10 +67,10 @@ public class UserController {
         return new ResponseEntity<>(userService.registerWithPhone(userDTO), HttpStatus.CREATED);
     }
 
-    @PutMapping("/users/{id}/edit")
-    public ResponseEntity<UserEditResponseDTO> editUser(@PathVariable int id, @RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
+    @PutMapping("/users/edit")
+    public ResponseEntity<UserEditResponseDTO> editUser(@RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        sessionManager.validateUserId(request.getSession(), id);
+        sessionManager.validateUserId(request.getSession(),userDTO.getId());
         return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
     }
 
@@ -108,5 +108,14 @@ public class UserController {
         sessionManager.validateUserId(request.getSession(), id);
         return new ResponseEntity<>(userService.getAllLikedPosts(id), HttpStatus.OK);
     }
+
+    @PostMapping("/users/{id}/setUsername")
+    public ResponseEntity<UserSetUsernameDTO> setUsername(@PathVariable int id,@Valid  @RequestBody UserSetUsernameDTO userDto, BindingResult result){
+        if (result.hasErrors()){
+            throw new MethodArgumentNotValidException("Wrong username or name");
+        }
+        return new ResponseEntity<>(userService.setUsername(id,userDto.getUsername(),userDto.getName()),HttpStatus.ACCEPTED);
+    }
+
 
 }

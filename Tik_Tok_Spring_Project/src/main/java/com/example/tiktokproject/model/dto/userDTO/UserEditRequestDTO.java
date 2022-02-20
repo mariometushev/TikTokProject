@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Pattern;
+
 @NoArgsConstructor
 @Getter
 @Setter
@@ -20,6 +22,6 @@ public class UserEditRequestDTO {
     private String newPassword;
     private String confirmNewPassword;
     private String description;
-    private String photoUrl;
+
 
 }

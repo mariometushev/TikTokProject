@@ -3,9 +3,9 @@ Content-Type: application/json
 
 {
   "dateOfBirth" : "2000-10-10",
-  "email" : "mario@gmail.com",
-  "password" : "Pesho123@",
-  "confirmPassword" : "Pesho123@"
+  "email" : "pesho@abv.bg",
+  "password" : "Pesho+123",
+  "confirmPassword" : "Pesho+123"
 }
 ###
 POST localhost:9999/registerWithPhone
@@ -13,9 +13,44 @@ Content-Type: application/json
 
 {
   "dateOfBirth" : "2000-10-10",
-  "phoneNumber" : "0888456789",
-  "password" : "Pesho@12345",
-  "confirmPassword" : "Pesho@12345"
+  "phoneNumber" : "+359886463978",
+  "password" : "Pesho+123",
+  "confirmPassword" : "Pesho+123"
+}
+
+###
+POST localhost:9999/users/4/setUsername
+Content-Type: application/json
+
+{
+  "username" : "hah ",
+  "name" : "MARIOooo"
+
+}
+
+###
+PUT localhost:9999/users/edit
+Content-Type: application/json
+
+{
+  "id" : 7,
+  "roleId" : 2,
+  "username" : null,
+  "name" : null,
+  "email" : null,
+  "phoneNumber" : null,
+  "password" : null,
+  "newPassword" : null,
+  "confirmNewPassword" : null,
+  "description" : null,
+  "photoUrl" : null
+}
+###
+PUT localhost:9999/users/6/edit/profilePicture
+Content-Type: application/json
+
+{
+
 }
 
 ###
@@ -23,8 +58,8 @@ POST localhost:9999/loginWithEmail
 Content-Type: application/json
 
 {
-  "email" : "tomi@abv.bg",
-  "password" : "Pesho@12345"
+  "email" : "messi16@abv.bg",
+  "password" : "Pesho1234"
 
 }
 
@@ -33,10 +68,13 @@ POST localhost:9999/loginWithPhone
 Content-Type: application/json
 
 {
-  "phoneNumber" : "0897897897",
-  "password" : "tomi+123"
+  "phoneNumber" : "+359886463978",
+  "password" : "Pesho+123"
 
 }
+###
+POST localhost:9999/logout
+
 
 ###
 GET localhost:9999/users/1

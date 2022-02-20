@@ -7,17 +7,20 @@ import com.example.tiktokproject.model.dto.postDTO.PostLikedDTO;
 import com.example.tiktokproject.model.dto.postDTO.PostWithoutOwnerDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.model.pojo.Post;
+import com.example.tiktokproject.model.pojo.TypeMapperClass;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeMap;
+import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.Pattern;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,7 +28,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -40,6 +42,7 @@ public class UserService {
     private ModelMapper modelMapper;
     @Autowired
     private PostRepository postRepository;
+
 
     public UserLoginResponseWithPhoneDTO loginWithPhone(UserLoginWithPhoneDTO user) {
         String phone = user.getPhoneNumber();
@@ -95,10 +98,10 @@ public class UserService {
 
     public UserEditResponseDTO editUser(UserEditRequestDTO userEditDTO) {
         boolean hasChangePassword = false;
-        if (userRepository.findById(userEditDTO.getId()).isEmpty()) {
-            throw new NotFoundException("Wrong user id");
+        User oldUser = userRepository.findById(userEditDTO.getId()).orElseThrow(() -> new NotFoundException("Not found user"));
+        if (userEditDTO.getRoleId() < 1 || userEditDTO.getRoleId() > 3){
+            throw new BadRequestException("No such role");
         }
-        User oldUser = userRepository.findById(userEditDTO.getId()).get();
         if (userEditDTO.getEmail() != null) {
             if (checkForInvalidEmail(userEditDTO.getEmail())) {
                 throw new BadRequestException("Invalid email address");
@@ -128,6 +131,9 @@ public class UserService {
             if (!passwordEncoder.matches(userEditDTO.getPassword(), oldUser.getPassword())) {
                 throw new BadRequestException("Wrong old password");
             }
+            if (checkForInvalidPassword(userEditDTO.getNewPassword())){
+                throw new BadRequestException("Wrong password credentials");
+            }
             if (passwordEncoder.matches(userEditDTO.getNewPassword(), oldUser.getPassword())) {
                 throw new BadRequestException("New password must be different");
             }
@@ -136,10 +142,7 @@ public class UserService {
             }
             hasChangePassword = true;
         }
-        TypeMap<UserEditRequestDTO, User> propertyMapper = modelMapper
-                .createTypeMap(UserEditRequestDTO.class, User.class,
-                        modelMapper.getConfiguration().setSkipNullEnabled(true));
-        propertyMapper.map(userEditDTO, oldUser);
+        TypeMapperClass.getInstance().map(userEditDTO, oldUser);
         if (hasChangePassword) {
             oldUser.setPassword(passwordEncoder.encode(userEditDTO.getNewPassword()));
         }
@@ -218,6 +221,10 @@ public class UserService {
         return postsLikedList;
     }
 
+    private boolean checkForInvalidPassword(String password){
+        return !password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}");
+    }
+
     private boolean checkForInvalidEmail(String email) {
         return !email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$");
     }
@@ -233,5 +240,20 @@ public class UserService {
         if (localDate.isAfter(LocalDate.now().minusYears(13))) {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
+    }
+
+    public UserSetUsernameDTO setUsername(int id, String username, String name) {
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
+        if (userRepository.findByUsername(username).isPresent()){
+            throw new BadRequestException("This username is already used");
+        }
+        user.setUsername(username);
+        if (name == null){
+            user.setName(username);
+        }else {
+            user.setName(name);
+        }
+        userRepository.save(user);
+        return modelMapper.map(user, UserSetUsernameDTO.class);
     }
 }

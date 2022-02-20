@@ -18,8 +18,7 @@ public class UserRegisterRequestWithPhoneDTO {
 
     @NotNull
     private LocalDate dateOfBirth;
-    @NotBlank
-    @NotNull
+    @Pattern(regexp = "^[+]3598[7-9][0-9]{7}$")
     private String phoneNumber;
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}")
     private String password;

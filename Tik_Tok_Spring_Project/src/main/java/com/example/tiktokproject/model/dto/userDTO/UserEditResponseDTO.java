@@ -20,6 +20,5 @@ public class UserEditResponseDTO {
     private String phoneNumber;
     private LocalDate dateOfBirth;
     private String description;
-    private String photoUrl;
 
 }
