@@ -101,7 +101,7 @@ public class CommentService {
 
     public void likeComment(User liker, int postId, int commentId) {
         Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post"));
-        Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment"));
+        Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment to like"));
         if (!p.getComments().contains(c)) {
             throw new BadRequestException("This post doesn't have that comment");
         }
@@ -114,5 +114,22 @@ public class CommentService {
 
         commentRepository.save(c);
         userRepository.save(liker);
+    }
+
+    public void unlikeComment(User userWhoWantToUnlike, int postId, int commentId) {
+        Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment to unlike"));
+        Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post"));
+        if(!p.getComments().contains(c)){
+            throw new BadRequestException("This post doesn't have that comment");
+        }
+        if(!userWhoWantToUnlike.getUserLikedComments().contains(c)){
+            throw new BadRequestException("You already unlike this comment");
+        }
+
+        userWhoWantToUnlike.removeLikedComment(c);
+        c.removeUserWhoLike(userWhoWantToUnlike);
+
+        commentRepository.save(c);
+        userRepository.save(userWhoWantToUnlike);
     }
 }

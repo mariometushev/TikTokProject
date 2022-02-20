@@ -81,9 +81,9 @@ public class UserController {
         return new ResponseEntity<>(userService.editProfilePicture(file, id), HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/users/{id}")
-    public ResponseEntity<UserInformationDTO> getUserById(@PathVariable int id) {
-        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.ACCEPTED);
+    @GetMapping("/users/{username}")
+    public ResponseEntity<UserInformationDTO> getUserByUsername(@PathVariable String username) {
+        return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/users/{id}/follow")
@@ -103,10 +103,10 @@ public class UserController {
     }
 
     @GetMapping("/user/{id}/likedPosts")
-    public ResponseEntity<List<PostLikedDTO>> getAllLikedPost(@PathVariable int id, HttpServletRequest request){
-            sessionManager.validateLogin(request);
-            sessionManager.validateUserId(request.getSession(), id);
-            return new ResponseEntity<>(userService.getAllLikedPosts(id),HttpStatus.OK);
+    public ResponseEntity<List<PostLikedDTO>> getAllLikedPost(@PathVariable int id, HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        sessionManager.validateUserId(request.getSession(), id);
+        return new ResponseEntity<>(userService.getAllLikedPosts(id), HttpStatus.OK);
     }
 
 }

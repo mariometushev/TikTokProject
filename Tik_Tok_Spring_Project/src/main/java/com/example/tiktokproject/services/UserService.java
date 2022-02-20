@@ -167,11 +167,8 @@ public class UserService {
         return modelMapper.map(oldUser, UserEditProfilePictureResponseDTO.class);
     }
 
-    public UserInformationDTO getUserById(int userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new NotFoundException("Wrong user id");
-        }
-        User u = userRepository.findById(userId).get();
+    public UserInformationDTO getUserByUsername(String username) {
+        User u = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Wrong username"));
         UserInformationDTO userInformationDTO = new UserInformationDTO();
         modelMapper.map(u, userInformationDTO);
         userInformationDTO.setFollowers(u.getFollowers().size());
@@ -187,10 +184,10 @@ public class UserService {
 
     public void follow(User follower, int id) {
         User star = userRepository.findById(id).orElseThrow(() -> new NotFoundException("No such user to follow"));
-        if(follower.getId() == star.getId()){
+        if (follower.getId() == star.getId()) {
             throw new BadRequestException("You can't follow yourself");
         }
-        if(star.getFollowers().contains(follower)){
+        if (star.getFollowers().contains(follower)) {
             throw new BadRequestException("You already subscribe to that person");
         }
         star.addFollower(follower);
@@ -198,11 +195,11 @@ public class UserService {
     }
 
     public void unfollow(User userWhoWantToUnfollow, int unfollowedUserId) {
-        User unfollowedUser = userRepository.findById(unfollowedUserId).orElseThrow(()->new NotFoundException("No such user to unfollow"));
-        if(userWhoWantToUnfollow.getId() == unfollowedUser.getId()){
+        User unfollowedUser = userRepository.findById(unfollowedUserId).orElseThrow(() -> new NotFoundException("No such user to unfollow"));
+        if (userWhoWantToUnfollow.getId() == unfollowedUser.getId()) {
             throw new BadRequestException("You can't unfollow yourself");
         }
-        if(!unfollowedUser.getFollowers().contains(userWhoWantToUnfollow)){
+        if (!unfollowedUser.getFollowers().contains(userWhoWantToUnfollow)) {
             throw new BadRequestException("You are already not follow that person");
         }
         unfollowedUser.removeFollower(userWhoWantToUnfollow);
@@ -214,7 +211,7 @@ public class UserService {
         List<Post> postsLiked = postRepository.findPostsByPostLikesContains(user);
         List<PostLikedDTO> postsLikedList = new ArrayList<>();
         for (Post post : postsLiked) {
-            PostLikedDTO postLiked = modelMapper.map(post,PostLikedDTO.class);
+            PostLikedDTO postLiked = modelMapper.map(post, PostLikedDTO.class);
             postLiked.setViews(post.getViews());
             postsLikedList.add(postLiked);
         }

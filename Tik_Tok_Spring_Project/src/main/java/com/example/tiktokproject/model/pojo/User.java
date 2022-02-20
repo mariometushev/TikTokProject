@@ -98,5 +98,9 @@ public class User {
     public void removeLikedPost(Post post) {
         this.userLikedPosts.remove(post);
     }
+
+    public void removeLikedComment(Comment c) {
+        this.userLikedComments.remove(c);
+    }
 }
 

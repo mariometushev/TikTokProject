@@ -22,50 +22,48 @@ public class PostController {
     private SessionManager sessionManager;
 
     @PostMapping("users/{id}/uploadPost")
-    public ResponseEntity<PostUploadResponseDTO> uploadPost(@PathVariable int id,@RequestBody PostUploadRequestDTO post, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request){
+    public ResponseEntity<PostUploadResponseDTO> uploadPost(@PathVariable int id, @RequestBody PostUploadRequestDTO post, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        sessionManager.validateUserId(request.getSession(),id);
+        sessionManager.validateUserId(request.getSession(), id);
         return new ResponseEntity<>(postService.uploadPost(post, file), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/posts/{id}")
-    public HttpStatus deletePost(@PathVariable(name = "id") int postId, HttpServletRequest request){
+    @DeleteMapping("/posts/{id}")//TODO user id needed here
+    public ResponseEntity<String> deletePost(@PathVariable(name = "id") int postId, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         postService.deletePost(postId, request.getSession());
-        return HttpStatus.ACCEPTED;
+        return new ResponseEntity<>("Successful delete request", HttpStatus.ACCEPTED);
     }
 
     @PutMapping("/posts/editPost")
-    public ResponseEntity<PostEditResponseDTO> editPost(@RequestBody PostEditRequestDTO postDto, HttpServletRequest request){
+    public ResponseEntity<PostEditResponseDTO> editPost(@RequestBody PostEditRequestDTO postDto, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        PostEditResponseDTO dto = postService.editPost(postDto, request.getSession());
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(postService.editPost(postDto, request.getSession()), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/posts/{id}")
-    public ResponseEntity<PostWithOwnerDTO> getById(@PathVariable int id){
-        PostWithOwnerDTO postDto = postService.getPost(id);
-        return new ResponseEntity<>(postDto, HttpStatus.OK);
+    public ResponseEntity<PostWithOwnerDTO> getById(@PathVariable int id) {
+        return new ResponseEntity<>(postService.getPost(id), HttpStatus.OK);
     }
 
     @GetMapping("/users/{id}/posts")
-    public ResponseEntity<List<Post>> getAllPostsSortByUploadDate(@PathVariable int id){
-            return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(id), HttpStatus.OK);
+    public ResponseEntity<List<Post>> getAllPostsSortByUploadDate(@PathVariable int id) {
+        return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(id), HttpStatus.OK);
     }
 
     @PostMapping("/posts/{id}/like")
-    public ResponseEntity<String> likePost(@PathVariable int id, HttpServletRequest request){
+    public ResponseEntity<String> likePost(@PathVariable int id, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         User user = sessionManager.getSessionUser(request.getSession());
-        postService.likePost(id,user);
-        return new ResponseEntity<>("Your like request was successful",HttpStatus.ACCEPTED);
+        postService.likePost(id, user);
+        return new ResponseEntity<>("Your like request was successful", HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/posts/{id}/unlike")
-    public ResponseEntity<String> unlikePost(@PathVariable int id, HttpServletRequest request){
+    public ResponseEntity<String> unlikePost(@PathVariable int id, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         User user = sessionManager.getSessionUser(request.getSession());
-        postService.unlikePost(id,user);
-        return new ResponseEntity<>("Your unlike request was successful",HttpStatus.ACCEPTED);
+        postService.unlikePost(id, user);
+        return new ResponseEntity<>("Your unlike request was successful", HttpStatus.ACCEPTED);
     }
 }

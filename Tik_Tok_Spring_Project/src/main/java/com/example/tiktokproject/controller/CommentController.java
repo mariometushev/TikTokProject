@@ -64,5 +64,14 @@ public class CommentController {
         return new ResponseEntity<>("You like the comment successful", HttpStatus.ACCEPTED);
     }
 
+    @PostMapping("/posts/{pId}/comments/{cId}/unlike")
+    public ResponseEntity<String> unlikeComment(@PathVariable(name = "cId") int commentId,
+                                              @PathVariable(name = "pId") int postId,
+                                              HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        User userWhoWantToUnlike = sessionManager.getSessionUser(request.getSession());
+        commentService.unlikeComment(userWhoWantToUnlike, postId, commentId);
+        return new ResponseEntity<>("You unlike the comment successful", HttpStatus.ACCEPTED);
+    }
 
 }

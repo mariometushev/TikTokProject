@@ -40,8 +40,11 @@ public class Comment {
     )
     private Set<User> commentLikes;
 
-    public void addUserWhoLike(User u){
+    public void addUserWhoLike(User u) {
         this.commentLikes.add(u);
     }
 
+    public void removeUserWhoLike(User userWhoWantToUnlike) {
+        this.commentLikes.remove(userWhoWantToUnlike);
+    }
 }
