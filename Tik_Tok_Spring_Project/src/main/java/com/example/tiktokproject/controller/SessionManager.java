@@ -1,6 +1,5 @@
 package com.example.tiktokproject.controller;
 
-import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
 import com.example.tiktokproject.model.pojo.User;

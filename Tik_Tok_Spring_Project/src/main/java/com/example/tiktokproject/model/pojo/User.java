@@ -63,7 +63,7 @@ public class User {
     @ManyToMany
     @JoinTable(
             name = "followers",
-            joinColumns = @JoinColumn(name = "followed_by_id"),
+            joinColumns = @JoinColumn(name = "followed_to_id"),
             inverseJoinColumns = @JoinColumn(name = "follower_id")
     )
     private Set<User> followers;

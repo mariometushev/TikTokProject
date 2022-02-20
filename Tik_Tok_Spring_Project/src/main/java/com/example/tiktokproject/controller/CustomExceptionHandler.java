@@ -17,6 +17,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ErrorDTO handlerBadRequest(Exception e) {
         ErrorDTO dto = new ErrorDTO();
+        e.printStackTrace();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.BAD_REQUEST.value());
         return dto;
@@ -27,6 +28,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ErrorDTO handlerUnauthorizedException(Exception e) {
         ErrorDTO dto = new ErrorDTO();
+        e.printStackTrace();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.UNAUTHORIZED.value());
         return dto;
@@ -37,6 +39,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ErrorDTO handlerNotFound(Exception e) {
         ErrorDTO dto = new ErrorDTO();
+        e.printStackTrace();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.NOT_FOUND.value());
         return dto;
@@ -47,6 +50,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ErrorDTO handlerMethodArgumentNotValidException(Exception e) {
         ErrorDTO dto = new ErrorDTO();
+        e.printStackTrace();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.BAD_REQUEST.value());
         return dto;
@@ -57,6 +61,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ErrorDTO handlerIOException (Exception e) {
         ErrorDTO dto = new ErrorDTO();
+        e.printStackTrace();
         dto.setMsg(e.getMessage());
         dto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return dto;

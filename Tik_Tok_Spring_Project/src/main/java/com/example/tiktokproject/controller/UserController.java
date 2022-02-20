@@ -70,12 +70,12 @@ public class UserController {
     @PutMapping("/users/edit")
     public ResponseEntity<UserEditResponseDTO> editUser(@RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        sessionManager.validateUserId(request.getSession(),userDTO.getId());
+        sessionManager.validateUserId(request.getSession(), userDTO.getId());
         return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/users/{id}/edit/profilePicture")
-    public ResponseEntity<UserEditProfilePictureResponseDTO> editProfilePicture(@PathVariable int id, @RequestParam MultipartFile file, HttpServletRequest request) {
+    @PostMapping("/users/{id}/edit/profilePicture")
+    public ResponseEntity<UserEditProfilePictureResponseDTO> editProfilePicture(@PathVariable int id, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), id);
         return new ResponseEntity<>(userService.editProfilePicture(file, id), HttpStatus.ACCEPTED);
@@ -84,6 +84,11 @@ public class UserController {
     @GetMapping("/users/{username}")
     public ResponseEntity<UserInformationDTO> getUserByUsername(@PathVariable String username) {
         return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/search/{search}")
+    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@PathVariable String search) {
+        return new ResponseEntity<>(userService.getAllUsersByUsername(search), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/users/{id}/follow")
@@ -110,11 +115,13 @@ public class UserController {
     }
 
     @PostMapping("/users/{id}/setUsername")
-    public ResponseEntity<UserSetUsernameDTO> setUsername(@PathVariable int id,@Valid  @RequestBody UserSetUsernameDTO userDto, BindingResult result){
-        if (result.hasErrors()){
+    public ResponseEntity<UserSetUsernameDTO> setUsername(HttpServletRequest request, @PathVariable int id, @Valid @RequestBody UserSetUsernameDTO userDto, BindingResult result) {
+        if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong username or name");
         }
-        return new ResponseEntity<>(userService.setUsername(id,userDto.getUsername(),userDto.getName()),HttpStatus.ACCEPTED);
+        sessionManager.validateLogin(request);
+        sessionManager.validateUserId(request.getSession(), id);
+        return new ResponseEntity<>(userService.setUsername(id, userDto.getUsername(), userDto.getName()), HttpStatus.ACCEPTED);
     }
 
 

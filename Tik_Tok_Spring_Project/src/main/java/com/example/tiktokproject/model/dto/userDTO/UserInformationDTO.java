@@ -18,8 +18,8 @@ public class UserInformationDTO {
     private String description;
     private Set<PostWithoutOwnerDTO> posts;
     private String photoUrl;
-    private int followers;
-    private int followerTo;
+    private int numberOfFollowers;
+    private int numberOfFollowerTo;
 
     public void addPost(PostWithoutOwnerDTO postDTO) {
         posts.add(postDTO);

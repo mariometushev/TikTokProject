@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -99,7 +100,7 @@ public class UserService {
     public UserEditResponseDTO editUser(UserEditRequestDTO userEditDTO) {
         boolean hasChangePassword = false;
         User oldUser = userRepository.findById(userEditDTO.getId()).orElseThrow(() -> new NotFoundException("Not found user"));
-        if (userEditDTO.getRoleId() < 1 || userEditDTO.getRoleId() > 3){
+        if (userEditDTO.getRoleId() < 1 || userEditDTO.getRoleId() > 3) {
             throw new BadRequestException("No such role");
         }
         if (userEditDTO.getEmail() != null) {
@@ -131,7 +132,7 @@ public class UserService {
             if (!passwordEncoder.matches(userEditDTO.getPassword(), oldUser.getPassword())) {
                 throw new BadRequestException("Wrong old password");
             }
-            if (checkForInvalidPassword(userEditDTO.getNewPassword())){
+            if (checkForInvalidPassword(userEditDTO.getNewPassword())) {
                 throw new BadRequestException("Wrong password credentials");
             }
             if (passwordEncoder.matches(userEditDTO.getNewPassword(), oldUser.getPassword())) {
@@ -152,7 +153,7 @@ public class UserService {
 
     public UserEditProfilePictureResponseDTO editProfilePicture(MultipartFile file, int userId) {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName = (System.nanoTime()) + "." + extension;
+        String fileName = System.nanoTime() + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big photo size. The maximum photo size is 250MB.");
         }
@@ -172,10 +173,9 @@ public class UserService {
 
     public UserInformationDTO getUserByUsername(String username) {
         User u = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Wrong username"));
-        UserInformationDTO userInformationDTO = new UserInformationDTO();
-        modelMapper.map(u, userInformationDTO);
-        userInformationDTO.setFollowers(u.getFollowers().size());
-        userInformationDTO.setFollowerTo(u.getFollowerTo().size());
+        UserInformationDTO userInformationDTO = modelMapper.map(u, UserInformationDTO.class);
+        userInformationDTO.setNumberOfFollowers(u.getFollowers().size());
+        userInformationDTO.setNumberOfFollowerTo(u.getFollowerTo().size());
         for (Post p : u.getPosts()) {
             PostWithoutOwnerDTO postDTO = modelMapper.map(p, PostWithoutOwnerDTO.class);
             postDTO.setComments(p.getComments().size());
@@ -221,7 +221,7 @@ public class UserService {
         return postsLikedList;
     }
 
-    private boolean checkForInvalidPassword(String password){
+    private boolean checkForInvalidPassword(String password) {
         return !password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}");
     }
 
@@ -244,16 +244,31 @@ public class UserService {
 
     public UserSetUsernameDTO setUsername(int id, String username, String name) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
-        if (userRepository.findByUsername(username).isPresent()){
+        if (userRepository.findByUsername(username).isPresent()) {
             throw new BadRequestException("This username is already used");
         }
         user.setUsername(username);
-        if (name == null){
+        if (name == null) {
             user.setName(username);
-        }else {
+        } else {
             user.setName(name);
         }
         userRepository.save(user);
         return modelMapper.map(user, UserSetUsernameDTO.class);
+    }
+
+    public List<UserUsernameDTO> getAllUsersByUsername(String search) {
+        search = "%" + search + "%";
+        List<User> users = userRepository
+                .findByUsernameLike(search)
+                .stream()
+                .sorted((u1, u2) -> u2.getFollowers().size() - u1.getFollowers().size())
+                .collect(Collectors.toList()).subList(0, 5);
+        List<UserUsernameDTO> responseUsers = new ArrayList<>();
+        for (User u : users) {
+            UserUsernameDTO user = modelMapper.map(u, UserUsernameDTO.class);
+            responseUsers.add(user);
+        }
+        return responseUsers;
     }
 }
