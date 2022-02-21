@@ -1,12 +1,15 @@
 package com.example.tiktokproject.controller;
 
+import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
 import com.example.tiktokproject.model.dto.playlistDTO.PlaylistRequestDTO;
 import com.example.tiktokproject.model.dto.playlistDTO.PlaylistResponseDTO;
+import com.example.tiktokproject.model.dto.playlistDTO.PlaylistWithoutOwnerDTO;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.services.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +26,10 @@ public class PlaylistController {
     @PostMapping("/users/{id}/createPlaylist")
     public ResponseEntity<PlaylistResponseDTO> createPlaylist(@PathVariable(name = "id") int userId,
                                                               @Valid @RequestBody PlaylistRequestDTO playlistDto,
-                                                              HttpServletRequest request) {
+                                                              HttpServletRequest request, BindingResult result) {
+        if (result.hasErrors()) {
+            throw new MethodArgumentNotValidException("Wrong credentials");
+        }
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), userId);
         User u = sessionManager.getSessionUser(request.getSession());
@@ -40,11 +46,23 @@ public class PlaylistController {
 
     @PostMapping("/playlists/{id}/edit")
     public ResponseEntity<PlaylistResponseDTO> editPlaylist(@PathVariable(name = "id") int playlistId,
-                             @Valid @RequestBody PlaylistRequestDTO playlistDto,
-                             HttpServletRequest request) {
+                                                            @Valid @RequestBody PlaylistRequestDTO playlistDto,
+                                                            HttpServletRequest request, BindingResult result) {
+        if (result.hasErrors()) {
+            throw new MethodArgumentNotValidException("Wrong credentials");
+        }
         sessionManager.validateLogin(request);
         User user = sessionManager.getSessionUser(request.getSession());
         return new ResponseEntity<>(playlistService.editPlaylist(user, playlistId, playlistDto), HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/posts/{pId}/addTo/playlists/{plId}")
+    public ResponseEntity<PlaylistWithoutOwnerDTO> addVideoToPlaylist(@PathVariable(name = "pId") int postId,
+                                                                      @PathVariable(name = "plId") int playlistId,
+                                                                      HttpServletRequest request) {
+        sessionManager.validateLogin(request);
+        User user = sessionManager.getSessionUser(request.getSession());
+        return new ResponseEntity<>(playlistService.addVideoToPlaylist(user, playlistId, postId), HttpStatus.ACCEPTED);
     }
 
 }

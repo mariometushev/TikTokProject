@@ -27,7 +27,15 @@ public class Playlist {
     private String name;
     @Column(name = "created_time")
     private LocalDateTime createdTime;
-    @ManyToMany(mappedBy = "playlists")
+    @ManyToMany
+    @JoinTable(
+            name = "posts_in_playlist",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "playlist_id")
+    )
     private Set<Post> posts;
 
+    public void addPost(Post post) {
+        posts.add(post);
+    }
 }

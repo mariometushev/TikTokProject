@@ -51,12 +51,7 @@ public class Post {
     )
     private Set<Hashtag> hashtags;
 
-    @ManyToMany
-    @JoinTable(
-            name = "posts_in_playlist",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "playlist_id")
-    )
+    @ManyToMany(mappedBy = "posts")
     private Set<Playlist> playlists;
 
     @ManyToMany
