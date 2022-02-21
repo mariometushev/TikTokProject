@@ -44,6 +44,7 @@ public class User {
     private LocalDateTime registerDate;
     @Column(name = "photo_url")
     private String photoUrl;
+    private boolean verified;
 
     @OneToMany(mappedBy = "owner")
     private Set<Playlist> playlists;

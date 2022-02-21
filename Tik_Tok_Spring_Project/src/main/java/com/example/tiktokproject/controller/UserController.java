@@ -67,6 +67,12 @@ public class UserController {
         return new ResponseEntity<>(userService.registerWithPhone(userDTO), HttpStatus.CREATED);
     }
 
+    @GetMapping("/verify/{token}")
+    public ResponseEntity<String> verifyEmail(@PathVariable(name = "token") String token, HttpServletRequest request) {
+        User user = sessionManager.getSessionUser(request.getSession());
+        return new ResponseEntity<>(userService.verifyEmail(token, user), HttpStatus.ACCEPTED);
+    }
+
     @PutMapping("/users/edit")
     public ResponseEntity<UserEditResponseDTO> editUser(@RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
         sessionManager.validateLogin(request);

@@ -13,14 +13,12 @@ import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
-import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.Pattern;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,6 +41,8 @@ public class UserService {
     private ModelMapper modelMapper;
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private EmailService emailService;
 
 
     public UserLoginResponseWithPhoneDTO loginWithPhone(UserLoginWithPhoneDTO user) {
@@ -75,12 +75,15 @@ public class UserService {
         if (userRepository.findByEmail(userEmailDTO.getEmail()).isPresent()) {
             throw new BadRequestException("User with this email already exist");
         }
-        checkForInValidPasswordAndDateOfBirth(userEmailDTO.getPassword(), userEmailDTO.getConfirmPassword(), userEmailDTO.getDateOfBirth());
+        checkForInValidPasswordAndDateOfBirth(userEmailDTO.getPassword(),
+                userEmailDTO.getConfirmPassword(),
+                userEmailDTO.getDateOfBirth());
         User user = modelMapper.map(userEmailDTO, User.class);
         user.setPassword(passwordEncoder.encode(userEmailDTO.getPassword()));
         user.setRoleId(1);
         user.setRegisterDate(LocalDateTime.now());
         userRepository.save(user);
+        emailService.sendSimpleMessage(user.getEmail(), user.getRegisterDate());
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
@@ -88,13 +91,25 @@ public class UserService {
         if (userRepository.findByPhoneNumber(userPhoneDTO.getPhoneNumber()).isPresent()) {
             throw new BadRequestException("User with this phone already exist");
         }
-        checkForInValidPasswordAndDateOfBirth(userPhoneDTO.getPassword(), userPhoneDTO.getConfirmPassword(), userPhoneDTO.getDateOfBirth());
+        checkForInValidPasswordAndDateOfBirth(userPhoneDTO.getPassword(),
+                userPhoneDTO.getConfirmPassword(),
+                userPhoneDTO.getDateOfBirth());
         User u = modelMapper.map(userPhoneDTO, User.class);
         u.setPassword(passwordEncoder.encode(userPhoneDTO.getPassword()));
         u.setRoleId(1);
         u.setRegisterDate(LocalDateTime.now());
         userRepository.save(u);
+        emailService.sendSimpleMessage(u.getEmail(), u.getRegisterDate());
         return modelMapper.map(u, UserRegisterResponseWithPhoneDTO.class);
+    }
+
+    public String verifyEmail(String token, User user) {
+        String checkToken = emailService.generateToken(user.getEmail(), user.getRegisterDate());
+        if (checkToken.equals(token)) {
+            user.setVerified(true);
+            userRepository.save(user);
+            return "Email verified.";
+        } else throw new BadRequestException("Invalid validation token");
     }
 
     public UserEditResponseDTO editUser(UserEditRequestDTO userEditDTO) {
@@ -157,9 +172,9 @@ public class UserService {
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big photo size. The maximum photo size is 250MB.");
         }
-//        if (!("jpg".equals(extension)) && !("png".equals(extension))) {
-//            throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
-//        }
+        if (!("jpg".equals(extension)) && !("png".equals(extension))) {
+            throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
+        }
         try {
             Files.copy(file.getInputStream(), new File(UPLOAD_PHOTO_FOLDER + File.separator + fileName).toPath());
         } catch (IOException e) {
@@ -221,27 +236,6 @@ public class UserService {
         return postsLikedList;
     }
 
-    private boolean checkForInvalidPassword(String password) {
-        return !password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}");
-    }
-
-    private boolean checkForInvalidEmail(String email) {
-        return !email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$");
-    }
-
-    private boolean checkForInvalidPhoneNumber(String phoneNumber) {
-        return !phoneNumber.matches("^[+]3598[7-9][0-9]{7}$");
-    }
-
-    private void checkForInValidPasswordAndDateOfBirth(String password, String confirmPassword, LocalDate localDate) {
-        if (!password.equals(confirmPassword)) {
-            throw new BadRequestException("Password and confirm password should be equals");
-        }
-        if (localDate.isAfter(LocalDate.now().minusYears(13))) {
-            throw new UnauthorizedException("You should be at least 13 years old");
-        }
-    }
-
     public UserSetUsernameDTO setUsername(int id, String username, String name) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
         if (userRepository.findByUsername(username).isPresent()) {
@@ -271,4 +265,26 @@ public class UserService {
         }
         return responseUsers;
     }
+
+    private boolean checkForInvalidPassword(String password) {
+        return !password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}");
+    }
+
+    private boolean checkForInvalidEmail(String email) {
+        return !email.matches("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$");
+    }
+
+    private boolean checkForInvalidPhoneNumber(String phoneNumber) {
+        return !phoneNumber.matches("^[+]3598[7-9][0-9]{7}$");
+    }
+
+    private void checkForInValidPasswordAndDateOfBirth(String password, String confirmPassword, LocalDate localDate) {
+        if (!password.equals(confirmPassword)) {
+            throw new BadRequestException("Password and confirm password should be equals");
+        }
+        if (localDate.isAfter(LocalDate.now().minusYears(13))) {
+            throw new UnauthorizedException("You should be at least 13 years old");
+        }
+    }
 }
+
