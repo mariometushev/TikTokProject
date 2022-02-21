@@ -46,6 +46,10 @@ public class CommentService {
         postRepository.save(p);
 
         CommentResponseDTO response = modelMapper.map(c, CommentResponseDTO.class);
+        UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
+        PostWithoutOwnerDTO post = modelMapper.map(c.getPost(), PostWithoutOwnerDTO.class);
+        response.setPost(post);
+        response.setOwner(user);
         response.setLikes(c.getCommentLikes().size());
         return response;
     }
@@ -62,6 +66,10 @@ public class CommentService {
         commentRepository.save(c);
         commentRepository.save(reply);
         CommentReplyResponseDTO response = modelMapper.map(reply, CommentReplyResponseDTO.class);
+        UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
+        PostWithoutOwnerDTO post = modelMapper.map(c.getPost(), PostWithoutOwnerDTO.class);
+        response.setOwner(user);
+        response.setPost(post);
         response.setLikes(reply.getCommentLikes().size());
         return response;
     }
@@ -129,6 +137,7 @@ public class CommentService {
         UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
         commentDto.setPost(post);
         commentDto.setOwner(user);
+        commentDto.setLikes(c.getCommentLikes().size());
         return commentDto;
     }
 }
