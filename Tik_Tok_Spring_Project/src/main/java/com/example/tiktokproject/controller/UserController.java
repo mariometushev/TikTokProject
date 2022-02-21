@@ -25,16 +25,6 @@ public class UserController {
     @Autowired
     private SessionManager sessionManager;
 
-    @PostMapping("/loginWithPhone")
-    public ResponseEntity<UserLoginResponseWithPhoneDTO> login(@Valid @RequestBody UserLoginWithPhoneDTO user, HttpSession session, HttpServletRequest request, BindingResult result) {
-        if (result.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong phone number or password credentials");
-        }
-        UserLoginResponseWithPhoneDTO dto = userService.loginWithPhone(user);
-        sessionManager.setSession(request, dto.getId());
-        return new ResponseEntity<>(dto, HttpStatus.OK);
-    }
-
     @PostMapping("/loginWithEmail")
     public ResponseEntity<UserLoginResponseWithEmailDTO> login(@Valid @RequestBody UserLoginWithEmailDTO user, HttpServletRequest request, BindingResult result) {
         if (result.hasErrors()) {
@@ -57,14 +47,6 @@ public class UserController {
             throw new MethodArgumentNotValidException("Wrong email or password credentials");
         }
         return new ResponseEntity<>(userService.registerWithEmail(userDTO), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/registerWithPhone")
-    public ResponseEntity<UserRegisterResponseWithPhoneDTO> register(@Valid @RequestBody UserRegisterRequestWithPhoneDTO userDTO, BindingResult result) {
-        if (result.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong phone number or password credentials");
-        }
-        return new ResponseEntity<>(userService.registerWithPhone(userDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/verify/{token}")

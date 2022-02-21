@@ -44,20 +44,6 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
-
-    public UserLoginResponseWithPhoneDTO loginWithPhone(UserLoginWithPhoneDTO user) {
-        String phone = user.getPhoneNumber();
-        String password = user.getPassword();
-        if (userRepository.findByPhoneNumber(phone).isEmpty()) {
-            throw new NotFoundException("Wrong phone number or password!");
-        }
-        if (!passwordEncoder.matches(password, userRepository.findByPhoneNumber(phone).get().getPassword())) {
-            throw new NotFoundException("Wrong phone number or password!");
-        }
-        User u = userRepository.findByPhoneNumber(phone).get();
-        return modelMapper.map(u, UserLoginResponseWithPhoneDTO.class);
-    }
-
     public UserLoginResponseWithEmailDTO loginWithEmail(UserLoginWithEmailDTO user) {
         String email = user.getEmail();
         String password = user.getPassword();
@@ -85,22 +71,6 @@ public class UserService {
         userRepository.save(user);
         emailService.sendSimpleMessage(user.getEmail(), user.getRegisterDate());
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
-    }
-
-    public UserRegisterResponseWithPhoneDTO registerWithPhone(UserRegisterRequestWithPhoneDTO userPhoneDTO) {
-        if (userRepository.findByPhoneNumber(userPhoneDTO.getPhoneNumber()).isPresent()) {
-            throw new BadRequestException("User with this phone already exist");
-        }
-        checkForInValidPasswordAndDateOfBirth(userPhoneDTO.getPassword(),
-                userPhoneDTO.getConfirmPassword(),
-                userPhoneDTO.getDateOfBirth());
-        User u = modelMapper.map(userPhoneDTO, User.class);
-        u.setPassword(passwordEncoder.encode(userPhoneDTO.getPassword()));
-        u.setRoleId(1);
-        u.setRegisterDate(LocalDateTime.now());
-        userRepository.save(u);
-        emailService.sendSimpleMessage(u.getEmail(), u.getRegisterDate());
-        return modelMapper.map(u, UserRegisterResponseWithPhoneDTO.class);
     }
 
     public String verifyEmail(String token, User user) {
