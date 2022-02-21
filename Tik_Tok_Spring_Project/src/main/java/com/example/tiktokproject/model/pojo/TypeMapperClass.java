@@ -10,12 +10,16 @@ import javax.persistence.Access;
 
 @Component
 public class TypeMapperClass {
-    private static ModelMapper modelMapper = new ModelMapper();
+    private static final ModelMapper modelMapper = new ModelMapper();
     private static TypeMap<UserEditRequestDTO, User> typeMapper;
-    public static TypeMap<UserEditRequestDTO, User> getInstance(){
-        if (typeMapper == null){
-            typeMapper = modelMapper.createTypeMap(UserEditRequestDTO.class, User.class, modelMapper.getConfiguration().setSkipNullEnabled(true));
+
+    public static TypeMap<UserEditRequestDTO, User> getInstance() {
+        synchronized (TypeMapperClass.class){
+            if (typeMapper == null) {
+                typeMapper = modelMapper.createTypeMap(UserEditRequestDTO.class, User.class, modelMapper.getConfiguration().setSkipNullEnabled(true));
+            }
         }
+
         return typeMapper;
     }
 }

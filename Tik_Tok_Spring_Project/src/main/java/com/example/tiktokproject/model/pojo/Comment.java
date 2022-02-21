@@ -24,7 +24,7 @@ public class Comment {
     @JoinColumn(name = "owner_id")
     private User owner;
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "id", insertable = false, updatable = false)
     private Comment parent;
     @OneToMany(mappedBy = "parent")
     private Set<Comment> replies;

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 public class PlaylistController {
@@ -63,6 +64,20 @@ public class PlaylistController {
         sessionManager.validateLogin(request);
         User user = sessionManager.getSessionUser(request.getSession());
         return new ResponseEntity<>(playlistService.addVideoToPlaylist(user, playlistId, postId), HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/posts/{pId}/removeFrom/playlists/{plId}")
+    public ResponseEntity<PlaylistWithoutOwnerDTO> removePostFromPlaylist(@PathVariable(name = "pId") int postId,
+                                                                          @PathVariable(name = "plId") int playlistId,
+                                                                          HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        User user = sessionManager.getSessionUser(request.getSession());
+        return new ResponseEntity<>(playlistService.removePostFromPlaylist(user, postId, playlistId), HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/users/{id}/playlists")
+    public ResponseEntity<List<PlaylistWithoutOwnerDTO>> getAllPlaylists(@PathVariable(name = "id") int userId){
+        return new ResponseEntity<>(playlistService.getAllPlaylists(userId), HttpStatus.OK);
     }
 
 }

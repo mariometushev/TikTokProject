@@ -38,4 +38,8 @@ public class Playlist {
     public void addPost(Post post) {
         posts.add(post);
     }
+
+    public void removePost(Post post) {
+        this.posts.remove(post);
+    }
 }

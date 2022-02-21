@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PlaylistService {
@@ -60,23 +62,55 @@ public class PlaylistService {
     }
 
     public PlaylistWithoutOwnerDTO addVideoToPlaylist(User user, int playlistId, int postId) {
-        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(() -> new NotFoundException("playlist not found"));
+        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(() -> new NotFoundException("Playlist not found"));
         if (!user.getPlaylists().contains(playlist)) {
             throw new BadRequestException("You can't add posts to another user playlist");
         }
-        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("post not found"));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
         if (playlist.getPosts().contains(post)) {
             throw new BadRequestException("This post is already in this playlist");
         }
         playlist.addPost(post);
         playlistRepository.save(playlist);
         PlaylistWithoutOwnerDTO dto = modelMapper.map(playlist, PlaylistWithoutOwnerDTO.class);
-        for (Post p : playlist.getPosts()) {
-            PostWithoutOwnerDTO postDTO = modelMapper.map(p, PostWithoutOwnerDTO.class);
-            postDTO.setPostLikes(p.getPostLikes().size());
-            postDTO.setComments(p.getComments().size());
-            dto.addPost(postDTO);
-        }
+        addPostToPostWithoutOwnerDto(dto, playlist);
         return dto;
+    }
+
+    public PlaylistWithoutOwnerDTO removePostFromPlaylist(User user, int postId, int playlistId) {
+        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(() -> new NotFoundException("Playlist not found"));
+        if (!user.getPlaylists().contains(playlist)) {
+            throw new BadRequestException("You can't remove posts to another user playlist");
+        }
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        if (!playlist.getPosts().contains(post)) {
+            throw new BadRequestException("This post is removed already from this playlist");
+        }
+        playlist.removePost(post);
+        playlistRepository.save(playlist);
+        PlaylistWithoutOwnerDTO playlistDto = modelMapper.map(playlist, PlaylistWithoutOwnerDTO.class);
+        addPostToPostWithoutOwnerDto(playlistDto, playlist);
+        return playlistDto;
+    }
+
+    private void addPostToPostWithoutOwnerDto(PlaylistWithoutOwnerDTO playlistDto, Playlist playlist){
+        for (Post p : playlist.getPosts()){
+            PostWithoutOwnerDTO postDto = modelMapper.map(p, PostWithoutOwnerDTO.class);
+            postDto.setPostLikes(p.getPostLikes().size());
+            postDto.setComments(p.getComments().size());
+            playlistDto.addPost(postDto);
+        }
+    }
+
+
+    public List<PlaylistWithoutOwnerDTO> getAllPlaylists(int userId) {
+        List<Playlist> playlists = playlistRepository.findAllByOwnerId(userId);
+        List<PlaylistWithoutOwnerDTO> playlistsDto = new ArrayList<>();
+        for (Playlist p : playlists) {
+            PlaylistWithoutOwnerDTO playlistWithoutOwnerDTO = modelMapper.map(p,PlaylistWithoutOwnerDTO.class);
+            addPostToPostWithoutOwnerDto(playlistWithoutOwnerDTO, p);
+            playlistsDto.add(playlistWithoutOwnerDTO);
+        }
+        return playlistsDto;
     }
 }
