@@ -256,5 +256,9 @@ public class UserService {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
     }
+
+    public void deleteUser(User user) {
+        userRepository.delete(user);
+    }
 }
 

@@ -1,10 +1,7 @@
 package com.example.tiktokproject.controller;
 
 import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
-import com.example.tiktokproject.model.dto.commentDTO.CommentEditResponseDTO;
-import com.example.tiktokproject.model.dto.commentDTO.CommentReplyResponseDTO;
-import com.example.tiktokproject.model.dto.commentDTO.CommentRequestDTO;
-import com.example.tiktokproject.model.dto.commentDTO.CommentResponseDTO;
+import com.example.tiktokproject.model.dto.commentDTO.*;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.CommentRepository;
 import com.example.tiktokproject.services.CommentService;
@@ -91,6 +88,12 @@ public class CommentController {
         User userWhoWantToUnlike = sessionManager.getSessionUser(request.getSession());
         commentService.unlikeComment(userWhoWantToUnlike, commentId);
         return new ResponseEntity<>("You unlike the comment successful", HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/comments/{id}")
+    public ResponseEntity<CommentGetResponseDTO> getCommentById(@PathVariable(name = "id") int commentId, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return new ResponseEntity<>(commentService.getCommentById(commentId), HttpStatus.OK);
     }
 
 }
