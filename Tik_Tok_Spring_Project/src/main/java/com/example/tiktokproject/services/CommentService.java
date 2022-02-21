@@ -3,10 +3,9 @@ package com.example.tiktokproject.services;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
-import com.example.tiktokproject.model.dto.commentDTO.CommentEditResponseDTO;
-import com.example.tiktokproject.model.dto.commentDTO.CommentReplyResponseDTO;
-import com.example.tiktokproject.model.dto.commentDTO.CommentRequestDTO;
-import com.example.tiktokproject.model.dto.commentDTO.CommentResponseDTO;
+import com.example.tiktokproject.model.dto.commentDTO.*;
+import com.example.tiktokproject.model.dto.postDTO.PostWithoutOwnerDTO;
+import com.example.tiktokproject.model.dto.userDTO.UserWithoutPostDTO;
 import com.example.tiktokproject.model.pojo.Comment;
 import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.pojo.User;
@@ -123,4 +122,13 @@ public class CommentService {
         userRepository.save(userWhoWantToUnlike);
     }
 
+    public CommentGetResponseDTO getCommentById(int commentId) {
+        Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Not found comment"));
+        CommentGetResponseDTO commentDto = modelMapper.map(c, CommentGetResponseDTO.class);
+        PostWithoutOwnerDTO post = modelMapper.map(c.getPost(), PostWithoutOwnerDTO.class);
+        UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
+        commentDto.setPost(post);
+        commentDto.setOwner(user);
+        return commentDto;
+    }
 }

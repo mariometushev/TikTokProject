@@ -30,7 +30,6 @@ public class UserController {
         if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong email or password credentials");
         }
-        // TODO change session logic outside
         UserLoginResponseWithEmailDTO dto = userService.loginWithEmail(user);
         sessionManager.setSession(request, dto.getId());
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -50,7 +49,7 @@ public class UserController {
     }
 
     @GetMapping("/verify/{token}")
-    public ResponseEntity<String> verifyEmail(@PathVariable(name = "token") String token, HttpServletRequest request) {
+    public ResponseEntity<String> verifyEmail(@PathVariable String token, HttpServletRequest request) {
         User user = sessionManager.getSessionUser(request.getSession());
         return new ResponseEntity<>(userService.verifyEmail(token, user), HttpStatus.ACCEPTED);
     }
@@ -110,6 +109,15 @@ public class UserController {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), id);
         return new ResponseEntity<>(userService.setUsername(id, userDto.getUsername(), userDto.getName()), HttpStatus.ACCEPTED);
+    }
+
+    @DeleteMapping("/users/{id}/deleteUser")
+    public ResponseEntity<String> deleteUser(@PathVariable(name = "id") int userId,HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        sessionManager.validateUserId(request.getSession(), userId);
+        User user = sessionManager.getSessionUser(request.getSession());
+        userService.deleteUser(user);
+        return new ResponseEntity<>("Your delete request was successful.", HttpStatus.ACCEPTED);
     }
 
 
