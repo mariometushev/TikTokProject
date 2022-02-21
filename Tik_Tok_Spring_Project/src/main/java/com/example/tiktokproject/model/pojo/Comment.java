@@ -23,8 +23,11 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
-    @Column(name = "parent_id")
-    private int parentId;
+    @ManyToOne
+    @JoinColumn(name = "id")
+    private Comment parent;
+    @OneToMany(mappedBy = "parent")
+    private Set<Comment> replies;
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
@@ -46,5 +49,9 @@ public class Comment {
 
     public void removeUserWhoLike(User userWhoWantToUnlike) {
         this.commentLikes.remove(userWhoWantToUnlike);
+    }
+
+    public void addCommentInReplies(Comment c) {
+        this.replies.add(c);
     }
 }

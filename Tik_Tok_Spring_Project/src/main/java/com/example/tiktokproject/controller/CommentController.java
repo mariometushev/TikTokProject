@@ -1,6 +1,8 @@
 package com.example.tiktokproject.controller;
 
+import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
 import com.example.tiktokproject.model.dto.commentDTO.CommentEditResponseDTO;
+import com.example.tiktokproject.model.dto.commentDTO.CommentReplyResponseDTO;
 import com.example.tiktokproject.model.dto.commentDTO.CommentRequestDTO;
 import com.example.tiktokproject.model.dto.commentDTO.CommentResponseDTO;
 import com.example.tiktokproject.model.pojo.User;
@@ -9,9 +11,12 @@ import com.example.tiktokproject.services.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 @RestController
 public class CommentController {
@@ -21,56 +26,70 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @PostMapping("/users/{uId}/posts/{pId}/comment")
-    public ResponseEntity<CommentResponseDTO> comment(@PathVariable(name = "uId") int userId,
-                                                      @PathVariable(name = "pId") int postId,
+    @PostMapping("/posts/{pId}/comment")
+    public ResponseEntity<CommentResponseDTO> comment(@PathVariable(name = "pId") int postId,
                                                       HttpServletRequest request,
-                                                      @RequestBody CommentRequestDTO comment) {
+                                                      @Valid @RequestBody CommentRequestDTO comment, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new MethodArgumentNotValidException("Wrong credentials");
+        }
         sessionManager.validateLogin(request);
-        sessionManager.validateUserId(request.getSession(), userId);
         User commentOwner = sessionManager.getSessionUser(request.getSession());
-        CommentResponseDTO response = commentService.makeComment(commentOwner, postId, comment);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(commentService.makeComment(commentOwner, postId, comment), HttpStatus.CREATED);
     }
 
-    @PutMapping("/posts/{pId}/comments/{cId}/edit")
+    @PostMapping("/comment/{cId}")
+    public ResponseEntity<CommentReplyResponseDTO> replyComment(@PathVariable(name = "cId") int commentId,
+                                                                @Valid @RequestBody CommentRequestDTO replyComment,
+                                                                HttpServletRequest request,
+                                                                BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new MethodArgumentNotValidException("Wrong credentials");
+        }
+        sessionManager.validateLogin(request);
+        User commentReplyOwner = sessionManager.getSessionUser(request.getSession());
+        return new ResponseEntity<>(commentService.replyComment(commentReplyOwner, commentId, replyComment), HttpStatus.ACCEPTED);
+    }
+
+
+    @PutMapping("/comments/{cId}/edit")
     public ResponseEntity<CommentEditResponseDTO> editComment(@PathVariable(name = "cId") int commentId,
-                                                              @PathVariable(name = "pId") int postId,
                                                               HttpServletRequest request,
-                                                              @RequestBody CommentRequestDTO comment) {
+                                                              @Valid @RequestBody CommentRequestDTO comment,
+                                                              BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new MethodArgumentNotValidException("Wrong credentials");
+        }
         sessionManager.validateLogin(request);
         User commentOwner = sessionManager.getSessionUser(request.getSession());
-        CommentEditResponseDTO response = commentService.editComment(commentOwner, postId, commentId, comment);
+        CommentEditResponseDTO response = commentService.editComment(commentOwner, commentId, comment);
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/posts/{pId}/comments/{cId}")
+    @DeleteMapping("/comments/{cId}")
     public ResponseEntity<String> deleteComment(@PathVariable(name = "cId") int commentId,
-                                                @PathVariable(name = "pId") int postId,
                                                 HttpServletRequest request) {
         sessionManager.validateLogin(request);
         User commentOwner = sessionManager.getSessionUser(request.getSession());
-        commentService.deleteComment(commentOwner, postId, commentId);
+        commentService.deleteComment(commentOwner, commentId);
         return new ResponseEntity<>("Delete comment request was successful", HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/posts/{pId}/comments/{cId}/like")
+    @PostMapping("/comments/{cId}/like")
     public ResponseEntity<String> likeComment(@PathVariable(name = "cId") int commentId,
-                                                @PathVariable(name = "pId") int postId,
-                                                HttpServletRequest request) {
+                                              HttpServletRequest request) {
         sessionManager.validateLogin(request);
         User liker = sessionManager.getSessionUser(request.getSession());
-        commentService.likeComment(liker, postId, commentId);
+        commentService.likeComment(liker, commentId);
         return new ResponseEntity<>("You like the comment successful", HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/posts/{pId}/comments/{cId}/unlike")
+    @PostMapping("/comments/{cId}/unlike")
     public ResponseEntity<String> unlikeComment(@PathVariable(name = "cId") int commentId,
-                                              @PathVariable(name = "pId") int postId,
-                                              HttpServletRequest request) {
+                                                HttpServletRequest request) {
         sessionManager.validateLogin(request);
         User userWhoWantToUnlike = sessionManager.getSessionUser(request.getSession());
-        commentService.unlikeComment(userWhoWantToUnlike, postId, commentId);
+        commentService.unlikeComment(userWhoWantToUnlike, commentId);
         return new ResponseEntity<>("You unlike the comment successful", HttpStatus.ACCEPTED);
     }
 

@@ -4,6 +4,7 @@ import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
 import com.example.tiktokproject.model.dto.commentDTO.CommentEditResponseDTO;
+import com.example.tiktokproject.model.dto.commentDTO.CommentReplyResponseDTO;
 import com.example.tiktokproject.model.dto.commentDTO.CommentRequestDTO;
 import com.example.tiktokproject.model.dto.commentDTO.CommentResponseDTO;
 import com.example.tiktokproject.model.pojo.Comment;
@@ -32,12 +33,6 @@ public class CommentService {
 
     public CommentResponseDTO makeComment(User commentOwner, int postId, CommentRequestDTO comment) {
         Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post to comment"));
-        if (comment.getText().isBlank()) {
-            throw new BadRequestException("Comment can't be blank");
-        }
-        if (comment.getText().length() > 150) {
-            throw new BadRequestException("Maximum comment length is 150 symbols");
-        }
         Comment c = modelMapper.map(comment, Comment.class);
         c.setPost(p);
         c.setText(comment.getText());
@@ -56,20 +51,26 @@ public class CommentService {
         return response;
     }
 
-    public CommentEditResponseDTO editComment(User commentOwner, int postId, int commentId, CommentRequestDTO comment) {
+
+    public CommentReplyResponseDTO replyComment(User commentOwner,int commentId, CommentRequestDTO replyComment) {
+        Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Not found comment"));
+        Comment reply = modelMapper.map(replyComment, Comment.class);
+        reply.setParent(c);
+        reply.setOwner(commentOwner);
+        reply.setCommentedOn(LocalDateTime.now());
+        reply.setPost(c.getPost());
+        c.addCommentInReplies(reply);
+        commentRepository.save(c);
+        commentRepository.save(reply);
+        CommentReplyResponseDTO response = modelMapper.map(reply, CommentReplyResponseDTO.class);
+        response.setLikes(reply.getCommentLikes().size());
+        return response;
+    }
+
+    public CommentEditResponseDTO editComment(User commentOwner, int commentId, CommentRequestDTO comment) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment"));
-        Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post"));
-        if (!p.getComments().contains(c)) {
-            throw new BadRequestException("This post doesn't have that comment");
-        }
         if (!commentOwner.getComments().contains(c)) {
             throw new UnauthorizedException("You can't edit another user comment");
-        }
-        if (comment.getText().isBlank()) {
-            throw new BadRequestException("Comment can't be blank");
-        }
-        if (comment.getText().length() > 150) {
-            throw new BadRequestException("Maximum comment length is 150 symbols");
         }
 
         c.setText(comment.getText());
@@ -81,12 +82,9 @@ public class CommentService {
         return response;
     }
 
-    public void deleteComment(User commentOwner, int postId, int commentId) {
-        Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post"));
+    public void deleteComment(User commentOwner, int commentId) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment"));
-        if (!p.getComments().contains(c)) {
-            throw new BadRequestException("This post doesn't have that comment");
-        }
+        Post p = c.getPost();
         if (!commentOwner.getComments().contains(c)) {
             throw new UnauthorizedException("You can't delete another user comment");
         }
@@ -99,12 +97,8 @@ public class CommentService {
         postRepository.save(p);
     }
 
-    public void likeComment(User liker, int postId, int commentId) {
-        Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post"));
+    public void likeComment(User liker, int commentId) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment to like"));
-        if (!p.getComments().contains(c)) {
-            throw new BadRequestException("This post doesn't have that comment");
-        }
         if (liker.getUserLikedComments().contains(c)) {
             throw new BadRequestException("You can't like that comment two times");
         }
@@ -116,12 +110,8 @@ public class CommentService {
         userRepository.save(liker);
     }
 
-    public void unlikeComment(User userWhoWantToUnlike, int postId, int commentId) {
+    public void unlikeComment(User userWhoWantToUnlike, int commentId) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment to unlike"));
-        Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post"));
-        if(!p.getComments().contains(c)){
-            throw new BadRequestException("This post doesn't have that comment");
-        }
         if(!userWhoWantToUnlike.getUserLikedComments().contains(c)){
             throw new BadRequestException("You already unlike this comment");
         }
@@ -132,4 +122,5 @@ public class CommentService {
         commentRepository.save(c);
         userRepository.save(userWhoWantToUnlike);
     }
+
 }
