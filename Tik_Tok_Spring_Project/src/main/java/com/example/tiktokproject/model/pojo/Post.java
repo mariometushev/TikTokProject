@@ -25,10 +25,6 @@ public class Post {
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    @ManyToOne
-    @JoinColumn(name = "song_id")
-    private Song song;
-
     @Column(name = "upload_date")
     private LocalDateTime uploadDate;
 

@@ -13,7 +13,6 @@ public class PostEditResponseDTO {
 
     private int id;
     private int ownerId;
-    private int songId;
     private LocalDateTime uploadDate;
     private boolean isPublic;
     private String description;

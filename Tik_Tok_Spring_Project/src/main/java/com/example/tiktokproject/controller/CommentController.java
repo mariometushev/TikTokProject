@@ -44,7 +44,7 @@ public class CommentController {
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/posts/{pId}/comments/{cId}/delete")
+    @DeleteMapping("/posts/{pId}/comments/{cId}")
     public ResponseEntity<String> deleteComment(@PathVariable(name = "cId") int commentId,
                                                 @PathVariable(name = "pId") int postId,
                                                 HttpServletRequest request) {

@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public class PostWithoutOwnerDTO {
 
     private int id;
-//    private String songUrl;
     private LocalDateTime uploadDate;
     private String description;
     private int views;
