@@ -3,54 +3,9 @@ Content-Type: application/json
 
 {
   "dateOfBirth" : "2000-10-10",
-  "email" : "pesho@abv.bg",
-  "password" : "Pesho+123",
-  "confirmPassword" : "Pesho+123"
-}
-###
-POST localhost:9999/registerWithPhone
-Content-Type: application/json
-
-{
-  "dateOfBirth" : "2000-10-10",
-  "phoneNumber" : "+359886463978",
-  "password" : "Pesho+123",
-  "confirmPassword" : "Pesho+123"
-}
-
-###
-POST localhost:9999/users/4/setUsername
-Content-Type: application/json
-
-{
-  "username" : "hah ",
-  "name" : "MARIOooo"
-
-}
-
-###
-PUT localhost:9999/users/edit
-Content-Type: application/json
-
-{
-  "id" : 7,
-  "roleId" : 2,
-  "username" : null,
-  "name" : null,
-  "email" : null,
-  "phoneNumber" : null,
-  "password" : null,
-  "newPassword" : null,
-  "confirmNewPassword" : null,
-  "description" : null,
-  "photoUrl" : null
-}
-###
-PUT localhost:9999/users/6/edit/profilePicture
-Content-Type: application/json
-
-{
-
+  "email" : "petur@abv.bg",
+  "password" : "Petur@123",
+  "confirmPassword" : "Petur@123"
 }
 
 ###
@@ -58,23 +13,50 @@ POST localhost:9999/loginWithEmail
 Content-Type: application/json
 
 {
-  "email" : "messi16@abv.bg",
-  "password" : "Pesho1234"
-
+  "email" : "petur@abv.bg",
+  "password" : "Petur@123"
 }
 
 ###
-POST localhost:9999/loginWithPhone
+POST localhost:9999/forgottenPassword
 Content-Type: application/json
 
 {
-  "phoneNumber" : "+359886463978",
-  "password" : "Pesho+123"
-
+  "email" : "petur@abv.bg"
 }
-###
-POST localhost:9999/logout
-
 
 ###
-GET localhost:9999/users/1
+PUT localhost:9999/forgottenPassword/changePassword
+Content-Type: application/json
+
+{
+  "password" : "Petur@1234",
+  "confirmPassword" : "Petur@1234"
+}
+
+###
+POST localhost:9999/users/1/setUsername
+Content-Type: application/json
+
+{
+  "id" : "1",
+  "username" : "MasterPetur",
+  "name" : "Petur Petrov"
+}
+
+###
+PUT localhost:9999/users/edit
+Content-Type: application/json
+
+{
+"id" : "1",
+"username" : "MasterPetur",
+"name" : "Petur Stoqnov",
+"email" : "peturveliki@abv.bg",
+"phoneNumber" : "+359889376648",
+"password" : "Petur@1234",
+"newPassword" : "Petur@12345",
+"confirmNewPassword" : "Petur@12345",
+"description" : "Hi, I am Petur from Sofia!"
+}
+
