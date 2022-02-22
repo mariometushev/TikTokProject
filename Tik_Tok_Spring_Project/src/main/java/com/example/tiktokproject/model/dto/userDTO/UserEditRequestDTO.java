@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @NoArgsConstructor
 @Getter
@@ -16,20 +17,20 @@ import javax.validation.constraints.Pattern;
 public class UserEditRequestDTO {
 
     private int id;
-    @Max(50)
+    @Size(max = 50, message = "username length should be maximum 50 symbols")
     private String username;
-    @Max(50)
+    @Size(max = 50, message = "name length should be maximum 50 symbols")
     private String name;
-    @Max(255)
+    @Size(max = 255, message = "email length should be maximum 255 symbols")
     private String email;
-    @Max(45)
+    @Size(max = 45, message = "name length should be maximum 45 symbols")
     private String phoneNumber;
-    @Max(50)
+    @Size(max = 50, message = "password length should be maximum 50 symbols")
     private String password;
-    @Max(50)
+    @Size(max = 50, message = "new password length should be maximum 50 symbols")
     private String newPassword;
     private String confirmNewPassword;
-    @Max(150)
+    @Size(max = 150, message = "description length should be maximum 150 symbols")
     private String description;
 
 

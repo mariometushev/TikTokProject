@@ -1,15 +1,11 @@
 package com.example.tiktokproject.controller;
 
-import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
 import com.example.tiktokproject.model.dto.commentDTO.*;
 import com.example.tiktokproject.model.pojo.User;
-import com.example.tiktokproject.model.repository.CommentRepository;
 import com.example.tiktokproject.services.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,10 +22,7 @@ public class CommentController {
     @PostMapping("/posts/{pId}/comment")
     public ResponseEntity<CommentResponseDTO> comment(@PathVariable(name = "pId") int postId,
                                                       HttpServletRequest request,
-                                                      @Valid @RequestBody CommentRequestDTO comment, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong credentials");
-        }
+                                                      @Valid @RequestBody CommentRequestDTO comment) {
         sessionManager.validateLogin(request);
         User commentOwner = sessionManager.getSessionUser(request.getSession());
         return new ResponseEntity<>(commentService.makeComment(commentOwner, postId, comment), HttpStatus.CREATED);
@@ -38,11 +31,7 @@ public class CommentController {
     @PostMapping("/comment/{cId}")
     public ResponseEntity<CommentReplyResponseDTO> replyComment(@PathVariable(name = "cId") int commentId,
                                                                 @Valid @RequestBody CommentRequestDTO replyComment,
-                                                                HttpServletRequest request,
-                                                                BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong credentials");
-        }
+                                                                HttpServletRequest request) {
         sessionManager.validateLogin(request);
         User commentReplyOwner = sessionManager.getSessionUser(request.getSession());
         return new ResponseEntity<>(commentService.replyComment(commentReplyOwner, commentId, replyComment), HttpStatus.ACCEPTED);
@@ -52,11 +41,7 @@ public class CommentController {
     @PutMapping("/comments/{cId}/edit")
     public ResponseEntity<CommentEditResponseDTO> editComment(@PathVariable(name = "cId") int commentId,
                                                               HttpServletRequest request,
-                                                              @Valid @RequestBody CommentRequestDTO comment,
-                                                              BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong credentials");
-        }
+                                                              @Valid @RequestBody CommentRequestDTO comment) {
         sessionManager.validateLogin(request);
         User commentOwner = sessionManager.getSessionUser(request.getSession());
         CommentEditResponseDTO response = commentService.editComment(commentOwner, commentId, comment);

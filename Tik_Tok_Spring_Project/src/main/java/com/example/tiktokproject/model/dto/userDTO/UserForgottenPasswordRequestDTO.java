@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Size;
 
 @NoArgsConstructor
 @Getter
@@ -14,7 +15,7 @@ import javax.validation.constraints.Max;
 @Validated
 public class UserForgottenPasswordRequestDTO {
 
-    @Email(regexp = "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$")
-    @Max(255)
+    @Email(regexp = "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9-]+.[a-zA-Z]+$", message = "Wrong email format")
+    @Size(max = 255, message = "email length should be maximum 255 symbols")
     private String email;
 }

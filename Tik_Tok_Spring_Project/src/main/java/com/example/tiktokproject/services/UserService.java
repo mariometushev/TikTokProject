@@ -72,7 +72,7 @@ public class UserService {
         user.setRoleId(1);
         user.setRegisterDate(LocalDateTime.now());
         userRepository.save(user);
-        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);
+//        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);TODO
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
@@ -84,7 +84,7 @@ public class UserService {
         if (t.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Token expiry date is expired.");
         }
-        user.setVerified(true);
+//        user.setVerified(true);
         userRepository.save(user);
         tokenRepository.delete(t);
     }
@@ -100,6 +100,9 @@ public class UserService {
         if (userEditDTO.getEmail() != null) {
             if (checkForInvalidEmail(userEditDTO.getEmail())) {
                 throw new BadRequestException("Invalid email address");
+            }
+            if (userRepository.findByEmail(userEditDTO.getEmail()).isPresent()) {
+                throw new BadRequestException("User with that email already exist");
             }
         }
         if (userEditDTO.getUsername() != null) {
@@ -117,20 +120,22 @@ public class UserService {
                 throw new BadRequestException("Invalid phone number");
             }
         }
-        if (userEditDTO.getNewPassword() != null) {
-            if (!passwordEncoder.matches(userEditDTO.getPassword(), oldUser.getPassword())) {
-                throw new BadRequestException("Wrong old password");
+        if (userEditDTO.getPassword() != null) {
+            if (userEditDTO.getNewPassword() != null) {
+                if (!passwordEncoder.matches(userEditDTO.getPassword(), oldUser.getPassword())) {
+                    throw new BadRequestException("Wrong old password");
+                }
+                if (checkForInvalidPassword(userEditDTO.getNewPassword())) {
+                    throw new BadRequestException("Wrong password credentials");
+                }
+                if (passwordEncoder.matches(userEditDTO.getNewPassword(), oldUser.getPassword())) {
+                    throw new BadRequestException("New password must be different");
+                }
+                if (!userEditDTO.getNewPassword().equals(userEditDTO.getConfirmNewPassword())) {
+                    throw new BadRequestException("Password miss match");
+                }
+                hasChangePassword = true;
             }
-            if (checkForInvalidPassword(userEditDTO.getNewPassword())) {
-                throw new BadRequestException("Wrong password credentials");
-            }
-            if (passwordEncoder.matches(userEditDTO.getNewPassword(), oldUser.getPassword())) {
-                throw new BadRequestException("New password must be different");
-            }
-            if (!userEditDTO.getNewPassword().equals(userEditDTO.getConfirmNewPassword())) {
-                throw new BadRequestException("Password miss match");
-            }
-            hasChangePassword = true;
         }
         TypeMapperClass.getInstance().map(userEditDTO, oldUser);
         if (hasChangePassword) {
@@ -227,11 +232,7 @@ public class UserService {
 
     public List<UserUsernameDTO> getAllUsersByUsername(String search) {
         search = "%" + search + "%";
-        List<User> users = userRepository
-                .findByUsernameLike(search)
-                .stream()
-                .sorted((u1, u2) -> u2.getFollowers().size() - u1.getFollowers().size())
-                .collect(Collectors.toList()).subList(0, 5);
+        List<User> users = userRepository.findBySearch(search, 5);
         List<UserUsernameDTO> responseUsers = new ArrayList<>();
         for (User u : users) {
             UserUsernameDTO user = modelMapper.map(u, UserUsernameDTO.class);
@@ -270,6 +271,12 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public void setLastLoginAttempt(int userId) {
+        User u = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        u.setLastLoginAttempt(LocalDateTime.now());
+        userRepository.save(u);
+    }
+
     private boolean checkForInvalidPassword(String password) {
         return !password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}");
     }
@@ -289,12 +296,6 @@ public class UserService {
         if (localDate.isAfter(LocalDate.now().minusYears(13))) {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
-    }
-
-    public void setLastLoginAttempt(int userId) {
-        User u = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        u.setLastLoginAttempt(LocalDateTime.now());
-        userRepository.save(u);
     }
 }
 

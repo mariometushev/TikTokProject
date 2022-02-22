@@ -20,8 +20,7 @@ public class CronJob {
 
     @Scheduled(cron = "0 0 12 * * FRI")//every friday in 12:00
     public void sendEmailsToUsersWhoHaveBeenInactiveLastWeek(){
-        LocalDateTime ldt = LocalDateTime.now().minusDays(7);
-        List<User> inactiveUsers = userRepository.findAllWhereLastLoginAttemptIsBefore(ldt);
+        List<User> inactiveUsers = userRepository.findAllWhereLastLoginAttemptIsBefore(LocalDateTime.now().toString());
         for(User u : inactiveUsers){
             emailService.sendMessageForInactivity(u);
         }

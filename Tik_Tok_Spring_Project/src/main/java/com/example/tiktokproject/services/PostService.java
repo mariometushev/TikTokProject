@@ -126,14 +126,15 @@ public class PostService {
         return postDto;
     }
 
-    public List<Post> getAllPostsSortByUploadDate(int id) {
-        User u = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
-        List<Post> posts = postRepository
-                .findAllByOwner(u)
-                .stream()
-                .sorted((p1, p2) -> p2.getUploadDate().compareTo(p1.getUploadDate()))
-                .collect(Collectors.toList());
-        return posts;
+    public List<PostWithOwnerDTO> getAllPostsSortByUploadDate(int id) {
+        List<Post> posts = postRepository.findPostsByUploadDate(id);
+        List<PostWithOwnerDTO> postsWithOwner = new ArrayList<>();
+        for (Post p : posts) {
+            PostWithOwnerDTO post = modelMapper.map(p, PostWithOwnerDTO.class);
+            post.setOwner(modelMapper.map(p.getOwner(), UserWithoutPostDTO.class));
+            postsWithOwner.add(post);
+        }
+        return postsWithOwner;
     }
 
     public void likePost(int postId, User user) {

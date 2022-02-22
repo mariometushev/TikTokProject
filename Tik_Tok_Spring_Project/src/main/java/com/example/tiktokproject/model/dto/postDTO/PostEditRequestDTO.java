@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Size;
 
 @NoArgsConstructor
 @Getter
@@ -16,6 +17,6 @@ public class PostEditRequestDTO {
     private int id;
     private int ownerId;
     private boolean isPublic;
-    @Max(150)
+    @Size(max = 150, message = "description length should be maximum 150 symbols")
     private String description;
 }

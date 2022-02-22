@@ -3,9 +3,9 @@ Content-Type: application/json
 
 {
   "dateOfBirth" : "2000-10-10",
-  "email" : "petur@abv.bg",
-  "password" : "Petur@123",
-  "confirmPassword" : "Petur@123"
+  "email" : "abv@bg.bg",
+  "password" : "Petur123",
+  "confirmPassword" : "Petur123"
 }
 
 ###

@@ -23,6 +23,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
     @Column(name = "role_id")
     private int roleId;
@@ -45,7 +46,7 @@ public class User {
     @Column(name = "photo_url")
     private String photoUrl;
     @Column(name = "is_verified")
-    private boolean verified;
+    private boolean isVerified;
     @Column(name = "last_login_attempt")
     private LocalDateTime lastLoginAttempt;
 

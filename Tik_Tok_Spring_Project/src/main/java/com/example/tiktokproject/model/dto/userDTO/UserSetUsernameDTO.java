@@ -5,10 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 @Getter
 @Setter
@@ -17,11 +14,10 @@ import javax.validation.constraints.NotNull;
 public class UserSetUsernameDTO {
 
     private int id;
-    @NotBlank
-    @NotNull
-    @Max(50)
+    @NotBlank(message = "username can't be blank")
+    @NotNull(message = "username is mandatory")
+    @Size(max = 50, message = "username length should be maximum 50 symbols")
     private String username;
-    @NotBlank
-    @Max(50)
+    @Size(max = 50, message = "name length should be maximum 50 symbols")
     private String name;
 }

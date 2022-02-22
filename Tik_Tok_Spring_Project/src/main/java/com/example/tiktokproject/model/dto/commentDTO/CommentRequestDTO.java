@@ -17,9 +17,8 @@ import javax.validation.constraints.Size;
 @Validated
 public class CommentRequestDTO {
 
-    @NotBlank
-    @Min(1)
-    @Max(150)
+    @NotBlank(message = "comment can't be blank")
+    @Size(min = 1,max = 150,message = "comment must be at least 1 symbol and maximum 150 symbols")
     private String text;
 
 }

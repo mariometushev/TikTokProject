@@ -1,6 +1,5 @@
 package com.example.tiktokproject.controller;
 
-import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
 import com.example.tiktokproject.model.dto.postDTO.PostLikedDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.model.pojo.User;
@@ -8,7 +7,6 @@ import com.example.tiktokproject.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,11 +25,7 @@ public class UserController {
 
     @PostMapping("/loginWithEmail")
     public ResponseEntity<UserLoginResponseWithEmailDTO> login(@Valid @RequestBody UserLoginWithEmailDTO user,
-                                                               HttpServletRequest request,
-                                                               BindingResult result) {
-        if (result.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong email or password credentials");
-        }
+                                                               HttpServletRequest request) {
         UserLoginResponseWithEmailDTO dto = userService.loginWithEmail(user);
         sessionManager.setSession(request, dto.getId());
         return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -44,13 +38,9 @@ public class UserController {
 
     @PostMapping("/registerWithEmail")
     public ResponseEntity<UserRegisterResponseWithEmailDTO> register(@Valid @RequestBody UserRegisterRequestWithEmailDTO userDTO,
-                                                                     HttpServletRequest request,
-                                                                     BindingResult result) {
-        if (result.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong email or password credentials");
-        }
+                                                                     HttpServletRequest request) {
         UserRegisterResponseWithEmailDTO user = userService.registerWithEmail(userDTO);
-        sessionManager.setSession(request, user.getId());
+//        sessionManager.setSession(request, user.getId());
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
@@ -63,11 +53,7 @@ public class UserController {
 
     @PostMapping("/forgottenPassword")
     public ResponseEntity<String> sendEmailForForgottenPassword(@Valid @RequestBody UserForgottenPasswordRequestDTO userDto,
-                                                                HttpServletRequest request,
-                                                                BindingResult result) {
-        if (result.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong email format");
-        }
+                                                                HttpServletRequest request) {
         userService.sendEmailForForgottenPassword(userDto);
         return new ResponseEntity<>("Email was send successfully.", HttpStatus.OK);
     }
@@ -81,11 +67,7 @@ public class UserController {
 
     @PutMapping("/forgottenPassword/changePassword")
     public ResponseEntity<UserEditResponseDTO> changeForgottenPassword(@Valid @RequestBody UserForgottenPasswordDTO userDto,
-                                                                       HttpServletRequest request,
-                                                                       BindingResult result) {
-        if (result.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong password credentials");
-        }
+                                                                       HttpServletRequest request) {
         User user = sessionManager.getSessionUser(request.getSession());
         return new ResponseEntity<>(userService.validateNewPassword(userDto, user), HttpStatus.ACCEPTED);
     }
@@ -93,11 +75,7 @@ public class UserController {
 
     @PutMapping("/users/edit")
     public ResponseEntity<UserEditResponseDTO> editUser(@Valid @RequestBody UserEditRequestDTO userDTO,
-                                                        HttpServletRequest request,
-                                                        BindingResult result) {
-        if (result.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong credentials");
-        }
+                                                        HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), userDTO.getId());
         return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
@@ -145,11 +123,7 @@ public class UserController {
 
     @PostMapping("/users/{id}/setUsername")
     public ResponseEntity<UserSetUsernameDTO> setUsername(HttpServletRequest request, @PathVariable int id,
-                                                          @Valid @RequestBody UserSetUsernameDTO userDto,
-                                                          BindingResult result) {
-        if (result.hasErrors()) {
-            throw new MethodArgumentNotValidException("Wrong username or name");
-        }
+                                                          @Valid @RequestBody UserSetUsernameDTO userDto) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), id);
         return new ResponseEntity<>(userService.setUsername(id, userDto.getUsername(), userDto.getName()), HttpStatus.ACCEPTED);

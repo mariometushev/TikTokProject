@@ -1,6 +1,5 @@
 package com.example.tiktokproject.controller;
 
-import com.example.tiktokproject.exceptions.MethodArgumentNotValidException;
 import com.example.tiktokproject.model.dto.postDTO.*;
 import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.pojo.User;
@@ -9,13 +8,11 @@ import com.example.tiktokproject.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
 import java.util.List;
 
 @RestController
@@ -30,11 +27,7 @@ public class PostController {
 
     @PostMapping("/users/{id}/makePost")
     public ResponseEntity<PostUploadResponseDTO> makePost(@PathVariable int id, @RequestBody PostUploadRequestDTO post,
-                                                          HttpServletRequest request,
-                                                          BindingResult result) {
-        if (result.hasErrors()){
-            throw new MethodArgumentNotValidException("Maximum description length is 150 symbols.");
-        }
+                                                          HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), id);
         User user = sessionManager.getSessionUser(request.getSession());
@@ -58,11 +51,7 @@ public class PostController {
 
     @PutMapping("/posts/editPost")
     public ResponseEntity<PostEditResponseDTO> editPost(@Valid @RequestBody PostEditRequestDTO postDto,
-                                                        HttpServletRequest request,
-                                                        BindingResult result) {
-        if (result.hasErrors()){
-            throw new MethodArgumentNotValidException("Maximum description length is 150 symbols.");
-        }
+                                                        HttpServletRequest request) {
         sessionManager.validateLogin(request);
         return new ResponseEntity<>(postService.editPost(postDto, request.getSession()), HttpStatus.ACCEPTED);
     }
@@ -73,7 +62,7 @@ public class PostController {
     }
 
     @GetMapping("/users/{id}/posts")
-    public ResponseEntity<List<Post>> getAllPostsSortByUploadDate(@PathVariable int id) {
+    public ResponseEntity<List<PostWithOwnerDTO>> getAllPostsSortByUploadDate(@PathVariable int id) {
         return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(id), HttpStatus.OK);
     }
 

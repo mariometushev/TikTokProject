@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,6 +18,6 @@ public class PostUploadRequestDTO {
 
     private int ownerId;
     private boolean isPublic;
-    @Max(150)
+    @Size(max = 150, message = "description length should be maximum 255 symbols")
     private String description;
 }

@@ -15,7 +15,7 @@ public class TypeMapperClass {
     private static TypeMap<UserEditRequestDTO, User> typeMapper;
 
     public static TypeMap<UserEditRequestDTO, User> getInstance() {
-        synchronized (TypeMapperClass.class){
+        synchronized (TypeMapperClass.class) {
             if (typeMapper == null) {
                 typeMapper = modelMapper.createTypeMap(UserEditRequestDTO.class, User.class, modelMapper.getConfiguration().setSkipNullEnabled(true));
             }

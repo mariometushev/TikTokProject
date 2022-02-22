@@ -32,9 +32,9 @@ public class SessionManager {
         if (newSession || !logged || !sameIP) {
             throw new UnauthorizedException("You have to log in");
         }
-        if (!isVerified) {
-            throw new UnauthorizedException("You have to verify your account.");
-        }
+//        if (!isVerified) {
+//            throw new UnauthorizedException("You have to verify your account.");
+//        }
     }
 
     public void validateUserId(HttpSession session, int userId) {
