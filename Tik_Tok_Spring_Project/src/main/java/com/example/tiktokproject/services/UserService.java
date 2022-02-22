@@ -257,7 +257,7 @@ public class UserService {
     }
 
     public UserEditResponseDTO validateNewPassword(UserForgottenPasswordDTO userDto, User user) {
-        if (!userDto.getNewPassword().equals(userDto.getConfirmNewPassword())){
+        if (!userDto.getNewPassword().equals(userDto.getConfirmNewPassword())) {
             throw new BadRequestException("Password and confirm password should be equals");
         }
         user.setPassword(passwordEncoder.encode(userDto.getNewPassword()));
@@ -289,6 +289,12 @@ public class UserService {
         if (localDate.isAfter(LocalDate.now().minusYears(13))) {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
+    }
+
+    public void setLastLoginAttempt(int userId) {
+        User u = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        u.setLastLoginAttempt(LocalDateTime.now());
+        userRepository.save(u);
     }
 }
 

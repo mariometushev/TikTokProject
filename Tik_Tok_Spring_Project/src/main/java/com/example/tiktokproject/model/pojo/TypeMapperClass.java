@@ -10,6 +10,7 @@ import javax.persistence.Access;
 
 @Component
 public class TypeMapperClass {
+
     private static final ModelMapper modelMapper = new ModelMapper();
     private static TypeMap<UserEditRequestDTO, User> typeMapper;
 

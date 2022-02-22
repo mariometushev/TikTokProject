@@ -4,6 +4,7 @@ import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.UserRepository;
+import com.example.tiktokproject.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,8 @@ public class SessionManager {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
     public void validateLogin(HttpServletRequest request) {
         HttpSession session = request.getSession();
@@ -29,7 +32,7 @@ public class SessionManager {
         if (newSession || !logged || !sameIP) {
             throw new UnauthorizedException("You have to log in");
         }
-        if (!isVerified){
+        if (!isVerified) {
             throw new UnauthorizedException("You have to verify your account.");
         }
     }
@@ -42,8 +45,7 @@ public class SessionManager {
 
     public User getSessionUser(HttpSession session) {
         int sessionUserId = (int) session.getAttribute(USER_ID);
-        User u = userRepository.findById(sessionUserId).orElseThrow(() -> new NotFoundException("Wrong user id"));
-        return u;
+        return userRepository.findById(sessionUserId).orElseThrow(() -> new NotFoundException("Wrong user id"));
     }
 
     public void setSession(HttpServletRequest request, int userId) {
@@ -51,5 +53,6 @@ public class SessionManager {
         session.setAttribute(SessionManager.LOGGED, true);
         session.setAttribute(SessionManager.LOGGED_FROM, request.getRemoteAddr());
         session.setAttribute(SessionManager.USER_ID, userId);
+        userService.setLastLoginAttempt(userId);
     }
 }

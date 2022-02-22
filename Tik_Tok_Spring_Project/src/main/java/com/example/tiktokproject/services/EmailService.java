@@ -3,14 +3,12 @@ package com.example.tiktokproject.services;
 import com.example.tiktokproject.model.pojo.Token;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.TokenRepository;
-import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -29,6 +27,9 @@ public class EmailService {
     public static final String PASSWORD_BODY = "In order to reset your password " +
             "please click on the following link: localhost:9999/forgottenPassword/";
     public static final String PASSWORD_TOPIC = "Forgotten password";
+    public static final String INACTIVITY_BODY = "Hello, you have been inactive for last seven days, " +
+            "we miss you, come to our awesome site";
+    public static final String INACTIVITY_TOPIC = "Inactivity in last seven days";
 
 
     public void sendSimpleMessage(User user, String body, String topic) {
@@ -46,8 +47,16 @@ public class EmailService {
         emailSender.send(message);
     }
 
-    public String generateToken() {
-        return UUID.randomUUID().toString();
+    public void sendMessageForInactivity(User u) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(adminEmail);
+        message.setTo(u.getEmail());
+        message.setSubject(INACTIVITY_TOPIC);
+        message.setText(INACTIVITY_BODY);
+        emailSender.send(message);
     }
 
+    private String generateToken() {
+        return UUID.randomUUID().toString();
+    }
 }

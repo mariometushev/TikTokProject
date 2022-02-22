@@ -28,7 +28,7 @@ public class PostController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("users/{id}/makePost")
+    @PostMapping("/users/{id}/makePost")
     public ResponseEntity<PostUploadResponseDTO> makePost(@PathVariable int id, @RequestBody PostUploadRequestDTO post,
                                                           HttpServletRequest request,
                                                           BindingResult result) {
@@ -42,7 +42,7 @@ public class PostController {
         return new ResponseEntity<>(postService.makePost(post), HttpStatus.CREATED);
     }
 
-    @PostMapping("users/{uId}/uploadPostVideo/{pId}")
+    @PostMapping("/users/{uId}/uploadPostVideo/{pId}")
     public ResponseEntity<PostUploadResponseDTO> uploadPostVideo(@PathVariable int uId, @PathVariable int pId, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), uId);

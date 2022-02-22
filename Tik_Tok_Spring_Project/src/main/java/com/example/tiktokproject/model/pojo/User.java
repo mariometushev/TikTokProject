@@ -46,6 +46,8 @@ public class User {
     private String photoUrl;
     @Column(name = "is_verified")
     private boolean verified;
+    @Column(name = "last_login_attempt")
+    private LocalDateTime lastLoginAttempt;
 
     @OneToMany(mappedBy = "owner")
     private Set<Playlist> playlists;
