@@ -7,14 +7,15 @@ import com.example.tiktokproject.model.dto.postDTO.PostLikedDTO;
 import com.example.tiktokproject.model.dto.postDTO.PostWithoutOwnerDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.model.pojo.Post;
+import com.example.tiktokproject.model.pojo.Token;
 import com.example.tiktokproject.model.pojo.TypeMapperClass;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.PostRepository;
+import com.example.tiktokproject.model.repository.TokenRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +44,8 @@ public class UserService {
     private PostRepository postRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private TokenRepository tokenRepository;
 
     public UserLoginResponseWithEmailDTO loginWithEmail(UserLoginWithEmailDTO user) {
         String email = user.getEmail();
@@ -69,25 +72,31 @@ public class UserService {
         user.setRoleId(1);
         user.setRegisterDate(LocalDateTime.now());
         userRepository.save(user);
-        emailService.sendSimpleMessage(user.getEmail(), user.getRegisterDate());
+        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
-    public String verifyEmail(String token, User user) {
-        String checkToken = emailService.generateToken(user.getEmail(), user.getRegisterDate());
-        if (checkToken.equals(token)) {
-            user.setVerified(true);
-            userRepository.save(user);
-            return "Email verified.";
-        } else throw new BadRequestException("Invalid validation token");
+    public void verifyEmail(String token, User user) {
+        Token t = tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found."));
+        if (user.getId() != t.getOwner().getId()) {
+            throw new BadRequestException("You are not the owner of this token.");
+        }
+        if (t.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Token expiry date is expired.");
+        }
+        user.setVerified(true);
+        userRepository.save(user);
+        tokenRepository.delete(t);
+    }
+
+    public void sendEmailForForgottenPassword(UserForgottenPasswordRequestDTO userDto) {
+        User user = userRepository.findByEmail(userDto.getEmail()).orElseThrow(() -> new NotFoundException("User not found."));
+        emailService.sendSimpleMessage(user, EmailService.PASSWORD_BODY, EmailService.PASSWORD_TOPIC);
     }
 
     public UserEditResponseDTO editUser(UserEditRequestDTO userEditDTO) {
         boolean hasChangePassword = false;
-        User oldUser = userRepository.findById(userEditDTO.getId()).orElseThrow(() -> new NotFoundException("Not found user"));
-        if (userEditDTO.getRoleId() < 1 || userEditDTO.getRoleId() > 3) {
-            throw new BadRequestException("No such role");
-        }
+        User oldUser = userRepository.findById(userEditDTO.getId()).orElseThrow(() -> new NotFoundException("User not found."));
         if (userEditDTO.getEmail() != null) {
             if (checkForInvalidEmail(userEditDTO.getEmail())) {
                 throw new BadRequestException("Invalid email address");
@@ -106,11 +115,6 @@ public class UserService {
         if (userEditDTO.getPhoneNumber() != null) {
             if (checkForInvalidPhoneNumber(userEditDTO.getPhoneNumber())) {
                 throw new BadRequestException("Invalid phone number");
-            }
-        }
-        if (userEditDTO.getDescription() != null) {
-            if (userEditDTO.getDescription().length() > 150) {
-                throw new BadRequestException("Description is too long");
             }
         }
         if (userEditDTO.getNewPassword() != null) {
@@ -236,6 +240,36 @@ public class UserService {
         return responseUsers;
     }
 
+    public void deleteUser(User user) {
+        userRepository.delete(user);
+    }
+
+
+    public void forgottenPassword(String token, User user) {
+        Token t = tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found."));
+        if (t.getOwner().getId() != user.getId()) {
+            throw new BadRequestException("You are not the owner of this token");
+        }
+        if (t.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Token expiry date is expired");
+        }
+        tokenRepository.delete(t);
+    }
+
+    public UserEditResponseDTO validateNewPassword(UserForgottenPasswordDTO userDto, User user) {
+        if (!userDto.getNewPassword().equals(userDto.getConfirmNewPassword())){
+            throw new BadRequestException("Password and confirm password should be equals");
+        }
+        user.setPassword(passwordEncoder.encode(userDto.getNewPassword()));
+        userRepository.save(user);
+        return modelMapper.map(user, UserEditResponseDTO.class);
+    }
+
+    public void changeUserRole(User user) {
+        user.setRoleId(PlaylistService.CREATOR_ROLE_ID);
+        userRepository.save(user);
+    }
+
     private boolean checkForInvalidPassword(String password) {
         return !password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).{8,}");
     }
@@ -255,10 +289,6 @@ public class UserService {
         if (localDate.isAfter(LocalDate.now().minusYears(13))) {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
-    }
-
-    public void deleteUser(User user) {
-        userRepository.delete(user);
     }
 }
 

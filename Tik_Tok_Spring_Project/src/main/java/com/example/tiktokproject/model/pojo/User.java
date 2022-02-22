@@ -44,6 +44,7 @@ public class User {
     private LocalDateTime registerDate;
     @Column(name = "photo_url")
     private String photoUrl;
+    @Column(name = "is_verified")
     private boolean verified;
 
     @OneToMany(mappedBy = "owner")

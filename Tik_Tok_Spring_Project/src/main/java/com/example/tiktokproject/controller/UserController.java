@@ -26,7 +26,9 @@ public class UserController {
     private SessionManager sessionManager;
 
     @PostMapping("/loginWithEmail")
-    public ResponseEntity<UserLoginResponseWithEmailDTO> login(@Valid @RequestBody UserLoginWithEmailDTO user, HttpServletRequest request, BindingResult result) {
+    public ResponseEntity<UserLoginResponseWithEmailDTO> login(@Valid @RequestBody UserLoginWithEmailDTO user,
+                                                               HttpServletRequest request,
+                                                               BindingResult result) {
         if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong email or password credentials");
         }
@@ -41,21 +43,61 @@ public class UserController {
     }
 
     @PostMapping("/registerWithEmail")
-    public ResponseEntity<UserRegisterResponseWithEmailDTO> register(@Valid @RequestBody UserRegisterRequestWithEmailDTO userDTO, BindingResult result) {
+    public ResponseEntity<UserRegisterResponseWithEmailDTO> register(@Valid @RequestBody UserRegisterRequestWithEmailDTO userDTO,
+                                                                     HttpServletRequest request,
+                                                                     BindingResult result) {
         if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong email or password credentials");
         }
-        return new ResponseEntity<>(userService.registerWithEmail(userDTO), HttpStatus.CREATED);
+        UserRegisterResponseWithEmailDTO user = userService.registerWithEmail(userDTO);
+        sessionManager.setSession(request, user.getId());
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @GetMapping("/verify/{token}")
     public ResponseEntity<String> verifyEmail(@PathVariable String token, HttpServletRequest request) {
         User user = sessionManager.getSessionUser(request.getSession());
-        return new ResponseEntity<>(userService.verifyEmail(token, user), HttpStatus.ACCEPTED);
+        userService.verifyEmail(token, user);
+        return new ResponseEntity<>("Email verified.", HttpStatus.ACCEPTED);
     }
 
+    @PostMapping("/forgottenPassword")
+    public ResponseEntity<String> sendEmailForForgottenPassword(@Valid @RequestBody UserForgottenPasswordRequestDTO userDto,
+                                                                HttpServletRequest request,
+                                                                BindingResult result) {
+        if (result.hasErrors()) {
+            throw new MethodArgumentNotValidException("Wrong email format");
+        }
+        userService.sendEmailForForgottenPassword(userDto);
+        return new ResponseEntity<>("Email was send successfully.", HttpStatus.OK);
+    }
+
+    @GetMapping("/forgottenPassword/{token}")
+    public ResponseEntity<String> forgottenPasswordEmail(@PathVariable String token, HttpServletRequest request) {
+        User user = sessionManager.getSessionUser(request.getSession());
+        userService.forgottenPassword(token, user);
+        return new ResponseEntity<>("Valid token, please enter your new password.", HttpStatus.OK);
+    }
+
+    @PutMapping("/forgottenPassword/changePassword")
+    public ResponseEntity<UserEditResponseDTO> changeForgottenPassword(@Valid @RequestBody UserForgottenPasswordDTO userDto,
+                                                                       HttpServletRequest request,
+                                                                       BindingResult result) {
+        if (result.hasErrors()) {
+            throw new MethodArgumentNotValidException("Wrong password credentials");
+        }
+        User user = sessionManager.getSessionUser(request.getSession());
+        return new ResponseEntity<>(userService.validateNewPassword(userDto, user), HttpStatus.ACCEPTED);
+    }
+
+
     @PutMapping("/users/edit")
-    public ResponseEntity<UserEditResponseDTO> editUser(@RequestBody UserEditRequestDTO userDTO, HttpServletRequest request) {
+    public ResponseEntity<UserEditResponseDTO> editUser(@Valid @RequestBody UserEditRequestDTO userDTO,
+                                                        HttpServletRequest request,
+                                                        BindingResult result) {
+        if (result.hasErrors()) {
+            throw new MethodArgumentNotValidException("Wrong credentials");
+        }
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), userDTO.getId());
         return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
@@ -73,8 +115,8 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/search/{search}")
-    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@PathVariable String search) {
+    @GetMapping("/search")
+    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@RequestParam String search) {
         return new ResponseEntity<>(userService.getAllUsersByUsername(search), HttpStatus.ACCEPTED);
     }
 
@@ -102,7 +144,9 @@ public class UserController {
     }
 
     @PostMapping("/users/{id}/setUsername")
-    public ResponseEntity<UserSetUsernameDTO> setUsername(HttpServletRequest request, @PathVariable int id, @Valid @RequestBody UserSetUsernameDTO userDto, BindingResult result) {
+    public ResponseEntity<UserSetUsernameDTO> setUsername(HttpServletRequest request, @PathVariable int id,
+                                                          @Valid @RequestBody UserSetUsernameDTO userDto,
+                                                          BindingResult result) {
         if (result.hasErrors()) {
             throw new MethodArgumentNotValidException("Wrong username or name");
         }
@@ -112,7 +156,7 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}/deleteUser")
-    public ResponseEntity<String> deleteUser(@PathVariable(name = "id") int userId,HttpServletRequest request){
+    public ResponseEntity<String> deleteUser(@PathVariable(name = "id") int userId, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), userId);
         User user = sessionManager.getSessionUser(request.getSession());

@@ -64,9 +64,6 @@ public class PostService {
     }
 
     public PostUploadResponseDTO makePost(PostUploadRequestDTO post) {
-        if (post.getDescription().length() > 150) {
-            throw new BadRequestException("Description lenght over 150 symbols");
-        }
         if (post.getDescription() != null) {
             if (post.getDescription().isBlank()) {
                 throw new BadRequestException("Only spaces in description is not allowed");
