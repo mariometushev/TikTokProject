@@ -43,7 +43,7 @@ public class EmailService {
         message.setFrom(adminEmail);
         message.setTo(user.getEmail());
         message.setSubject(topic);
-        message.setText(body + token);
+        message.setText(body + token.getToken());
         emailSender.send(message);
     }
 

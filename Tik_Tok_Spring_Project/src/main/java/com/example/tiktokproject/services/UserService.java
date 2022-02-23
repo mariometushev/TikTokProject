@@ -72,7 +72,7 @@ public class UserService {
         user.setRoleId(1);
         user.setRegisterDate(LocalDateTime.now());
         userRepository.save(user);
-//        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);TODO
+        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
@@ -84,7 +84,7 @@ public class UserService {
         if (t.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Token expiry date is expired.");
         }
-//        user.setVerified(true);
+        user.setVerified(true);
         userRepository.save(user);
         tokenRepository.delete(t);
     }

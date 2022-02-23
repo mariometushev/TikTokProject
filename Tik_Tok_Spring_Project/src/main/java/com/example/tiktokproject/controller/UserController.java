@@ -40,7 +40,7 @@ public class UserController {
     public ResponseEntity<UserRegisterResponseWithEmailDTO> register(@Valid @RequestBody UserRegisterRequestWithEmailDTO userDTO,
                                                                      HttpServletRequest request) {
         UserRegisterResponseWithEmailDTO user = userService.registerWithEmail(userDTO);
-//        sessionManager.setSession(request, user.getId());
+        sessionManager.setSession(request, user.getId());
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
