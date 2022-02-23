@@ -11,7 +11,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -51,20 +53,20 @@ public class User {
     @Column(name = "last_login_attempt")
     private LocalDateTime lastLoginAttempt;
 
-    @OneToMany(mappedBy = "owner")
-    private Set<Playlist> playlists;
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    private List<Playlist> playlists = new ArrayList<>();
 
-    @OneToMany(mappedBy = "owner")
-    private Set<Comment> comments;
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "owner")
-    private Set<Post> posts;
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    private List<Post> posts = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "postLikes")
-    private Set<Post> userLikedPosts;
+    @ManyToMany(mappedBy = "postLikes", fetch = FetchType.LAZY)
+    private List<Post> userLikedPosts = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "commentLikes")
-    private Set<Comment> userLikedComments;
+    @ManyToMany(mappedBy = "commentLikes", fetch = FetchType.LAZY)
+    private List<Comment> userLikedComments = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -72,10 +74,10 @@ public class User {
             joinColumns = @JoinColumn(name = "followed_to_id"),
             inverseJoinColumns = @JoinColumn(name = "follower_id")
     )
-    private Set<User> followers = new HashSet<>();
+    private List<User> followers = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "followers")
-    private Set<User> followerTo;
+    @ManyToMany(mappedBy = "followers", fetch = FetchType.LAZY)
+    private List<User> followerTo = new ArrayList<>();
 
     public void addFollower(User follower) {
         this.getFollowers().add(follower);

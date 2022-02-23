@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -28,7 +30,7 @@ public class Comment {
     @JoinColumn(name = "id", insertable = false, updatable = false)
     private Comment parent;
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
-    private Set<Comment> replies = new HashSet<>();
+    private List<Comment> replies = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
@@ -42,7 +44,7 @@ public class Comment {
             joinColumns = @JoinColumn(name = "comment_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> commentLikes = new HashSet<>();
+    private List<User> commentLikes = new ArrayList<>();
 
     public void addUserWhoLike(User u) {
         this.commentLikes.add(u);
