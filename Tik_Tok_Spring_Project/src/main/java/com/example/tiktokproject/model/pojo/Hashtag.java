@@ -1,5 +1,6 @@
 package com.example.tiktokproject.model.pojo;
 
+import com.example.tiktokproject.model.dto.postDTO.PostWithOwnerDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
