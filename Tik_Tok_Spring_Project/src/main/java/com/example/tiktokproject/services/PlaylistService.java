@@ -128,4 +128,18 @@ public class PlaylistService {
             playlistDto.addPost(postDto);
         }
     }
+
+    public PlaylistWithoutOwnerDTO getPlaylistById(int playlistId) {
+        Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(() -> new NotFoundException("Playlist not found"));
+        PlaylistWithoutOwnerDTO playlistDto = modelMapper.map(playlist, PlaylistWithoutOwnerDTO.class);
+        UserWithoutPostDTO user = modelMapper.map(playlist.getOwner(), UserWithoutPostDTO.class);
+        playlistDto.setUserWithoutPost(user);
+        for (Post post : playlist.getPosts()) {
+            PostWithoutOwnerDTO postDto = modelMapper.map(post, PostWithoutOwnerDTO.class);
+            postDto.setPostHaveLikes(post.getPostLikes().size());
+            postDto.setPostHaveComments(post.getPostComments().size());
+            playlistDto.addPost(postDto);
+        }
+        return playlistDto;
+    }
 }

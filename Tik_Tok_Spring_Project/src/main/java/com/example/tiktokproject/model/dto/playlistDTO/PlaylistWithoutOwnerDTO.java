@@ -22,12 +22,9 @@ public class PlaylistWithoutOwnerDTO {
     @JsonProperty("owner")
     private UserWithoutPostDTO userWithoutPost;
     @JsonProperty("posts")
-    private List<PostWithoutOwnerDTO> postsWithoutOwner;
+    private List<PostWithoutOwnerDTO> postsWithoutOwner = new ArrayList<>();
 
     public void addPost(PostWithoutOwnerDTO postDTO) {
-        if(postsWithoutOwner == null){
-            postsWithoutOwner = new ArrayList<>();
-        }
         this.postsWithoutOwner.add(postDTO);
     }
 }

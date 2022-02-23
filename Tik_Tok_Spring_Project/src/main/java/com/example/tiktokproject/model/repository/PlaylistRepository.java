@@ -14,4 +14,5 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Integer> {
     @Query(value = "SELECT * FROM playlists AS p WHERE p.owner_id = :id", nativeQuery = true)
     List<Playlist> findAllByOwnerId(@Param("id") Integer id);
 
+
 }
