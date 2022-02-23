@@ -72,4 +72,6 @@ public class PlaylistController {
         return new ResponseEntity<>(playlistService.getAllPlaylists(userId), HttpStatus.OK);
     }
 
+    
+
 }

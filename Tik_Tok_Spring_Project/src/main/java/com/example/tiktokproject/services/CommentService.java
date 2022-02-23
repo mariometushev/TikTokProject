@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class CommentService {
@@ -142,4 +144,16 @@ public class CommentService {
         c.setCommentedOn(dateTime);
     }
 
+    public List<CommentWithoutOwnerDTO> getAllCommentsByPostId(int postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        List<Comment> comments = commentRepository.findAllByPost(post);
+        List<CommentWithoutOwnerDTO> commentWithoutOwner = new ArrayList<>();
+        for (Comment comment : comments) {
+            CommentWithoutOwnerDTO commentDto = modelMapper.map(comment, CommentWithoutOwnerDTO.class);
+            commentDto.setCommentHasReplies(commentRepository.findRepliesByCommentId(comment.getId()));
+            commentDto.setCommentHasLikes(comment.getCommentLikes().size());
+            commentWithoutOwner.add(commentDto);
+        }
+        return commentWithoutOwner;
+    }
 }
