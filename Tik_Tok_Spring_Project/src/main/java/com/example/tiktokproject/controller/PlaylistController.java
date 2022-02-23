@@ -72,4 +72,9 @@ public class PlaylistController {
         return new ResponseEntity<>(playlistService.getAllPlaylists(userId), HttpStatus.OK);
     }
 
+    @GetMapping("playlists/{id}")
+    public ResponseEntity<PlaylistWithoutOwnerDTO> getPlaylistById(@PathVariable(name = "id") int playlistId){
+        return new ResponseEntity<>(playlistService.getPlaylistById(playlistId), HttpStatus.OK);
+    }
+
 }

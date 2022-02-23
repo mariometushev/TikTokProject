@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -44,7 +46,7 @@ public class Post {
     private String videoUrl;
 
     @OneToMany(mappedBy = "post",fetch = FetchType.LAZY)
-    private Set<Comment> postComments = new HashSet<>();
+    private List<Comment> postComments = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -52,10 +54,10 @@ public class Post {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "hashtag_id")
     )
-    private Set<Hashtag> hashtags = new HashSet<>();
+    private List<Hashtag> hashtags = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "posts")
-    private Set<Playlist> playlists;
+    @ManyToMany(mappedBy = "posts", fetch = FetchType.LAZY)
+    private List<Playlist> playlists = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -63,7 +65,7 @@ public class Post {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> postLikes = new HashSet<>();
+    private List<User> postLikes = new ArrayList<>();
 
     public void addLike(User user) {
         this.postLikes.add(user);

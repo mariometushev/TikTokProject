@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -16,7 +17,7 @@ public class UserInformationDTO {
     private String username;
     private String name;
     private String description;
-    private Set<PostWithoutOwnerDTO> posts;
+    private List<PostWithoutOwnerDTO> posts = new ArrayList<>();
     private String photoUrl;
     private int numberOfFollowers;
     private int numberOfFollowerTo;

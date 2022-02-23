@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 public class CommentController {
@@ -79,6 +80,12 @@ public class CommentController {
     public ResponseEntity<CommentGetResponseDTO> getCommentById(@PathVariable(name = "id") int commentId, HttpServletRequest request){
         sessionManager.validateLogin(request);
         return new ResponseEntity<>(commentService.getCommentById(commentId), HttpStatus.OK);
+    }
+
+    @GetMapping("/posts/{id}/AllComments")
+    public ResponseEntity<List<CommentWithoutOwnerDTO>> getAllCommentsByPostId(@PathVariable(name = "id") int postId, HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return new ResponseEntity<>(commentService.getAllCommentsByPostId(postId), HttpStatus.OK);
     }
 
 }
