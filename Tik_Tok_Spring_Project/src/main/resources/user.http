@@ -2,10 +2,10 @@ POST localhost:9999/registerWithEmail
 Content-Type: application/json
 
 {
-  "dateOfBirth" : "2000-10-10",
-  "email" : "abv@bg.bg",
-  "password" : "Petur123",
-  "confirmPassword" : "Petur123"
+  "dateOfBirth": "2000-10-10",
+  "email": "abv@bg.bg",
+  "password": "Petur123",
+  "confirmPassword": "Petur123"
 }
 
 ###
@@ -13,8 +13,8 @@ POST localhost:9999/loginWithEmail
 Content-Type: application/json
 
 {
-  "email" : "petur@abv.bg",
-  "password" : "Petur@123"
+"email" : "peturveliki1@abv.bg",
+  "password" : "Petur@12345"
 }
 
 ###
@@ -22,7 +22,7 @@ POST localhost:9999/forgottenPassword
 Content-Type: application/json
 
 {
-  "email" : "petur@abv.bg"
+  "email": "petur@abv.bg"
 }
 
 ###
@@ -30,8 +30,8 @@ PUT localhost:9999/forgottenPassword/changePassword
 Content-Type: application/json
 
 {
-  "password" : "Petur@1234",
-  "confirmPassword" : "Petur@1234"
+  "password": "Petur@1234",
+  "confirmPassword": "Petur@1234"
 }
 
 ###
@@ -39,9 +39,9 @@ POST localhost:9999/users/1/setUsername
 Content-Type: application/json
 
 {
-  "id" : "1",
-  "username" : "MasterPetur",
-  "name" : "Petur Petrov"
+  "id": "1",
+  "username": "MasterPetur",
+  "name": "Petur Petrov"
 }
 
 ###
@@ -49,14 +49,22 @@ PUT localhost:9999/users/edit
 Content-Type: application/json
 
 {
-"id" : "1",
-"username" : "MasterPetur",
-"name" : "Petur Stoqnov",
-"email" : "peturveliki@abv.bg",
-"phoneNumber" : "+359889376648",
-"password" : "Petur@1234",
-"newPassword" : "Petur@12345",
-"confirmNewPassword" : "Petur@12345",
-"description" : "Hi, I am Petur from Sofia!"
+  "id": "1",
+  "username": "MasterPetur",
+  "name": "Petur Stoqnov",
+  "email": "peturveliki@abv.bg",
+  "phoneNumber": "+359889376648",
+  "password": "Petur@1234",
+  "newPassword": "Petur@12345",
+  "confirmNewPassword": "Petur@12345",
+  "description": "Hi, I am Petur from Sofia!"
 }
 
+###
+POST localhost:9999/users/19/makePost
+Content-Type: application/json
+
+{
+  "privacy": true,
+  "description": "#Make my #first #post #try #something"
+}

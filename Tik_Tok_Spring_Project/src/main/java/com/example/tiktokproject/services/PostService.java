@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,13 +41,14 @@ public class PostService {
     private ModelMapper modelMapper;
     @Autowired
     private HashtagRepository hashtagRepository;
-    @Autowired
-    private UserRepository userRepository;
 
     public PostUploadResponseDTO uploadPostVideo(int postId, MultipartFile file) {
         Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        if (p.getVideoUrl() != null) {
+            throw new BadRequestException("You can't upload more than one video files in one post");
+        }
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName = System.nanoTime() + postId + "." + extension;
+        String fileName = UUID.randomUUID().toString() + postId + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big video size. The maximum video size is 250MB.");
         }
@@ -60,69 +62,65 @@ public class PostService {
         }
         p.setVideoUrl(fileName);
         postRepository.save(p);
-        return modelMapper.map(p, PostUploadResponseDTO.class);
+        PostUploadResponseDTO response = modelMapper.map(p, PostUploadResponseDTO.class);
+        response.setOwnerWithoutPost(modelMapper.map(p.getOwner(), UserWithoutPostDTO.class));
+        return response;
     }
 
-    public PostUploadResponseDTO makePost(PostUploadRequestDTO post) {
-        if (post.getDescription() != null) {
-            if (post.getDescription().isBlank()) {
-                throw new BadRequestException("Only spaces in description is not allowed");
-            }
-        }
+    public PostUploadResponseDTO makePost(PostUploadRequestDTO post, User u) {
+        checkForNullButNotBlankInput(post.getDescription());
         Post p = modelMapper.map(post, Post.class);
         p.setUploadDate(LocalDateTime.now());
-
-        String[] spaces = post.getDescription().split(" ");
-        ArrayList<String> hashtags = new ArrayList<>();
-        for (String s : spaces) {
-            if (s.matches(HASHTAG_REGEX)) {
-                hashtags.add(s);
-            }
+        p.setOwner(u);
+        if (p.getDescription() != null && !p.getDescription().isBlank()) {
+            checkForHashtags(p);
         }
-        if (hashtags.size() > 0) {
-            for (String hashtag : hashtags) {
-                Hashtag hash = new Hashtag();
-                hash.setTitle(hashtag);
-//                hash.addPost(p);
-                hashtagRepository.save(hash);
-            }
-        }
-
         postRepository.save(p);
-        return modelMapper.map(p, PostUploadResponseDTO.class);
+        PostUploadResponseDTO postUpload = modelMapper.map(p, PostUploadResponseDTO.class);
+        UserWithoutPostDTO userWithoutPost = modelMapper.map(u, UserWithoutPostDTO.class);
+        postUpload.setOwnerWithoutPost(userWithoutPost);
+        return postUpload;
     }
 
     public void deletePost(int postId, HttpSession session) {
         checkUserPrivileges(postId, session);
-        postRepository.deleteById(postRepository.findById(postId).get().getId());
+        postRepository.deleteById(postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException("Post not found"))
+                .getId());
     }
 
-    public PostEditResponseDTO editPost(PostEditRequestDTO postDto, HttpSession session) {
-        checkUserPrivileges(postDto.getId(), session);
-        Post post = postRepository.findById(postDto.getId()).get();
-        if (postDto.isPublic() != post.isPublic()) {
-            post.setPublic(postDto.isPublic());
+    public PostEditResponseDTO editPost(int postId, PostEditRequestDTO postDto, HttpSession session) {
+        checkUserPrivileges(postId, session);
+        checkForNullButNotBlankInput(postDto.getDescription());
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        if (postDto.isPrivacy() != post.isPrivacy()) {
+            post.setPrivacy(postDto.isPrivacy());
         }
-        if (!postDto.getDescription().equals(post.getDescription())) {
-            post.setDescription(postDto.getDescription());
+        if (postDto.getDescription() != null && !postDto.getDescription().isBlank()) {
+            if (!postDto.getDescription().equals(post.getDescription())) {
+                post.setDescription(postDto.getDescription());
+            }
+            checkForHashtags(post);
         }
         postRepository.save(post);
-        return modelMapper.map(post, PostEditResponseDTO.class);
+        PostEditResponseDTO response = modelMapper.map(post, PostEditResponseDTO.class);
+        response.setUserWithoutPost(modelMapper.map(post.getOwner(), UserWithoutPostDTO.class));
+        return response;
     }
 
 
     public PostWithOwnerDTO getPost(int id) {
         Post post = postRepository.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
-        if (!post.isPublic()) {
+        if (!post.isPrivacy()) {
             throw new UnauthorizedException("This video is private!");
         }
         post.setViews(post.getViews() + 1);
         postRepository.save(post);
         UserWithoutPostDTO userDto = modelMapper.map(post.getOwner(), UserWithoutPostDTO.class);
         PostWithOwnerDTO postDto = modelMapper.map(post, PostWithOwnerDTO.class);
-        postDto.setOwner(userDto);
-        postDto.setLikes(post.getPostLikes().size());
-        postDto.setComments(post.getComments().size());
+        postDto.setUserWithoutPost(userDto);
+        postDto.setPostHaveLikes(post.getPostLikes().size());
+        postDto.setPostHaveComments(post.getPostComments().size());
         return postDto;
     }
 
@@ -131,7 +129,9 @@ public class PostService {
         List<PostWithOwnerDTO> postsWithOwner = new ArrayList<>();
         for (Post p : posts) {
             PostWithOwnerDTO post = modelMapper.map(p, PostWithOwnerDTO.class);
-            post.setOwner(modelMapper.map(p.getOwner(), UserWithoutPostDTO.class));
+            post.setUserWithoutPost(modelMapper.map(p.getOwner(), UserWithoutPostDTO.class));
+            post.setPostHaveComments(p.getPostComments().size());
+            post.setPostHaveLikes(p.getPostLikes().size());
             postsWithOwner.add(post);
         }
         return postsWithOwner;
@@ -146,8 +146,6 @@ public class PostService {
             throw new BadRequestException("You already liked this post");
         }
         post.addLike(user);
-        user.addLikedPost(post);
-        userRepository.save(user);
         postRepository.save(post);
     }
 
@@ -160,17 +158,44 @@ public class PostService {
             throw new BadRequestException("You already unliked this post");
         }
         post.removeLike(user);
-        user.removeLikedPost(post);
-        userRepository.save(user);
         postRepository.save(post);
+    }
+
+    private void checkForHashtags(Post p) {
+        String[] spaces = p.getDescription().split(" ");
+        ArrayList<String> hashtags = new ArrayList<>();
+        for (String s : spaces) {
+            if (s.matches(HASHTAG_REGEX)) {
+                hashtags.add(s);
+            }
+        }
+        if (hashtags.size() > 0) {
+            for (String hashtag : hashtags) {
+                Hashtag hash;
+                if (hashtagRepository.findHashtagByTitle(hashtag).isPresent()) {
+                    hash = hashtagRepository.findHashtagByTitle(hashtag).get();
+                } else {
+                    hash = new Hashtag();
+                    hash.setTitle(hashtag);
+                    hashtagRepository.save(hash);
+                }
+                p.addHashtag(hash);
+            }
+        }
     }
 
     private void checkUserPrivileges(int postId, HttpSession session) {
         if (postRepository.findById(postId).isEmpty()) {
-            throw new NotFoundException("No post found!");
+            throw new NotFoundException("Post not found!");
         }
         if (postRepository.findById(postId).get().getOwner().getId() != (int) session.getAttribute(SessionManager.USER_ID)) {
-            throw new UnauthorizedException("You can't delete this post!");
+            throw new UnauthorizedException("You can't delete another user post!");
+        }
+    }
+
+    private void checkForNullButNotBlankInput(String text) {
+        if (text.trim().isEmpty()) {
+            throw new BadRequestException("This field can't be only white spaces");
         }
     }
 }

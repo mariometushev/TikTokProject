@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -65,13 +66,13 @@ public class User {
     @ManyToMany(mappedBy = "commentLikes")
     private Set<Comment> userLikedComments;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "followers",
             joinColumns = @JoinColumn(name = "followed_to_id"),
             inverseJoinColumns = @JoinColumn(name = "follower_id")
     )
-    private Set<User> followers;
+    private Set<User> followers = new HashSet<>();
 
     @ManyToMany(mappedBy = "followers")
     private Set<User> followerTo;
@@ -88,24 +89,5 @@ public class User {
         this.comments.add(c);
     }
 
-    public void addLikedComment(Comment c) {
-        this.userLikedComments.add(c);
-    }
-
-    public void removeComment(Comment c) {
-        this.comments.remove(c);
-    }
-
-    public void addLikedPost(Post post) {
-        this.userLikedPosts.add(post);
-    }
-
-    public void removeLikedPost(Post post) {
-        this.userLikedPosts.remove(post);
-    }
-
-    public void removeLikedComment(Comment c) {
-        this.userLikedComments.remove(c);
-    }
 }
 

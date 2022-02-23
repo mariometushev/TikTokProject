@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -27,19 +28,22 @@ public class Playlist {
     private String name;
     @Column(name = "created_time")
     private LocalDateTime createdTime;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "posts_in_playlist",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "playlist_id")
+            joinColumns = @JoinColumn(name = "playlist_id"),
+            inverseJoinColumns = @JoinColumn(name = "post_id")
     )
-    private Set<Post> posts;
+    private Set<Post> posts = new HashSet<>();
 
     public void addPost(Post post) {
+        if (posts == null) {
+            posts = new HashSet<>();
+        }
         posts.add(post);
     }
 
     public void removePost(Post post) {
-        this.posts.remove(post);
+        posts.remove(post);
     }
 }

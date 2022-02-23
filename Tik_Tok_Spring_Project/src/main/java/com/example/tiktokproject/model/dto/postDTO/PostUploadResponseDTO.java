@@ -1,5 +1,7 @@
 package com.example.tiktokproject.model.dto.postDTO;
 
+import com.example.tiktokproject.model.dto.userDTO.UserWithoutPostDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,10 +14,11 @@ import java.time.LocalDateTime;
 public class PostUploadResponseDTO {
 
     private int id;
-    private int ownerId;
+    @JsonProperty("owner")
+    private UserWithoutPostDTO ownerWithoutPost;
     private LocalDateTime uploadDate;
-    private boolean isPublic;
     private String description;
-    private String videoUrl;
+    @JsonProperty("is public")
+    private boolean privacy;
 
 }

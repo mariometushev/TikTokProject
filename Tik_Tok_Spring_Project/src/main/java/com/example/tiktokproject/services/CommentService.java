@@ -11,7 +11,6 @@ import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.CommentRepository;
 import com.example.tiktokproject.model.repository.PostRepository;
-import com.example.tiktokproject.model.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,50 +26,56 @@ public class CommentService {
     private ModelMapper modelMapper;
     @Autowired
     private CommentRepository commentRepository;
-    @Autowired
-    private UserRepository userRepository;
 
     public CommentResponseDTO makeComment(User commentOwner, int postId, CommentRequestDTO comment) {
         Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post to comment"));
         Comment c = modelMapper.map(comment, Comment.class);
-        c.setPost(p);
-        c.setText(comment.getText());
-        c.setOwner(commentOwner);
-        c.setCommentedOn(LocalDateTime.now());
+        setCommentOwnerCommentPostAndCommentUploadDate(c, commentOwner, p, LocalDateTime.now());
         commentRepository.save(c);
 
-//        commentOwner.addComment(c);
-//        p.addComment(c);
-
-        userRepository.save(commentOwner);
+        p.addComment(c);
         postRepository.save(p);
 
         CommentResponseDTO response = modelMapper.map(c, CommentResponseDTO.class);
-        UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
-        PostWithoutOwnerDTO post = modelMapper.map(c.getPost(), PostWithoutOwnerDTO.class);
-        response.setPost(post);
-        response.setOwner(user);
-        response.setLikes(c.getCommentLikes().size());
+        UserWithoutPostDTO user = modelMapper.map(commentOwner, UserWithoutPostDTO.class);
+        PostWithoutOwnerDTO post = modelMapper.map(p, PostWithoutOwnerDTO.class);
+
+        post.setPostHaveComments(p.getPostComments().size());
+        post.setPostHaveLikes(p.getPostLikes().size());
+        response.setUserWithoutPost(user);
+        response.setPostWithoutOwner(post);
+        response.setCommentHasLikes(c.getCommentLikes().size());
         return response;
     }
 
-
-    public CommentReplyResponseDTO replyComment(User commentOwner,int commentId, CommentRequestDTO replyComment) {
+    public CommentReplyResponseDTO replyComment(User commentOwner, int commentId, CommentRequestDTO replyComment) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Not found comment"));
         Comment reply = modelMapper.map(replyComment, Comment.class);
+        Post p = c.getPost();
+        setCommentOwnerCommentPostAndCommentUploadDate(reply, commentOwner, p, LocalDateTime.now());
         reply.setParent(c);
-        reply.setOwner(commentOwner);
-        reply.setCommentedOn(LocalDateTime.now());
-        reply.setPost(c.getPost());
+
+        p.addComment(reply);
+
         c.addCommentInReplies(reply);
+        postRepository.save(p);
         commentRepository.save(c);
         commentRepository.save(reply);
+        commentRepository.insertIntoTable(c.getId(), reply.getId());
+
+        CommentWithoutOwnerDTO parent = modelMapper.map(c, CommentWithoutOwnerDTO.class);
+        parent.setCommentHasLikes(c.getCommentLikes().size());
+        parent.setCommentHasReplies(commentRepository.findRepliesByCommentId(c.getId()));
+
         CommentReplyResponseDTO response = modelMapper.map(reply, CommentReplyResponseDTO.class);
         UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
-        PostWithoutOwnerDTO post = modelMapper.map(c.getPost(), PostWithoutOwnerDTO.class);
-        response.setOwner(user);
-        response.setPost(post);
-        response.setLikes(reply.getCommentLikes().size());
+        PostWithoutOwnerDTO post = modelMapper.map(p, PostWithoutOwnerDTO.class);
+
+        post.setPostHaveComments(p.getPostComments().size());
+        response.setUserWithoutPost(user);
+        response.setPostWithoutOwner(post);
+        response.setCommentHasLikes(reply.getCommentLikes().size());
+        response.setParent(parent);
         return response;
     }
 
@@ -85,7 +90,7 @@ public class CommentService {
         commentRepository.save(c);
 
         CommentEditResponseDTO response = modelMapper.map(c, CommentEditResponseDTO.class);
-        response.setLikes(c.getCommentLikes().size());
+        response.setCommentHasLikes(c.getCommentLikes().size());
         return response;
     }
 
@@ -100,8 +105,6 @@ public class CommentService {
 //        p.removeComment(c);
 
         commentRepository.delete(c);
-        userRepository.save(commentOwner);
-        postRepository.save(p);
     }
 
     public void likeComment(User liker, int commentId) {
@@ -109,25 +112,17 @@ public class CommentService {
         if (liker.getUserLikedComments().contains(c)) {
             throw new BadRequestException("You can't like that comment two times");
         }
-
-//        liker.addLikedComment(c);
-//        c.addUserWhoLike(liker);
-
+        c.addUserWhoLike(liker);
         commentRepository.save(c);
-        userRepository.save(liker);
     }
 
     public void unlikeComment(User userWhoWantToUnlike, int commentId) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment to unlike"));
-        if(!userWhoWantToUnlike.getUserLikedComments().contains(c)){
+        if (!userWhoWantToUnlike.getUserLikedComments().contains(c)) {
             throw new BadRequestException("You already unlike this comment");
         }
-
-//        userWhoWantToUnlike.removeLikedComment(c);
-//        c.removeUserWhoLike(userWhoWantToUnlike);
-
+        c.removeUserWhoLike(userWhoWantToUnlike);
         commentRepository.save(c);
-        userRepository.save(userWhoWantToUnlike);
     }
 
     public CommentGetResponseDTO getCommentById(int commentId) {
@@ -135,9 +130,16 @@ public class CommentService {
         CommentGetResponseDTO commentDto = modelMapper.map(c, CommentGetResponseDTO.class);
         PostWithoutOwnerDTO post = modelMapper.map(c.getPost(), PostWithoutOwnerDTO.class);
         UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
-        commentDto.setPost(post);
-        commentDto.setOwner(user);
-        commentDto.setLikes(c.getCommentLikes().size());
+        commentDto.setPostWithoutOwner(post);
+        commentDto.setUserWithoutPost(user);
+        commentDto.setCommentHasLikes(c.getCommentLikes().size());
         return commentDto;
     }
+
+    private void setCommentOwnerCommentPostAndCommentUploadDate(Comment c, User u, Post p, LocalDateTime dateTime) {
+        c.setOwner(u);
+        c.setPost(p);
+        c.setCommentedOn(dateTime);
+    }
+
 }

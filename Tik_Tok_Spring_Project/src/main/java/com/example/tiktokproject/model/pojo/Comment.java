@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -26,8 +27,8 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "id", insertable = false, updatable = false)
     private Comment parent;
-    @OneToMany(mappedBy = "parent")
-    private Set<Comment> replies;
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    private Set<Comment> replies = new HashSet<>();
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
@@ -35,13 +36,13 @@ public class Comment {
     private String text;
     @Column(name = "commented_on")
     private LocalDateTime commentedOn;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "comments_have_likes",
             joinColumns = @JoinColumn(name = "comment_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> commentLikes;
+    private Set<User> commentLikes = new HashSet<>();
 
     public void addUserWhoLike(User u) {
         this.commentLikes.add(u);

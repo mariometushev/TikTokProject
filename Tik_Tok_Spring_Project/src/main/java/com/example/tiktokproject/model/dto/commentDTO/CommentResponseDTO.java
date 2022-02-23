@@ -4,6 +4,7 @@ import com.example.tiktokproject.model.dto.postDTO.PostWithoutOwnerDTO;
 import com.example.tiktokproject.model.dto.userDTO.UserWithoutPostDTO;
 import com.example.tiktokproject.model.pojo.Post;
 import com.example.tiktokproject.model.pojo.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,10 +17,13 @@ import java.time.LocalDateTime;
 public class CommentResponseDTO {
 
     private int id;
-    private UserWithoutPostDTO owner;
-    private PostWithoutOwnerDTO post;
+    @JsonProperty("comment owner")
+    private UserWithoutPostDTO userWithoutPost;
+    @JsonProperty("comment post")
+    private PostWithoutOwnerDTO postWithoutOwner;
     private String text;
     private LocalDateTime commentedOn;
-    private int likes;
+    @JsonProperty("comment likes")
+    private int commentHasLikes;
 
 }

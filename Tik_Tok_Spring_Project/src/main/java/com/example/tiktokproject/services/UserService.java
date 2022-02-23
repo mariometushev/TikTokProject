@@ -172,8 +172,8 @@ public class UserService {
         userInformationDTO.setNumberOfFollowerTo(u.getFollowerTo().size());
         for (Post p : u.getPosts()) {
             PostWithoutOwnerDTO postDTO = modelMapper.map(p, PostWithoutOwnerDTO.class);
-            postDTO.setComments(p.getComments().size());
-            postDTO.setPostLikes(p.getPostLikes().size());
+            postDTO.setPostHaveComments(p.getPostComments().size());
+            postDTO.setPostHaveLikes(p.getPostLikes().size());
             userInformationDTO.addPost(postDTO);
         }
         return userInformationDTO;

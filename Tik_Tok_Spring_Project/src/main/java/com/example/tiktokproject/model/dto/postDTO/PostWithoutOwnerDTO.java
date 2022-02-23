@@ -1,5 +1,6 @@
 package com.example.tiktokproject.model.dto.postDTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +16,9 @@ public class PostWithoutOwnerDTO {
     private String description;
     private int views;
     private String videoUrl;
-    private int comments;
-    private int postLikes;
+    @JsonProperty("post comments")
+    private int postHaveComments;
+    @JsonProperty("post likes")
+    private int postHaveLikes;
 
 }

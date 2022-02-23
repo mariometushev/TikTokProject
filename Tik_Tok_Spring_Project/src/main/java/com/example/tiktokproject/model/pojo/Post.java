@@ -1,12 +1,15 @@
 package com.example.tiktokproject.model.pojo;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -29,7 +32,7 @@ public class Post {
     private LocalDateTime uploadDate;
 
     @Column(name = "is_public")
-    private boolean isPublic;
+    private boolean privacy;
 
     @Column
     private String description;
@@ -40,27 +43,27 @@ public class Post {
     @Column(name = "video_url")
     private String videoUrl;
 
-    @OneToMany(mappedBy = "post")
-    private Set<Comment> comments;
+    @OneToMany(mappedBy = "post",fetch = FetchType.LAZY)
+    private Set<Comment> postComments = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "posts_have_hashtags",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "hashtag_id")
     )
-    private Set<Hashtag> hashtags;
+    private Set<Hashtag> hashtags = new HashSet<>();
 
     @ManyToMany(mappedBy = "posts")
     private Set<Playlist> playlists;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "posts_have_likes",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<User> postLikes;
+    private Set<User> postLikes = new HashSet<>();
 
     public void addLike(User user) {
         this.postLikes.add(user);
@@ -70,12 +73,12 @@ public class Post {
         this.postLikes.remove(user);
     }
 
-    public void removeComment(Comment comment) {
-        this.comments.remove(comment);
+    public void addHashtag(Hashtag hash) {
+        this.hashtags.add(hash);
     }
 
-    public void addComment(Comment comment) {
-        this.comments.add(comment);
+    public void addComment(Comment c) {
+        this.postComments.add(c);
     }
 }
 

@@ -40,7 +40,7 @@ public class PlaylistController {
         return new ResponseEntity<>("Delete playlist request was successful", HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/playlists/{id}/edit")
+    @PutMapping("/playlists/{id}/edit")
     public ResponseEntity<PlaylistResponseDTO> editPlaylist(@PathVariable(name = "id") int playlistId,
                                                             @Valid @RequestBody PlaylistRequestDTO playlistDto,
                                                             HttpServletRequest request) {
@@ -49,7 +49,7 @@ public class PlaylistController {
         return new ResponseEntity<>(playlistService.editPlaylist(user, playlistId, playlistDto), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/posts/{pId}/addTo/playlists/{plId}")
+    @PostMapping("/posts/{pId}/addToPlaylist/{plId}")
     public ResponseEntity<PlaylistWithoutOwnerDTO> addVideoToPlaylist(@PathVariable(name = "pId") int postId,
                                                                       @PathVariable(name = "plId") int playlistId,
                                                                       HttpServletRequest request) {
@@ -58,7 +58,7 @@ public class PlaylistController {
         return new ResponseEntity<>(playlistService.addVideoToPlaylist(user, playlistId, postId), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/posts/{pId}/removeFrom/playlists/{plId}")
+    @PostMapping("/posts/{pId}/removeFromPlaylist/{plId}")
     public ResponseEntity<PlaylistWithoutOwnerDTO> removePostFromPlaylist(@PathVariable(name = "pId") int postId,
                                                                           @PathVariable(name = "plId") int playlistId,
                                                                           HttpServletRequest request){

@@ -1,11 +1,14 @@
 package com.example.tiktokproject.model.pojo;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Component
@@ -14,6 +17,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "hashtags")
+@EqualsAndHashCode
 public class Hashtag {
 
     @Id
@@ -21,10 +25,7 @@ public class Hashtag {
     private int id;
     @Column
     private String title;
-    @ManyToMany(mappedBy = "hashtags")
-    private Set<Post> posts;
+    @ManyToMany(mappedBy = "hashtags",fetch = FetchType.LAZY)
+    private Set<Post> posts = new HashSet<>();
 
-    public void addPost(Post post) {
-        this.posts.add(post);
-    }
 }

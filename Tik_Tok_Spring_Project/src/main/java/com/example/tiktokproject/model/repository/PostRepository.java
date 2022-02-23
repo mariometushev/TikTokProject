@@ -20,9 +20,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     List<Post> findPostsByPostLikesContains(User u);
 
-    @Query(value = "SELECT * FROM posts AS p" +
-            "JOIN users AS u ON (u.id = p.owner_id)" +
-            "WHERE u.id = :id" +
+    @Query(value = "SELECT * FROM posts AS p " +
+            "JOIN users AS u ON (u.id = p.owner_id) " +
+            "WHERE u.id = :id " +
             "ORDER BY p.upload_date DESC", nativeQuery = true)
     List<Post> findPostsByUploadDate(@Param("id") Integer id);
 }

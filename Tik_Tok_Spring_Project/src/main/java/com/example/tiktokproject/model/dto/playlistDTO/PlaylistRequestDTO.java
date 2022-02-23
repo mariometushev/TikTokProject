@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Validated
 public class PlaylistRequestDTO {
 
-    @NotBlank(message = "playlist name can't be blank")
+    @NotBlank(message = "playlist name can't be null or blank")
     @Size(min = 1,max = 45,message = "playlist name should be at least 1 symbol and maximum 150 symbols")
     private String name;
 

@@ -26,13 +26,13 @@ public class PostController {
     private UserService userService;
 
     @PostMapping("/users/{id}/makePost")
-    public ResponseEntity<PostUploadResponseDTO> makePost(@PathVariable int id, @RequestBody PostUploadRequestDTO post,
+    public ResponseEntity<PostUploadResponseDTO> makePost(@PathVariable int id, @Valid @RequestBody PostUploadRequestDTO post,
                                                           HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), id);
         User user = sessionManager.getSessionUser(request.getSession());
         userService.changeUserRole(user);
-        return new ResponseEntity<>(postService.makePost(post), HttpStatus.CREATED);
+        return new ResponseEntity<>(postService.makePost(post,user), HttpStatus.CREATED);
     }
 
     @PostMapping("/users/{uId}/uploadPostVideo/{pId}")
@@ -49,11 +49,11 @@ public class PostController {
         return new ResponseEntity<>("Successful delete request", HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/posts/editPost")
-    public ResponseEntity<PostEditResponseDTO> editPost(@Valid @RequestBody PostEditRequestDTO postDto,
+    @PutMapping("/posts/{id}/editPost")
+    public ResponseEntity<PostEditResponseDTO> editPost(@PathVariable int id,@Valid @RequestBody PostEditRequestDTO postDto,
                                                         HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return new ResponseEntity<>(postService.editPost(postDto, request.getSession()), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(postService.editPost(id,postDto, request.getSession()), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/posts/{id}")
