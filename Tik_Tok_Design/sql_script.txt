@@ -1,0 +1,306 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema tik_tok_project
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema tik_tok_project
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `tik_tok_project` DEFAULT CHARACTER SET utf8 ;
+USE `tik_tok_project` ;
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`roles`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`roles` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 4
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`users`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`users` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `role_id` INT NOT NULL,
+  `username` VARCHAR(50) NULL DEFAULT NULL,
+  `name` VARCHAR(50) NULL DEFAULT NULL,
+  `email` VARCHAR(255) NULL DEFAULT NULL,
+  `phone_number` VARCHAR(45) NULL DEFAULT NULL,
+  `password` VARCHAR(150) NOT NULL,
+  `date_of_birth` DATE NOT NULL,
+  `description` VARCHAR(150) NULL DEFAULT 'NO BIO YET',
+  `register_date` DATETIME NOT NULL,
+  `photo_url` VARCHAR(150) NULL DEFAULT NULL,
+  `is_verified` TINYINT NULL DEFAULT NULL,
+  `last_login_attempt` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
+  UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE,
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
+  UNIQUE INDEX `phone_number_UNIQUE` (`phone_number` ASC) VISIBLE,
+  INDEX `user_role_id_fk_idx` (`role_id` ASC) VISIBLE,
+  CONSTRAINT `user_role_id_fk`
+    FOREIGN KEY (`role_id`)
+    REFERENCES `tik_tok_project`.`roles` (`id`)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 6
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`posts`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`posts` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `owner_id` INT NOT NULL,
+  `upload_date` DATETIME NOT NULL,
+  `is_public` TINYINT NOT NULL,
+  `description` VARCHAR(150) NULL DEFAULT NULL,
+  `views` INT NULL DEFAULT '0',
+  `video_url` VARCHAR(500) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
+  INDEX `posts_owner_id_fk_idx` (`owner_id` ASC) VISIBLE,
+  CONSTRAINT `posts_owner_id_fk`
+    FOREIGN KEY (`owner_id`)
+    REFERENCES `tik_tok_project`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 5
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`comments`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`comments` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `owner_id` INT NOT NULL,
+  `post_id` INT NOT NULL,
+  `text` VARCHAR(150) NOT NULL,
+  `commented_on` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
+  INDEX `comment_owner_id_fk_idx` (`owner_id` ASC) VISIBLE,
+  INDEX `comment_post_id_fk_idx` (`post_id` ASC) VISIBLE,
+  CONSTRAINT `comment_owner_id_fk`
+    FOREIGN KEY (`owner_id`)
+    REFERENCES `tik_tok_project`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `comment_post_id_fk`
+    FOREIGN KEY (`post_id`)
+    REFERENCES `tik_tok_project`.`posts` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 11
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`comments_have_comments`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`comments_have_comments` (
+  `parent_id` INT NOT NULL,
+  `child_id` INT NOT NULL,
+  PRIMARY KEY (`parent_id`, `child_id`),
+  INDEX `c_h_c_fk_child_idx` (`child_id` ASC) VISIBLE,
+  CONSTRAINT `c_h_c_fk_child`
+    FOREIGN KEY (`child_id`)
+    REFERENCES `tik_tok_project`.`comments` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `c_h_c_fk_parent`
+    FOREIGN KEY (`parent_id`)
+    REFERENCES `tik_tok_project`.`comments` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`comments_have_likes`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`comments_have_likes` (
+  `comment_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  PRIMARY KEY (`comment_id`, `user_id`),
+  INDEX `comment_likes_user_id_fk` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `comment_likes_comment_id_fk`
+    FOREIGN KEY (`comment_id`)
+    REFERENCES `tik_tok_project`.`comments` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `comment_likes_user_id_fk`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `tik_tok_project`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`followers`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`followers` (
+  `follower_id` INT NOT NULL,
+  `followed_to_id` INT NOT NULL,
+  PRIMARY KEY (`follower_id`, `followed_to_id`),
+  INDEX `followers_followed_by_id_fk_idx` (`followed_to_id` ASC) VISIBLE,
+  CONSTRAINT `followers_followed_by_id_fk`
+    FOREIGN KEY (`followed_to_id`)
+    REFERENCES `tik_tok_project`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `followers_follower_id_fk`
+    FOREIGN KEY (`follower_id`)
+    REFERENCES `tik_tok_project`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`hashtags`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`hashtags` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `title` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 19
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`playlists`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`playlists` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `owner_id` INT NOT NULL,
+  `name` VARCHAR(45) NOT NULL,
+  `created_time` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
+  INDEX `playlist_owner_id_fk_idx` (`owner_id` ASC) VISIBLE,
+  CONSTRAINT `playlist_owner_id_fk`
+    FOREIGN KEY (`owner_id`)
+    REFERENCES `tik_tok_project`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 3
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`posts_have_hashtags`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`posts_have_hashtags` (
+  `hashtag_id` INT NOT NULL,
+  `post_id` INT NOT NULL,
+  PRIMARY KEY (`hashtag_id`, `post_id`),
+  INDEX `v_have_h_post_id_fk_idx` (`post_id` ASC) VISIBLE,
+  CONSTRAINT `v_have_h_hashtag_id_fk`
+    FOREIGN KEY (`hashtag_id`)
+    REFERENCES `tik_tok_project`.`hashtags` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `v_have_h_post_id_fk`
+    FOREIGN KEY (`post_id`)
+    REFERENCES `tik_tok_project`.`posts` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`posts_have_likes`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`posts_have_likes` (
+  `post_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  PRIMARY KEY (`post_id`, `user_id`),
+  INDEX `video_likes_user_id_fk_idx` (`user_id` ASC) VISIBLE,
+  CONSTRAINT `video_likes_post_id_fk`
+    FOREIGN KEY (`post_id`)
+    REFERENCES `tik_tok_project`.`posts` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `video_likes_user_id_fk`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `tik_tok_project`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`posts_in_playlist`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`posts_in_playlist` (
+  `playlist_id` INT NOT NULL,
+  `post_id` INT NOT NULL,
+  PRIMARY KEY (`playlist_id`, `post_id`),
+  INDEX `videos_in_playlist_post_id_fk_idx` (`post_id` ASC) VISIBLE,
+  CONSTRAINT `videos_in_playlist_playlist_id_fk`
+    FOREIGN KEY (`playlist_id`)
+    REFERENCES `tik_tok_project`.`playlists` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `videos_in_playlist_post_id_fk`
+    FOREIGN KEY (`post_id`)
+    REFERENCES `tik_tok_project`.`posts` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `tik_tok_project`.`users_have_tokens`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tik_tok_project`.`users_have_tokens` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `owner_id` INT NOT NULL,
+  `token` VARCHAR(155) NOT NULL,
+  `expiry_date` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `uht_fk_owner_id_idx` (`owner_id` ASC) VISIBLE,
+  CONSTRAINT `uht_fk_owner_id`
+    FOREIGN KEY (`owner_id`)
+    REFERENCES `tik_tok_project`.`users` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+AUTO_INCREMENT = 7
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
