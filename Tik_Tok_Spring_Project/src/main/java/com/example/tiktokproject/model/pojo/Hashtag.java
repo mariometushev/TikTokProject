@@ -9,7 +9,9 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -18,7 +20,6 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "hashtags")
-@EqualsAndHashCode
 public class Hashtag {
 
     @Id
@@ -27,6 +28,6 @@ public class Hashtag {
     @Column
     private String title;
     @ManyToMany(mappedBy = "hashtags",fetch = FetchType.LAZY)
-    private Set<Post> posts = new HashSet<>();
+    private List<Post> posts = new ArrayList<>();
 
 }

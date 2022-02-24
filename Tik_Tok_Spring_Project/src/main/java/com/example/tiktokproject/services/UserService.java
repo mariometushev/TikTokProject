@@ -231,6 +231,9 @@ public class UserService {
     }
 
     public List<UserUsernameDTO> getAllUsersByUsername(String search) {
+        if(search.trim().isEmpty()){
+            throw new BadRequestException("search field can't be only white spaces");
+        }
         search = "%" + search + "%";
         List<User> users = userRepository.findBySearch(search, 5);
         List<UserUsernameDTO> responseUsers = new ArrayList<>();

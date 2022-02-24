@@ -82,7 +82,7 @@ public class CommentController {
         return new ResponseEntity<>(commentService.getCommentById(commentId), HttpStatus.OK);
     }
 
-    @GetMapping("/posts/{id}/AllComments")
+    @GetMapping("/posts/{id}/allComments")
     public ResponseEntity<List<CommentWithoutOwnerDTO>> getAllCommentsByPostId(@PathVariable(name = "id") int postId, HttpServletRequest request){
         sessionManager.validateLogin(request);
         return new ResponseEntity<>(commentService.getAllCommentsByPostId(postId), HttpStatus.OK);

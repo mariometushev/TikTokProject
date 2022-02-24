@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 public class HashtagService {
 
     @Autowired
-    HashtagRepository hashtagRepository;
+    private HashtagRepository hashtagRepository;
     @Autowired
     private ModelMapper modelMapper;
 
-    public HashtagResponseDTO getAllPostsByHashtag(String title) {
+    public HashtagResponseDTO getAllPostsByHashtag(String title) {//TODO doesn't work!!!
         Hashtag hashtag = hashtagRepository.findHashtagByTitle(title).orElseThrow(() -> new NotFoundException("Hashtag not found"));
         HashtagResponseDTO hashtagDto = modelMapper.map(hashtag,HashtagResponseDTO.class);
         for (Post post : hashtag.getPosts()) {

@@ -26,6 +26,6 @@ public class Token {
     private User owner;
     @Column
     private String token;
-    @Column(name = "expiry_date")//TODO : change the name, but it's not commited
+    @Column(name = "expiry_date")
     private LocalDateTime expiryDate;
 }
