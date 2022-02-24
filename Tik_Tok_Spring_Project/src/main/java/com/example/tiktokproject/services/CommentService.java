@@ -32,6 +32,7 @@ public class CommentService {
     public CommentResponseDTO makeComment(User commentOwner, int postId, CommentRequestDTO comment) {
         Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("No such post to comment"));
         Comment c = modelMapper.map(comment, Comment.class);
+
         setCommentOwnerCommentPostAndCommentUploadDate(c, commentOwner, p, LocalDateTime.now());
         commentRepository.save(c);
 
@@ -51,6 +52,7 @@ public class CommentService {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Not found comment"));
         Comment reply = modelMapper.map(replyComment, Comment.class);
         Post p = c.getPost();
+
         setCommentOwnerCommentPostAndCommentUploadDate(reply, commentOwner, p, LocalDateTime.now());
         reply.setParent(c);
 
@@ -122,8 +124,10 @@ public class CommentService {
 
     public CommentGetResponseDTO getCommentById(int commentId) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Not found comment"));
+
         CommentGetResponseDTO commentDto = modelMapper.map(c, CommentGetResponseDTO.class);
         PostWithoutOwnerDTO post = modelMapper.map(c.getPost(), PostWithoutOwnerDTO.class);
+
         post.setPostHaveComments(c.getPost().getPostComments().size());
         post.setPostHaveLikes(c.getPost().getPostLikes().size());
         UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
@@ -131,12 +135,6 @@ public class CommentService {
         commentDto.setUserWithoutPost(user);
         commentDto.setCommentHasLikes(c.getCommentLikes().size());
         return commentDto;
-    }
-
-    private void setCommentOwnerCommentPostAndCommentUploadDate(Comment c, User u, Post p, LocalDateTime dateTime) {
-        c.setOwner(u);
-        c.setPost(p);
-        c.setCommentedOn(dateTime);
     }
 
     public List<CommentWithoutOwnerDTO> getAllCommentsByPostId(int postId) {
@@ -150,5 +148,11 @@ public class CommentService {
             commentWithoutOwner.add(commentDto);
         }
         return commentWithoutOwner;
+    }
+
+    private void setCommentOwnerCommentPostAndCommentUploadDate(Comment c, User u, Post p, LocalDateTime dateTime) {
+        c.setOwner(u);
+        c.setPost(p);
+        c.setCommentedOn(dateTime);
     }
 }

@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findAllWhereLastLoginAttemptIsBefore(@Param("date") String localDateNow);
 
     @Query(value = "SELECT * FROM users AS u " +
-            "JOIN followers AS f ON(u.id= f.followed_to_id) " +
+            "JOIN followers AS f ON(u.id = f.followed_to_id) " +
             "WHERE u.username LIKE :search " +
             "GROUP BY f.followed_to_id " +
             "ORDER BY f.followed_to_id DESC LIMIT :limit ", nativeQuery = true)

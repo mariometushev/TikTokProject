@@ -83,7 +83,7 @@ public class PlaylistService {
         }
         playlist.addPost(post);
         playlistRepository.save(playlist);
-        UserWithoutPostDTO userWithoutPost = modelMapper.map(user,UserWithoutPostDTO.class);
+        UserWithoutPostDTO userWithoutPost = modelMapper.map(user, UserWithoutPostDTO.class);
         PlaylistWithoutOwnerDTO dto = modelMapper.map(playlist, PlaylistWithoutOwnerDTO.class);
         dto.setUserWithoutPost(userWithoutPost);
         addPostToPostWithoutOwnerDto(dto, playlist);
@@ -101,7 +101,7 @@ public class PlaylistService {
         }
         playlist.removePost(post);
         playlistRepository.save(playlist);
-        UserWithoutPostDTO userWithoutPost = modelMapper.map(user,UserWithoutPostDTO.class);
+        UserWithoutPostDTO userWithoutPost = modelMapper.map(user, UserWithoutPostDTO.class);
         PlaylistWithoutOwnerDTO playlistDto = modelMapper.map(playlist, PlaylistWithoutOwnerDTO.class);
         playlistDto.setUserWithoutPost(userWithoutPost);
         addPostToPostWithoutOwnerDto(playlistDto, playlist);
@@ -113,8 +113,7 @@ public class PlaylistService {
         List<Playlist> playlists = playlistRepository.findAllByOwnerId(userId);
         List<PlaylistWithoutOwnerDTO> playlistsDto = new ArrayList<>();
         User u = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        UserWithoutPostDTO userWithoutPost = modelMapper
-                .map(u, UserWithoutPostDTO.class);
+        UserWithoutPostDTO userWithoutPost = modelMapper.map(u, UserWithoutPostDTO.class);
         for (Playlist p : playlists) {
             PlaylistWithoutOwnerDTO playlistWithoutOwnerDTO = modelMapper.map(p, PlaylistWithoutOwnerDTO.class);
             addPostToPostWithoutOwnerDto(playlistWithoutOwnerDTO, p);
@@ -124,26 +123,22 @@ public class PlaylistService {
         return playlistsDto;
     }
 
-    private void addPostToPostWithoutOwnerDto(PlaylistWithoutOwnerDTO playlistDto, Playlist playlist) {
-        for (Post p : playlist.getPosts()) {
-            PostWithoutOwnerDTO postDto = modelMapper.map(p, PostWithoutOwnerDTO.class);
-            postDto.setPostHaveLikes(p.getPostLikes().size());
-            postDto.setPostHaveComments(p.getPostComments().size());
-            playlistDto.addPost(postDto);
-        }
-    }
-
     public PlaylistWithoutOwnerDTO getPlaylistById(int playlistId) {
         Playlist playlist = playlistRepository.findById(playlistId).orElseThrow(() -> new NotFoundException("Playlist not found"));
         PlaylistWithoutOwnerDTO playlistDto = modelMapper.map(playlist, PlaylistWithoutOwnerDTO.class);
         UserWithoutPostDTO user = modelMapper.map(playlist.getOwner(), UserWithoutPostDTO.class);
         playlistDto.setUserWithoutPost(user);
-        for (Post post : playlist.getPosts()) {
-            PostWithoutOwnerDTO postDto = modelMapper.map(post, PostWithoutOwnerDTO.class);
-            postDto.setPostHaveLikes(post.getPostLikes().size());
-            postDto.setPostHaveComments(post.getPostComments().size());
+        addPostToPostWithoutOwnerDto(playlistDto, playlist);
+        return playlistDto;
+    }
+
+    private void addPostToPostWithoutOwnerDto(PlaylistWithoutOwnerDTO playlistDto, Playlist playlist) {
+        List<Post> postsInPlaylist = playlist.getPosts();
+        for (Post p : postsInPlaylist) {
+            PostWithoutOwnerDTO postDto = modelMapper.map(p, PostWithoutOwnerDTO.class);
+            postDto.setPostHaveLikes(p.getPostLikes().size());
+            postDto.setPostHaveComments(p.getPostComments().size());
             playlistDto.addPost(postDto);
         }
-        return playlistDto;
     }
 }

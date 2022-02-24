@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
@@ -47,12 +48,13 @@ public class PostService {
         if (p.getVideoUrl() != null) {
             throw new BadRequestException("You can't upload more than one video files in one post");
         }
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName = UUID.randomUUID().toString() + postId + "." + extension;
+        MimetypesFileTypeMap mime = new MimetypesFileTypeMap();
+        String realFileExtension = mime.getContentType(file.getName());
+        String fileName = UUID.randomUUID().toString() + postId + "." + realFileExtension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big video size. The maximum video size is 50MB.");
         }
-        if (!("mp4".equals(extension))) {
+        if (!("mp4".equals(realFileExtension))) {
             throw new BadRequestException("Wrong video format.You can upload only .mp4.");
         }
         try {
@@ -73,7 +75,7 @@ public class PostService {
         p.setUploadDate(LocalDateTime.now());
         p.setOwner(u);
         if (p.getDescription() != null && !p.getDescription().isBlank()) {
-            checkForHashtags(p,true);
+            checkForHashtags(p, true);
         }
         postRepository.save(p);
         PostUploadResponseDTO postUpload = modelMapper.map(p, PostUploadResponseDTO.class);
@@ -84,9 +86,7 @@ public class PostService {
 
     public void deletePost(int postId, HttpSession session) {
         checkUserPrivileges(postId, session);
-        postRepository.deleteById(postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("Post not found"))
-                .getId());
+        postRepository.delete(postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found")));
     }
 
     public PostEditResponseDTO editPost(int postId, PostEditRequestDTO postDto, HttpSession session) {
@@ -178,9 +178,9 @@ public class PostService {
                     hash.setTitle(hashtag);
                     hashtagRepository.save(hash);
                 }
-                if(addHashtag) {
+                if (addHashtag) {
                     p.addHashtag(hash);
-                }else{
+                } else {
                     p.removeHashtag(hash);
                 }
             }
