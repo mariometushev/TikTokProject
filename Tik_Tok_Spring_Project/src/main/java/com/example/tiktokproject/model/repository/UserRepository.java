@@ -19,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             "WHERE u.last_login_attempt <= DATE_SUB(:date,INTERVAL 7 DAYS)  ", nativeQuery = true)
     List<User> findAllWhereLastLoginAttemptIsBefore(@Param("date") String localDateNow);
 
+
+
+
     @Query(value = "SELECT * FROM users AS u " +
             "JOIN followers AS f ON(u.id= f.followed_to_id) " +
             "WHERE u.username LIKE :search " +
