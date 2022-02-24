@@ -18,8 +18,11 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     @Query(value = "INSERT INTO comments_have_comments (parent_id,child_id) VALUES (:parentId,:childId)", nativeQuery = true)
     void insertIntoTable(@Param("parentId") Integer parentId, @Param("childId") Integer childId);
 
-    @Query(value = "SELECT COUNT(*) FROM comments_have_comments WHERE parent_id = :id",nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM comments_have_comments WHERE parent_id = :id", nativeQuery = true)
     int findRepliesByCommentId(@Param("id") Integer id);
 
     List<Comment> findAllByPost(Post post);
+
+    @Query(value = "SELECT child_id FROM comments_have_comments WHERE parent_id = :commentId", nativeQuery = true)
+    List<Integer> findAllCommentRepliesId(@Param("commentId") Integer commentId);
 }

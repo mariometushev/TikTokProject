@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Service
 public class PostService {
 
-    private static final long MAX_UPLOAD_SIZE = 250 * 1024 * 1024;
+    private static final long MAX_UPLOAD_SIZE = 50 * 1024 * 1024;
     private static final String UPLOAD_FOLDER = "uploads";
     public static final String HASHTAG_REGEX = "#[A-Za-z0-9_]+";
 
@@ -50,7 +50,7 @@ public class PostService {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
         String fileName = UUID.randomUUID().toString() + postId + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
-            throw new BadRequestException("Too big video size. The maximum video size is 250MB.");
+            throw new BadRequestException("Too big video size. The maximum video size is 50MB.");
         }
         if (!("mp4".equals(extension))) {
             throw new BadRequestException("Wrong video format.You can upload only .mp4.");
@@ -73,7 +73,7 @@ public class PostService {
         p.setUploadDate(LocalDateTime.now());
         p.setOwner(u);
         if (p.getDescription() != null && !p.getDescription().isBlank()) {
-            checkForHashtags(p);
+            checkForHashtags(p,true);
         }
         postRepository.save(p);
         PostUploadResponseDTO postUpload = modelMapper.map(p, PostUploadResponseDTO.class);
@@ -97,10 +97,9 @@ public class PostService {
             post.setPrivacy(postDto.isPrivacy());
         }
         if (postDto.getDescription() != null && !postDto.getDescription().isBlank()) {
-            if (!postDto.getDescription().equals(post.getDescription())) {
-                post.setDescription(postDto.getDescription());
-            }
-            checkForHashtags(post);
+            checkForHashtags(post, false);
+            post.setDescription(postDto.getDescription());
+            checkForHashtags(post, true);
         }
         postRepository.save(post);
         PostEditResponseDTO response = modelMapper.map(post, PostEditResponseDTO.class);
@@ -161,7 +160,7 @@ public class PostService {
         postRepository.save(post);
     }
 
-    private void checkForHashtags(Post p) {
+    private void checkForHashtags(Post p, boolean addHashtag) {
         String[] spaces = p.getDescription().split(" ");
         ArrayList<String> hashtags = new ArrayList<>();
         for (String s : spaces) {
@@ -179,7 +178,11 @@ public class PostService {
                     hash.setTitle(hashtag);
                     hashtagRepository.save(hash);
                 }
-                p.addHashtag(hash);
+                if(addHashtag) {
+                    p.addHashtag(hash);
+                }else{
+                    p.removeHashtag(hash);
+                }
             }
         }
     }

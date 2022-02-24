@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -15,7 +16,7 @@ import javax.validation.constraints.Size;
 @Validated
 public class PostEditRequestDTO {
 
-    @Size(min = 1, message = "Id can not be less than one")
+    @Min(value = 1,message = "Id can not be less than one")
     @NotNull(message = "ownerId field can't be null")
     private int ownerId;
     @NotNull(message = "privacy field can't be null")

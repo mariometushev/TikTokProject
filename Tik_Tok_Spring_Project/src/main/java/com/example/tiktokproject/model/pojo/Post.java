@@ -45,7 +45,7 @@ public class Post {
     @Column(name = "video_url")
     private String videoUrl;
 
-    @OneToMany(mappedBy = "post",fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     private List<Comment> postComments = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -79,5 +79,8 @@ public class Post {
         this.hashtags.add(hash);
     }
 
+    public void removeHashtag(Hashtag hash) {
+        this.hashtags.remove(hash);
+    }
 }
 

@@ -83,7 +83,9 @@ public class PlaylistService {
         }
         playlist.addPost(post);
         playlistRepository.save(playlist);
+        UserWithoutPostDTO userWithoutPost = modelMapper.map(user,UserWithoutPostDTO.class);
         PlaylistWithoutOwnerDTO dto = modelMapper.map(playlist, PlaylistWithoutOwnerDTO.class);
+        dto.setUserWithoutPost(userWithoutPost);
         addPostToPostWithoutOwnerDto(dto, playlist);
         return dto;
     }
@@ -99,7 +101,9 @@ public class PlaylistService {
         }
         playlist.removePost(post);
         playlistRepository.save(playlist);
+        UserWithoutPostDTO userWithoutPost = modelMapper.map(user,UserWithoutPostDTO.class);
         PlaylistWithoutOwnerDTO playlistDto = modelMapper.map(playlist, PlaylistWithoutOwnerDTO.class);
+        playlistDto.setUserWithoutPost(userWithoutPost);
         addPostToPostWithoutOwnerDto(playlistDto, playlist);
         return playlistDto;
     }

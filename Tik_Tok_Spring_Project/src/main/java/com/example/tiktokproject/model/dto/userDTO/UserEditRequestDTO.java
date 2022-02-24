@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -16,7 +17,7 @@ import javax.validation.constraints.Size;
 @Validated
 public class UserEditRequestDTO {
 
-    @Size(min = 1, message = "Id can not be less than one")
+    @Min(value = 1,message = "Id can not be less than one")
     private int id;
     @Size(max = 50, message = "username length should be maximum 50 symbols")
     private String username;

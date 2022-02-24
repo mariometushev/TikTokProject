@@ -92,11 +92,13 @@ public class CommentService {
 
     public void deleteComment(User commentOwner, int commentId) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment"));
-        Post p = c.getPost();
         if (!commentOwner.getComments().contains(c)) {
             throw new UnauthorizedException("You can't delete another user comment");
         }
-
+        List<Integer> replies = commentRepository.findAllCommentRepliesId(commentId);
+        for (Integer i : replies) {
+            commentRepository.deleteById(i);
+        }
         commentRepository.delete(c);
     }
 
@@ -122,6 +124,8 @@ public class CommentService {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Not found comment"));
         CommentGetResponseDTO commentDto = modelMapper.map(c, CommentGetResponseDTO.class);
         PostWithoutOwnerDTO post = modelMapper.map(c.getPost(), PostWithoutOwnerDTO.class);
+        post.setPostHaveComments(c.getPost().getPostComments().size());
+        post.setPostHaveLikes(c.getPost().getPostLikes().size());
         UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
         commentDto.setPostWithoutOwner(post);
         commentDto.setUserWithoutPost(user);

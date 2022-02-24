@@ -72,7 +72,7 @@ public class UserService {
         user.setRoleId(1);
         user.setRegisterDate(LocalDateTime.now());
         userRepository.save(user);
-        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);
+//        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
@@ -220,8 +220,11 @@ public class UserService {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new BadRequestException("This username is already used");
         }
+        if(username.trim().isEmpty() || username.contains(" ")){
+            throw new BadRequestException("Wrong username format");
+        }
         user.setUsername(username);
-        if (name == null) {
+        if (name == null || name.trim().isEmpty()) {
             user.setName(username);
         } else {
             user.setName(name);

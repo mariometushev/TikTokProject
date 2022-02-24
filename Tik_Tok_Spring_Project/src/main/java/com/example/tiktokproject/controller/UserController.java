@@ -88,13 +88,13 @@ public class UserController {
         return new ResponseEntity<>(userService.editProfilePicture(file, id), HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/users/{username}")
-    public ResponseEntity<UserInformationDTO> getUserByUsername(@PathVariable String username) {
+    @GetMapping("/users")
+    public ResponseEntity<UserInformationDTO> getUserByUsername(@RequestParam("username") String username) {
         return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@RequestParam String search) {
+    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@RequestParam("search") String search) {
         return new ResponseEntity<>(userService.getAllUsersByUsername(search), HttpStatus.ACCEPTED);
     }
 

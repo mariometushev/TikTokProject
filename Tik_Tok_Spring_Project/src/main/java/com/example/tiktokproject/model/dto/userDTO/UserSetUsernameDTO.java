@@ -13,7 +13,6 @@ import javax.validation.constraints.*;
 @Validated
 public class UserSetUsernameDTO {
 
-    private int id;
     @NotBlank(message = "username can't be blank")
     @NotNull(message = "username is mandatory")
     @Size(max = 50, message = "username length should be maximum 50 symbols")
