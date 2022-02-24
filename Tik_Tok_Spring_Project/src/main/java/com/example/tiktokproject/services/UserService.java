@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.activation.MimetypesFileTypeMap;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -72,7 +73,7 @@ public class UserService {
         user.setRoleId(1);
         user.setRegisterDate(LocalDateTime.now());
         userRepository.save(user);
-//        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);
+        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
@@ -146,12 +147,13 @@ public class UserService {
     }
 
     public UserEditProfilePictureResponseDTO editProfilePicture(MultipartFile file, int userId) {
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName = System.nanoTime() + "." + extension;
+        MimetypesFileTypeMap mime = new MimetypesFileTypeMap();
+        String realFileExtension = mime.getContentType(file.getName());
+        String fileName = System.nanoTime() + "." + realFileExtension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
-            throw new BadRequestException("Too big photo size. The maximum photo size is 250MB.");
+            throw new BadRequestException("Too big photo size. The maximum photo size is 50MB.");
         }
-        if (!("jpg".equals(extension)) && !("png".equals(extension))) {
+        if (!("jpg".equals(realFileExtension)) && !("png".equals(realFileExtension))) {
             throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
         }
         try {
@@ -170,7 +172,8 @@ public class UserService {
         UserInformationDTO userInformationDTO = modelMapper.map(u, UserInformationDTO.class);
         userInformationDTO.setNumberOfFollowers(u.getFollowers().size());
         userInformationDTO.setNumberOfFollowerTo(u.getFollowerTo().size());
-        for (Post p : u.getPosts()) {
+        List<Post> userPosts = u.getPosts();
+        for (Post p : userPosts) {
             PostWithoutOwnerDTO postDTO = modelMapper.map(p, PostWithoutOwnerDTO.class);
             postDTO.setPostHaveComments(p.getPostComments().size());
             postDTO.setPostHaveLikes(p.getPostLikes().size());
@@ -185,7 +188,7 @@ public class UserService {
             throw new BadRequestException("You can't follow yourself");
         }
         if (star.getFollowers().contains(follower)) {
-            throw new BadRequestException("You already subscribe to that person");
+            throw new BadRequestException("You are already follow that person");
         }
         star.addFollower(follower);
         userRepository.save(star);

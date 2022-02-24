@@ -11,6 +11,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class HashtagService {
 
@@ -19,10 +21,11 @@ public class HashtagService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public HashtagResponseDTO getAllPostsByHashtag(String title) {//TODO doesn't work!!!
+    public HashtagResponseDTO getAllPostsByHashtag(String title) {
         Hashtag hashtag = hashtagRepository.findHashtagByTitle(title).orElseThrow(() -> new NotFoundException("Hashtag not found"));
-        HashtagResponseDTO hashtagDto = modelMapper.map(hashtag,HashtagResponseDTO.class);
-        for (Post post : hashtag.getPosts()) {
+        HashtagResponseDTO hashtagDto = modelMapper.map(hashtag, HashtagResponseDTO.class);
+        List<Post> hashtagPosts = hashtag.getPosts();
+        for (Post post : hashtagPosts) {
             PostWithOwnerDTO postDto = modelMapper.map(post, PostWithOwnerDTO.class);
             postDto.setPostHaveComments(post.getPostComments().size());
             postDto.setPostHaveLikes(post.getPostLikes().size());

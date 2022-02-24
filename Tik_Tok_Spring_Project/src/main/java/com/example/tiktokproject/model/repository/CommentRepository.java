@@ -13,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
+
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO comments_have_comments (parent_id,child_id) VALUES (:parentId,:childId)", nativeQuery = true)

@@ -29,13 +29,13 @@ public class SessionManager {
         boolean logged = session.getAttribute(LOGGED) != null && ((Boolean) session.getAttribute(LOGGED));
         boolean sameIP = request.getRemoteAddr().equals(session.getAttribute(LOGGED_FROM));
         boolean userIdIsNull = session.getAttribute(USER_ID) == null;
-//        boolean isVerified = getSessionUser(session).isVerified();
+        boolean isVerified = getSessionUser(session).isVerified();
         if (userIdIsNull || newSession || !logged || !sameIP) {
             throw new UnauthorizedException("You have to log in");
         }
-//        if (!isVerified) {
-//            throw new UnauthorizedException("You have to verify your account.");
-//        }
+        if (!isVerified) {
+            throw new UnauthorizedException("You have to verify your account.");
+        }
     }
 
     public void validateUserId(HttpSession session, int userId) {

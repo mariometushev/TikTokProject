@@ -16,7 +16,7 @@ import java.util.UUID;
 public class EmailService {
 
     @Autowired
-    TokenRepository tokenRepository;
+    private TokenRepository tokenRepository;
     @Autowired
     private JavaMailSender emailSender;
     @Value(value = "${spring.mail.username}")
