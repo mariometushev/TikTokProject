@@ -2,6 +2,7 @@ package com.example.tiktokproject.services;
 
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,13 +10,14 @@ import java.nio.file.Files;
 
 @Service
 public class FileService {
-    public OutputStream download(String filename) {
-        File f = new File(filename);
+
+    public void download(String filename, HttpServletResponse response) {
+        File f = new File("photos" + File.separator + filename);
         try {
-           return Files.newOutputStream(f.toPath());
+            Files.copy(f.toPath(), response.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
     }
+
 }
