@@ -80,16 +80,13 @@ public class User {
     private List<User> followerTo = new ArrayList<>();
 
     public void addFollower(User follower) {
-        this.getFollowers().add(follower);
+        this.followers.add(follower);
     }
 
     public void removeFollower(User userWhoWantToUnfollow) {
-        this.getFollowers().remove(userWhoWantToUnfollow);
+        this.followers.remove(userWhoWantToUnfollow);
     }
 
-    public void addComment(Comment c) {
-        this.comments.add(c);
-    }
 
 }
 

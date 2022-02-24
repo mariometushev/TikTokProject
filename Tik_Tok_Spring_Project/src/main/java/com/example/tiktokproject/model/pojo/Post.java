@@ -79,8 +79,5 @@ public class Post {
         this.hashtags.add(hash);
     }
 
-    public void addComment(Comment c) {
-        this.postComments.add(c);
-    }
 }
 

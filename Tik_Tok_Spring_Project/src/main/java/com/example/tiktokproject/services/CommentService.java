@@ -35,9 +35,6 @@ public class CommentService {
         setCommentOwnerCommentPostAndCommentUploadDate(c, commentOwner, p, LocalDateTime.now());
         commentRepository.save(c);
 
-        p.addComment(c);
-        postRepository.save(p);
-
         CommentResponseDTO response = modelMapper.map(c, CommentResponseDTO.class);
         UserWithoutPostDTO user = modelMapper.map(commentOwner, UserWithoutPostDTO.class);
         PostWithoutOwnerDTO post = modelMapper.map(p, PostWithoutOwnerDTO.class);
@@ -57,9 +54,6 @@ public class CommentService {
         setCommentOwnerCommentPostAndCommentUploadDate(reply, commentOwner, p, LocalDateTime.now());
         reply.setParent(c);
 
-        p.addComment(reply);
-
-        c.addCommentInReplies(reply);
         postRepository.save(p);
         commentRepository.save(c);
         commentRepository.save(reply);
@@ -102,9 +96,6 @@ public class CommentService {
         if (!commentOwner.getComments().contains(c)) {
             throw new UnauthorizedException("You can't delete another user comment");
         }
-
-//        commentOwner.removeComment(c);
-//        p.removeComment(c);
 
         commentRepository.delete(c);
     }

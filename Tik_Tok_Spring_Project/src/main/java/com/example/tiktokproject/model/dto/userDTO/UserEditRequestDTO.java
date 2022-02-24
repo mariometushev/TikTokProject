@@ -16,6 +16,7 @@ import javax.validation.constraints.Size;
 @Validated
 public class UserEditRequestDTO {
 
+    @Size(min = 1, message = "Id can not be less than one")
     private int id;
     @Size(max = 50, message = "username length should be maximum 50 symbols")
     private String username;

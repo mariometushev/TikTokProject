@@ -15,6 +15,7 @@ import javax.validation.constraints.Size;
 @Validated
 public class PostEditRequestDTO {
 
+    @Size(min = 1, message = "Id can not be less than one")
     @NotNull(message = "ownerId field can't be null")
     private int ownerId;
     @NotNull(message = "privacy field can't be null")

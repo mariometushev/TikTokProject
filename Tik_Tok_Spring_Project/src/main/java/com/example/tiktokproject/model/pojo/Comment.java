@@ -53,8 +53,4 @@ public class Comment {
     public void removeUserWhoLike(User userWhoWantToUnlike) {
         this.commentLikes.remove(userWhoWantToUnlike);
     }
-
-    public void addCommentInReplies(Comment c) {
-        this.replies.add(c);
-    }
 }
