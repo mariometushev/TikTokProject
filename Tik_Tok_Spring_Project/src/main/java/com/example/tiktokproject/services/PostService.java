@@ -14,6 +14,7 @@ import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
 import lombok.Synchronized;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.tika.Tika;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -51,8 +52,13 @@ public class PostService {
         if (p.getVideoUrl() != null) {
             throw new BadRequestException("You can't upload more than one video files in one post");
         }
-        MimetypesFileTypeMap mime = new MimetypesFileTypeMap();
-        String realFileExtension = mime.getContentType(file.getName());
+        Tika tika = new Tika();
+        String realFileExtension = null;
+        try {
+            realFileExtension = tika.detect(file.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String fileName = UUID.randomUUID().toString() + postId + "." + realFileExtension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big video size. The maximum video size is 50MB.");
