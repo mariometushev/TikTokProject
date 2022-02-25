@@ -16,6 +16,9 @@ import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -109,8 +112,9 @@ public class PlaylistService {
     }
 
 
-    public List<PlaylistWithoutOwnerDTO> getAllPlaylists(int userId) {
-        List<Playlist> playlists = playlistRepository.findAllByOwnerId(userId);
+    public List<PlaylistWithoutOwnerDTO> getAllPlaylists(int userId, int pageNumber, int rowsNumber) {
+        Pageable page = PageRequest.of(pageNumber, rowsNumber, Sort.by("createdTime").descending());
+        List<Playlist> playlists = playlistRepository.findAllByOwnerId(userId, page);
         List<PlaylistWithoutOwnerDTO> playlistsDto = new ArrayList<>();
         User u = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         UserWithoutPostDTO userWithoutPost = modelMapper.map(u, UserWithoutPostDTO.class);

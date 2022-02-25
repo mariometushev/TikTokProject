@@ -13,7 +13,11 @@ import com.example.tiktokproject.model.repository.CommentRepository;
 import com.example.tiktokproject.model.repository.PostRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,6 +52,7 @@ public class CommentService {
         return response;
     }
 
+    //TODO transactional?
     public CommentReplyResponseDTO replyComment(User commentOwner, int commentId, CommentRequestDTO replyComment) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Not found comment"));
         Comment reply = modelMapper.map(replyComment, Comment.class);
@@ -137,9 +142,10 @@ public class CommentService {
         return commentDto;
     }
 
-    public List<CommentWithoutOwnerDTO> getAllCommentsByPostId(int postId) {
+    public List<CommentWithoutOwnerDTO> getAllCommentsByPostId(int postId, int pageNumber, int rowsNumber) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
-        List<Comment> comments = commentRepository.findAllByPost(post);
+        Pageable page = PageRequest.of(pageNumber, rowsNumber, Sort.by("commentedOn").descending());
+        List<Comment> comments = commentRepository.findAllByPost(post,page);
         List<CommentWithoutOwnerDTO> commentWithoutOwner = new ArrayList<>();
         for (Comment comment : comments) {
             CommentWithoutOwnerDTO commentDto = modelMapper.map(comment, CommentWithoutOwnerDTO.class);

@@ -2,6 +2,7 @@ package com.example.tiktokproject.model.repository;
 
 import com.example.tiktokproject.model.pojo.Comment;
 import com.example.tiktokproject.model.pojo.Post;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +23,7 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     @Query(value = "SELECT COUNT(*) FROM comments_have_comments WHERE parent_id = :id", nativeQuery = true)
     int findRepliesByCommentId(@Param("id") Integer id);
 
-    List<Comment> findAllByPost(Post post);
+    List<Comment> findAllByPost(Post post, Pageable pageable);
 
     @Query(value = "SELECT child_id FROM comments_have_comments WHERE parent_id = :commentId", nativeQuery = true)
     List<Integer> findAllCommentRepliesId(@Param("commentId") Integer commentId);

@@ -61,19 +61,21 @@ public class PlaylistController {
     @PostMapping("/posts/{pId}/removeFromPlaylist/{plId}")
     public ResponseEntity<PlaylistWithoutOwnerDTO> removePostFromPlaylist(@PathVariable(name = "pId") int postId,
                                                                           @PathVariable(name = "plId") int playlistId,
-                                                                          HttpServletRequest request){
+                                                                          HttpServletRequest request) {
         sessionManager.validateLogin(request);
         User user = sessionManager.getSessionUser(request.getSession());
         return new ResponseEntity<>(playlistService.removePostFromPlaylist(user, postId, playlistId), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/users/{id}/playlists")
-    public ResponseEntity<List<PlaylistWithoutOwnerDTO>> getAllPlaylists(@PathVariable(name = "id") int userId){
-        return new ResponseEntity<>(playlistService.getAllPlaylists(userId), HttpStatus.OK);
+    public ResponseEntity<List<PlaylistWithoutOwnerDTO>> getAllPlaylists(@PathVariable(name = "id") int userId,
+                                                                         @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                         @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber) {
+        return new ResponseEntity<>(playlistService.getAllPlaylists(userId,pageNumber,rowsNumber), HttpStatus.OK);
     }
 
     @GetMapping("playlists/{id}")
-    public ResponseEntity<PlaylistWithoutOwnerDTO> getPlaylistById(@PathVariable(name = "id") int playlistId){
+    public ResponseEntity<PlaylistWithoutOwnerDTO> getPlaylistById(@PathVariable(name = "id") int playlistId) {
         return new ResponseEntity<>(playlistService.getPlaylistById(playlistId), HttpStatus.OK);
     }
 

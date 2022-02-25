@@ -1,5 +1,6 @@
 package com.example.tiktokproject.services;
 
+import com.example.tiktokproject.controller.SessionManager;
 import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.exceptions.NotFoundException;
 import com.example.tiktokproject.exceptions.UnauthorizedException;
@@ -13,11 +14,16 @@ import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.TokenRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.ApplicationScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -73,7 +79,7 @@ public class UserService {
         user.setRoleId(1);
         user.setRegisterDate(LocalDateTime.now());
         userRepository.save(user);
-        emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC);
+        new Thread(() -> emailService.sendSimpleMessage(user, EmailService.REGISTRATION_BODY, EmailService.REGISTRATION_TOPIC)).start();
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
@@ -146,14 +152,15 @@ public class UserService {
         return modelMapper.map(oldUser, UserEditResponseDTO.class);
     }
 
-    public UserEditProfilePictureResponseDTO editProfilePicture(MultipartFile file, int userId) {
+    @SneakyThrows
+    public UserEditProfilePictureResponseDTO editProfilePicture(MultipartFile file, int userId) {//todo check mime type
         MimetypesFileTypeMap mime = new MimetypesFileTypeMap();
         String realFileExtension = mime.getContentType(file.getName());
         String fileName = System.nanoTime() + "." + realFileExtension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big photo size. The maximum photo size is 50MB.");
         }
-        if (!("jpg".equals(realFileExtension)) && !("png".equals(realFileExtension))) {
+        if (!("png".equalsIgnoreCase(realFileExtension)) && !("jpg".equalsIgnoreCase(realFileExtension))) {
             throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
         }
         try {
@@ -168,6 +175,9 @@ public class UserService {
     }
 
     public UserInformationDTO getUserByUsername(String username) {
+        if (username.trim().isEmpty()) {
+            throw new BadRequestException("Username is mandatory");
+        }
         User u = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Wrong username"));
         UserInformationDTO userInformationDTO = modelMapper.map(u, UserInformationDTO.class);
         userInformationDTO.setNumberOfFollowers(u.getFollowers().size());
@@ -206,9 +216,10 @@ public class UserService {
         userRepository.save(unfollowedUser);
     }
 
-    public List<PostLikedDTO> getAllLikedPosts(int id) {
+    public List<PostLikedDTO> getAllLikedPosts(int id,int pageNumber,int rowsNumber) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
-        List<Post> postsLiked = postRepository.findPostsByPostLikesContains(user);
+        Pageable page = PageRequest.of(pageNumber,rowsNumber, Sort.by("views").descending());
+        List<Post> postsLiked = postRepository.findPostsByPostLikesContains(user,page);
         List<PostLikedDTO> postsLikedList = new ArrayList<>();
         for (Post post : postsLiked) {
             PostLikedDTO postLiked = modelMapper.map(post, PostLikedDTO.class);
@@ -223,7 +234,7 @@ public class UserService {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new BadRequestException("This username is already used");
         }
-        if(username.trim().isEmpty() || username.contains(" ")){
+        if (username.trim().isEmpty() || username.contains(" ")) {
             throw new BadRequestException("Wrong username format");
         }
         user.setUsername(username);
@@ -237,8 +248,8 @@ public class UserService {
     }
 
     public List<UserUsernameDTO> getAllUsersByUsername(String search) {
-        if(search.trim().isEmpty()){
-            throw new BadRequestException("search field can't be only white spaces");
+        if (search.trim().isEmpty()) {
+            throw new BadRequestException("Search field is mandatory");
         }
         search = "%" + search + "%";
         List<User> users = userRepository.findBySearch(search, 5);
@@ -255,11 +266,8 @@ public class UserService {
     }
 
 
-    public void forgottenPassword(String token, User user) {
+    public void forgottenPassword(String token) {
         Token t = tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found."));
-        if (t.getOwner().getId() != user.getId()) {
-            throw new BadRequestException("You are not the owner of this token");
-        }
         if (t.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Token expiry date is expired");
         }

@@ -18,7 +18,9 @@ public class HashtagController {
     HashtagService hashtagService;
 
     @GetMapping("/hashtags")
-    public ResponseEntity<HashtagResponseDTO> getAllPostsByHashtag(@RequestParam(name = "title") String title){
-        return new ResponseEntity<>(hashtagService.getAllPostsByHashtag(title), HttpStatus.OK);
+    public ResponseEntity<HashtagResponseDTO> getAllPostsByHashtag(@RequestParam(name = "title") String title,
+                                                                   @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                   @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber) {
+        return new ResponseEntity<>(hashtagService.getAllPostsByHashtag(title,pageNumber,rowsNumber), HttpStatus.OK);
     }
 }

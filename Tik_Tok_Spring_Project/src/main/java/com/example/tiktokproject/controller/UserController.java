@@ -52,16 +52,14 @@ public class UserController {
     }
 
     @PostMapping("/forgottenPassword")
-    public ResponseEntity<String> sendEmailForForgottenPassword(@Valid @RequestBody UserForgottenPasswordRequestDTO userDto,
-                                                                HttpServletRequest request) {
+    public ResponseEntity<String> sendEmailForForgottenPassword(@Valid @RequestBody UserForgottenPasswordRequestDTO userDto) {
         userService.sendEmailForForgottenPassword(userDto);
         return new ResponseEntity<>("Email was send successfully.", HttpStatus.OK);
     }
 
     @GetMapping("/forgottenPassword/{token}")
-    public ResponseEntity<String> checkForgottenPasswordEmailToken(@PathVariable String token, HttpServletRequest request) {
-        User user = sessionManager.getSessionUser(request.getSession());
-        userService.forgottenPassword(token, user);
+    public ResponseEntity<String> checkForgottenPasswordEmailToken(@PathVariable String token) {
+        userService.forgottenPassword(token);
         return new ResponseEntity<>("Valid token, please enter your new password.", HttpStatus.OK);
     }
 
@@ -81,7 +79,7 @@ public class UserController {
         return new ResponseEntity<>(userService.editUser(userDTO), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/users/{id}/edit/profilePicture")
+    @PostMapping(value = "/users/{id}/edit/profilePicture")
     public ResponseEntity<UserEditProfilePictureResponseDTO> editProfilePicture(@PathVariable int id, @RequestParam(name = "file") MultipartFile file, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), id);
@@ -89,12 +87,12 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<UserInformationDTO> getUserByUsername(@RequestParam("username") String username) {
+    public ResponseEntity<UserInformationDTO> getUserByUsername(@RequestParam(value = "username", defaultValue = "") String username) {
         return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@RequestParam("search") String search) {
+    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@RequestParam(value = "search", defaultValue = "") String search) {
         return new ResponseEntity<>(userService.getAllUsersByUsername(search), HttpStatus.ACCEPTED);
     }
 
@@ -115,10 +113,13 @@ public class UserController {
     }
 
     @GetMapping("/user/{id}/likedPosts")
-    public ResponseEntity<List<PostLikedDTO>> getAllLikedPost(@PathVariable int id, HttpServletRequest request) {
+    public ResponseEntity<List<PostLikedDTO>> getAllLikedPost(@PathVariable int id,
+                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                              @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber,
+                                                              HttpServletRequest request) {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), id);
-        return new ResponseEntity<>(userService.getAllLikedPosts(id), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getAllLikedPosts(id, pageNumber, rowsNumber), HttpStatus.OK);
     }
 
     @PostMapping("/users/{id}/setUsername")

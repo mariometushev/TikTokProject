@@ -32,7 +32,7 @@ public class PostController {
         sessionManager.validateUserId(request.getSession(), id);
         User user = sessionManager.getSessionUser(request.getSession());
         userService.changeUserRole(user);
-        return new ResponseEntity<>(postService.makePost(post,user), HttpStatus.CREATED);
+        return new ResponseEntity<>(postService.makePost(post, user), HttpStatus.CREATED);
     }
 
     @PostMapping("/users/{uId}/uploadPostVideo/{pId}")
@@ -50,10 +50,10 @@ public class PostController {
     }
 
     @PutMapping("/posts/{id}/editPost")
-    public ResponseEntity<PostEditResponseDTO> editPost(@PathVariable int id,@Valid @RequestBody PostEditRequestDTO postDto,
+    public ResponseEntity<PostEditResponseDTO> editPost(@PathVariable int id, @Valid @RequestBody PostEditRequestDTO postDto,
                                                         HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return new ResponseEntity<>(postService.editPost(id,postDto, request.getSession()), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(postService.editPost(id, postDto, request.getSession()), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/posts/{id}")
@@ -62,8 +62,10 @@ public class PostController {
     }
 
     @GetMapping("/users/{id}/posts")
-    public ResponseEntity<List<PostWithOwnerDTO>> getAllPostsSortByUploadDate(@PathVariable int id) {
-        return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(id), HttpStatus.OK);
+    public ResponseEntity<List<PostWithOwnerDTO>> getAllPostsSortByUploadDate(@PathVariable int id,
+                                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                              @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber) {
+        return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(id, pageNumber, rowsNumber), HttpStatus.OK);
     }
 
     @PostMapping("/posts/{id}/like")

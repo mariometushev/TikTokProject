@@ -12,9 +12,12 @@ import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.HashtagRepository;
 import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
+import lombok.Synchronized;
 import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -113,7 +116,7 @@ public class PostService {
         if (!post.isPrivacy()) {
             throw new UnauthorizedException("This video is private!");
         }
-        post.setViews(post.getViews() + 1);
+        post.setViews(post.getViews() + 1);//TODO synchronized???
         postRepository.save(post);
         UserWithoutPostDTO userDto = modelMapper.map(post.getOwner(), UserWithoutPostDTO.class);
         PostWithOwnerDTO postDto = modelMapper.map(post, PostWithOwnerDTO.class);
@@ -123,8 +126,9 @@ public class PostService {
         return postDto;
     }
 
-    public List<PostWithOwnerDTO> getAllPostsSortByUploadDate(int id) {
-        List<Post> posts = postRepository.findPostsByUploadDate(id);
+    public List<PostWithOwnerDTO> getAllPostsSortByUploadDate(int id, int rowsNumber, int pageNumber) {
+        Pageable page = PageRequest.of(rowsNumber, pageNumber);
+        List<Post> posts = postRepository.findPostsByUploadDate(id, page);
         List<PostWithOwnerDTO> postsWithOwner = new ArrayList<>();
         for (Post p : posts) {
             PostWithOwnerDTO post = modelMapper.map(p, PostWithOwnerDTO.class);

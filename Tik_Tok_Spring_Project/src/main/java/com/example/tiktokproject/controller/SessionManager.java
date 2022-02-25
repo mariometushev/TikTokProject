@@ -5,6 +5,7 @@ import com.example.tiktokproject.exceptions.UnauthorizedException;
 import com.example.tiktokproject.model.pojo.User;
 import com.example.tiktokproject.model.repository.UserRepository;
 import com.example.tiktokproject.services.UserService;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

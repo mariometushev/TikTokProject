@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.annotation.RequestScope;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@RequestScope
 public class CommentController {
 
     @Autowired
@@ -77,15 +79,18 @@ public class CommentController {
     }
 
     @GetMapping("/comments/{id}")
-    public ResponseEntity<CommentGetResponseDTO> getCommentById(@PathVariable(name = "id") int commentId, HttpServletRequest request){
+    public ResponseEntity<CommentGetResponseDTO> getCommentById(@PathVariable(name = "id") int commentId, HttpServletRequest request) {
         sessionManager.validateLogin(request);
         return new ResponseEntity<>(commentService.getCommentById(commentId), HttpStatus.OK);
     }
 
     @GetMapping("/posts/{id}/allComments")
-    public ResponseEntity<List<CommentWithoutOwnerDTO>> getAllCommentsByPostId(@PathVariable(name = "id") int postId, HttpServletRequest request){
+    public ResponseEntity<List<CommentWithoutOwnerDTO>> getAllCommentsByPostId(@PathVariable(name = "id") int postId,
+                                                                               @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                               @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber,
+                                                                               HttpServletRequest request) {
         sessionManager.validateLogin(request);
-        return new ResponseEntity<>(commentService.getAllCommentsByPostId(postId), HttpStatus.OK);
+        return new ResponseEntity<>(commentService.getAllCommentsByPostId(postId, pageNumber, rowsNumber), HttpStatus.OK);
     }
 
 }
