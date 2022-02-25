@@ -27,6 +27,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "ORDER BY p.upload_date DESC", nativeQuery = true)
     List<Post> findPostsByUploadDate(@Param("id") Integer id, Pageable pageable);
 
-    List<Post> findAllBy(Hashtag hashtag, Pageable page);
+    @Query(value = "SELECT * FROM posts AS p " +
+            "JOIN posts_have_hashtags AS phh ON (p.id = phh.post_id) " +
+            "WHERE phh.hashtag_id = :id ", nativeQuery = true)
+    List<Post> findAllByHashtagId(@Param("id") Integer id, Pageable page);
 
 }

@@ -45,7 +45,14 @@ public class SessionManager {
         }
     }
 
+    public boolean isUserLogged(HttpSession session){
+        return session.getAttribute(LOGGED) != null;
+    }
+
     public User getSessionUser(HttpSession session) {
+        if(session.getAttribute(USER_ID) == null){
+            throw new UnauthorizedException("You have to log in");
+        }
         int sessionUserId = (int) session.getAttribute(USER_ID);
         return userRepository.findById(sessionUserId).orElseThrow(() -> new NotFoundException("Wrong user id"));
     }

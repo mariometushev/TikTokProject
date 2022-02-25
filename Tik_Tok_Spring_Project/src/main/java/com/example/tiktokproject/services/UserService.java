@@ -15,6 +15,7 @@ import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.TokenRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
 import org.modelmapper.ModelMapper;
@@ -28,6 +29,7 @@ import org.springframework.web.context.annotation.ApplicationScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,6 +37,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,7 +102,7 @@ public class UserService {
 
     public void sendEmailForForgottenPassword(UserForgottenPasswordRequestDTO userDto) {
         User user = userRepository.findByEmail(userDto.getEmail()).orElseThrow(() -> new NotFoundException("User not found."));
-        emailService.sendSimpleMessage(user, EmailService.PASSWORD_BODY, EmailService.PASSWORD_TOPIC);
+        new Thread(() -> emailService.sendSimpleMessage(user, EmailService.PASSWORD_BODY, EmailService.PASSWORD_TOPIC));
     }
 
     public UserEditResponseDTO editUser(UserEditRequestDTO userEditDTO) {
@@ -163,11 +166,12 @@ public class UserService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String fileName = System.nanoTime() + "." + realFileExtension;
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String fileName =  UUID.randomUUID().toString() + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big photo size. The maximum photo size is 50MB.");
         }
-        if (!("png".equalsIgnoreCase(realFileExtension)) && !("jpg".equalsIgnoreCase(realFileExtension))) {
+        if (!("image/png".equalsIgnoreCase(realFileExtension)) && !("image/jpeg".equalsIgnoreCase(realFileExtension))) {
             throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
         }
         try {
@@ -223,10 +227,10 @@ public class UserService {
         userRepository.save(unfollowedUser);
     }
 
-    public List<PostLikedDTO> getAllLikedPosts(int id,int pageNumber,int rowsNumber) {
+    public List<PostLikedDTO> getAllLikedPosts(int id, int pageNumber, int rowsNumber) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Not found user"));
-        Pageable page = PageRequest.of(pageNumber,rowsNumber, Sort.by("views").descending());
-        List<Post> postsLiked = postRepository.findPostsByPostLikesContains(user,page);
+        Pageable page = PageRequest.of(pageNumber, rowsNumber, Sort.by("views").descending());
+        List<Post> postsLiked = postRepository.findPostsByPostLikesContains(user, page);
         List<PostLikedDTO> postsLikedList = new ArrayList<>();
         for (Post post : postsLiked) {
             PostLikedDTO postLiked = modelMapper.map(post, PostLikedDTO.class);
@@ -254,12 +258,13 @@ public class UserService {
         return modelMapper.map(user, UserSetUsernameDTO.class);
     }
 
-    public List<UserUsernameDTO> getAllUsersByUsername(String search) {
+    public List<UserUsernameDTO> getAllUsersByUsername(String search,int pageNumber,int rowsNumber) {
         if (search.trim().isEmpty()) {
             throw new BadRequestException("Search field is mandatory");
         }
         search = "%" + search + "%";
-        List<User> users = userRepository.findBySearch(search, 5);
+        Pageable page = PageRequest.of(pageNumber,rowsNumber);
+        List<User> users = userRepository.findBySearch(search, page);
         List<UserUsernameDTO> responseUsers = new ArrayList<>();
         for (User u : users) {
             UserUsernameDTO user = modelMapper.map(u, UserUsernameDTO.class);

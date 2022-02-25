@@ -113,7 +113,7 @@ public class PlaylistService {
 
 
     public List<PlaylistWithoutOwnerDTO> getAllPlaylists(int userId, int pageNumber, int rowsNumber) {
-        Pageable page = PageRequest.of(pageNumber, rowsNumber, Sort.by("createdTime").descending());
+        Pageable page = PageRequest.of(pageNumber, rowsNumber, Sort.by("created_time").descending());
         List<Playlist> playlists = playlistRepository.findAllByOwnerId(userId, page);
         List<PlaylistWithoutOwnerDTO> playlistsDto = new ArrayList<>();
         User u = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));

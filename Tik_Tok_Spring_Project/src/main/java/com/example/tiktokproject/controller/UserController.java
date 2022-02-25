@@ -1,5 +1,6 @@
 package com.example.tiktokproject.controller;
 
+import com.example.tiktokproject.exceptions.BadRequestException;
 import com.example.tiktokproject.model.dto.postDTO.PostLikedDTO;
 import com.example.tiktokproject.model.dto.userDTO.*;
 import com.example.tiktokproject.model.pojo.User;
@@ -52,7 +53,11 @@ public class UserController {
     }
 
     @PostMapping("/forgottenPassword")
-    public ResponseEntity<String> sendEmailForForgottenPassword(@Valid @RequestBody UserForgottenPasswordRequestDTO userDto) {
+    public ResponseEntity<String> sendEmailForForgottenPassword(@Valid @RequestBody UserForgottenPasswordRequestDTO userDto,
+                                                                HttpSession session) {
+        if(sessionManager.isUserLogged(session)){
+            throw new BadRequestException("You are already logged");
+        }
         userService.sendEmailForForgottenPassword(userDto);
         return new ResponseEntity<>("Email was send successfully.", HttpStatus.OK);
     }
@@ -93,8 +98,10 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@RequestParam(value = "search", defaultValue = "") String search) {
-        return new ResponseEntity<>(userService.getAllUsersByUsername(search), HttpStatus.ACCEPTED);
+    public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@RequestParam(value = "search", defaultValue = "") String search,
+                                                                      @RequestParam(name = "pageNumber",defaultValue = "0") int pageNumber,
+                                                                      @RequestParam(name = "rowsNumber",defaultValue = "10") int rowsNumber) {
+        return new ResponseEntity<>(userService.getAllUsersByUsername(search,pageNumber,rowsNumber), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/users/{id}/follow")

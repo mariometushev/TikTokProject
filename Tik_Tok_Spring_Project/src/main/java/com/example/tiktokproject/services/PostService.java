@@ -59,11 +59,12 @@ public class PostService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String fileName = UUID.randomUUID().toString() + postId + "." + realFileExtension;
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String fileName = UUID.randomUUID().toString() + postId + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big video size. The maximum video size is 50MB.");
         }
-        if (!("mp4".equals(realFileExtension))) {
+        if (!("video/mp4".equals(realFileExtension))) {
             throw new BadRequestException("Wrong video format.You can upload only .mp4.");
         }
         try {

@@ -29,9 +29,9 @@ public class HashtagService {
 
     public HashtagResponseDTO getAllPostsByHashtag(String title, int rowsNumber, int pageNumber) {
         Hashtag hashtag = hashtagRepository.findHashtagByTitle(title).orElseThrow(() -> new NotFoundException("Hashtag not found"));
-        Pageable page = PageRequest.of(rowsNumber, pageNumber, Sort.by("title").descending());
+        Pageable page = PageRequest.of(rowsNumber, pageNumber, Sort.by("views").descending());
         HashtagResponseDTO hashtagDto = modelMapper.map(hashtag, HashtagResponseDTO.class);
-        List<Post> hashtagPosts = postRepository.findAllBy(hashtag, page);
+        List<Post> hashtagPosts = postRepository.findAllByHashtagId(hashtag.getId(), page);
         for (Post post : hashtagPosts) {
             PostWithOwnerDTO postDto = modelMapper.map(post, PostWithOwnerDTO.class);
             postDto.setPostHaveComments(post.getPostComments().size());
