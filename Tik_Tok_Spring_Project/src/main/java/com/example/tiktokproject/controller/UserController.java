@@ -143,6 +143,7 @@ public class UserController {
         sessionManager.validateLogin(request);
         sessionManager.validateUserId(request.getSession(), userId);
         User user = sessionManager.getSessionUser(request.getSession());
+        request.getSession().invalidate();
         userService.deleteUser(user);
         return new ResponseEntity<>("Your delete request was successful.", HttpStatus.ACCEPTED);
     }

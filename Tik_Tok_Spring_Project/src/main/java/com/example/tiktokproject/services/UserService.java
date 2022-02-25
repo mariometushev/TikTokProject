@@ -87,6 +87,7 @@ public class UserService {
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
+    //TODO transactional?
     public void verifyEmail(String token, User user) {
         Token t = tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found."));
         if (user.getId() != t.getOwner().getId()) {
@@ -102,7 +103,7 @@ public class UserService {
 
     public void sendEmailForForgottenPassword(UserForgottenPasswordRequestDTO userDto) {
         User user = userRepository.findByEmail(userDto.getEmail()).orElseThrow(() -> new NotFoundException("User not found."));
-        new Thread(() -> emailService.sendSimpleMessage(user, EmailService.PASSWORD_BODY, EmailService.PASSWORD_TOPIC));
+        new Thread(() -> emailService.sendSimpleMessage(user, EmailService.PASSWORD_BODY, EmailService.PASSWORD_TOPIC)).start();
     }
 
     public UserEditResponseDTO editUser(UserEditRequestDTO userEditDTO) {
@@ -157,7 +158,6 @@ public class UserService {
     }
 
 
-    @SneakyThrows
     public UserEditProfilePictureResponseDTO editProfilePicture(MultipartFile file, int userId) {
         Tika tika = new Tika();
         String realFileExtension = null;
@@ -167,7 +167,7 @@ public class UserService {
             e.printStackTrace();
         }
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName =  UUID.randomUUID().toString() + "." + extension;
+        String fileName = UUID.randomUUID() + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big photo size. The maximum photo size is 50MB.");
         }
@@ -258,12 +258,12 @@ public class UserService {
         return modelMapper.map(user, UserSetUsernameDTO.class);
     }
 
-    public List<UserUsernameDTO> getAllUsersByUsername(String search,int pageNumber,int rowsNumber) {
+    public List<UserUsernameDTO> getAllUsersByUsername(String search, int pageNumber, int rowsNumber) {
         if (search.trim().isEmpty()) {
             throw new BadRequestException("Search field is mandatory");
         }
         search = "%" + search + "%";
-        Pageable page = PageRequest.of(pageNumber,rowsNumber);
+        Pageable page = PageRequest.of(pageNumber, rowsNumber);
         List<User> users = userRepository.findBySearch(search, page);
         List<UserUsernameDTO> responseUsers = new ArrayList<>();
         for (User u : users) {
