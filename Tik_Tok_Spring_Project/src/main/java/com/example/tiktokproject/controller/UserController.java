@@ -60,8 +60,8 @@ public class UserController {
 
     @GetMapping("/forgottenPassword/{token}")
     public ResponseEntity<String> checkForgottenPasswordEmailToken(@PathVariable String token, HttpServletRequest request) {
-        User user = sessionManager.getSessionUser(request.getSession());
-        userService.forgottenPassword(token, user);
+        sessionManager.setSessionUserId(request, userService.getUserIdByToken(token));
+        userService.forgottenPassword(token);
         return new ResponseEntity<>("Valid token, please enter your new password.", HttpStatus.OK);
     }
 

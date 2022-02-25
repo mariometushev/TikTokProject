@@ -57,4 +57,9 @@ public class SessionManager {
         userService.setLastLoginAttempt(userId);
     }
 
+    public void setSessionUserId(HttpServletRequest request, int userId){
+        HttpSession session = request.getSession();
+        session.setAttribute(SessionManager.USER_ID, userId);
+    }
+
 }

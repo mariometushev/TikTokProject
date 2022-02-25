@@ -14,6 +14,7 @@ import com.example.tiktokproject.model.repository.PostRepository;
 import com.example.tiktokproject.model.repository.TokenRepository;
 import com.example.tiktokproject.model.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.tika.Tika;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -147,8 +148,13 @@ public class UserService {
     }
 
     public UserEditProfilePictureResponseDTO editProfilePicture(MultipartFile file, int userId) {
-        MimetypesFileTypeMap mime = new MimetypesFileTypeMap();
-        String realFileExtension = mime.getContentType(file.getName());
+        Tika tika = new Tika();
+        String realFileExtension = null;
+        try {
+            realFileExtension = tika.detect(file.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String fileName = System.nanoTime() + "." + realFileExtension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big photo size. The maximum photo size is 50MB.");
@@ -255,11 +261,8 @@ public class UserService {
     }
 
 
-    public void forgottenPassword(String token, User user) {
+    public void forgottenPassword(String token) {
         Token t = tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found."));
-        if (t.getOwner().getId() != user.getId()) {
-            throw new BadRequestException("You are not the owner of this token");
-        }
         if (t.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Token expiry date is expired");
         }
@@ -305,6 +308,10 @@ public class UserService {
         if (localDate.isAfter(LocalDate.now().minusYears(13))) {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
+    }
+
+    public int getUserIdByToken(String token) {
+        return tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found")).getOwner().getId();
     }
 }
 
