@@ -32,4 +32,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "WHERE phh.hashtag_id = :id ", nativeQuery = true)
     List<Post> findAllByHashtagId(@Param("id") Integer id, Pageable page);
 
+    List<Post> findAllPosts(Pageable pageable);
+
 }

@@ -19,6 +19,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -133,18 +134,16 @@ public class PostService {
         return postDto;
     }
 
-    public List<PostWithOwnerDTO> getAllPostsSortByUploadDate(int id, int rowsNumber, int pageNumber) {
+    public List<PostWithOwnerDTO> getAllPostsByUserIdSortByUploadDate(int id, int rowsNumber, int pageNumber) {
         Pageable page = PageRequest.of(rowsNumber, pageNumber);
         List<Post> posts = postRepository.findPostsByUploadDate(id, page);
-        List<PostWithOwnerDTO> postsWithOwner = new ArrayList<>();
-        for (Post p : posts) {
-            PostWithOwnerDTO post = modelMapper.map(p, PostWithOwnerDTO.class);
-            post.setUserWithoutPost(modelMapper.map(p.getOwner(), UserWithoutPostDTO.class));
-            post.setPostHaveComments(p.getPostComments().size());
-            post.setPostHaveLikes(p.getPostLikes().size());
-            postsWithOwner.add(post);
-        }
-        return postsWithOwner;
+        return mappingPostToPostWithOwnerDTO(posts);
+    }
+
+    public List<PostWithOwnerDTO> getAllPostsSortByUploadDate(int pageNumber, int rowsNumber) {
+        Pageable page = PageRequest.of(pageNumber, rowsNumber, Sort.by("upload_date"));
+        List<Post> posts = postRepository.findAllPosts(page);
+        return mappingPostToPostWithOwnerDTO(posts);
     }
 
     public void likePost(int postId, User user) {
@@ -169,6 +168,18 @@ public class PostService {
         }
         post.removeLike(user);
         postRepository.save(post);
+    }
+
+    private List<PostWithOwnerDTO> mappingPostToPostWithOwnerDTO(List<Post> posts){
+        List<PostWithOwnerDTO> postsWithOwner = new ArrayList<>();
+        for (Post p : posts) {
+            PostWithOwnerDTO post = modelMapper.map(p, PostWithOwnerDTO.class);
+            post.setUserWithoutPost(modelMapper.map(p.getOwner(), UserWithoutPostDTO.class));
+            post.setPostHaveComments(p.getPostComments().size());
+            post.setPostHaveLikes(p.getPostLikes().size());
+            postsWithOwner.add(post);
+        }
+        return postsWithOwner;
     }
 
     private void checkForHashtags(Post p, boolean addHashtag) {

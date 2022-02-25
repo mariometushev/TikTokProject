@@ -62,10 +62,10 @@ public class PostController {
     }
 
     @GetMapping("/users/{id}/posts")
-    public ResponseEntity<List<PostWithOwnerDTO>> getAllPostsSortByUploadDate(@PathVariable int id,
-                                                                              @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
-                                                                              @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber) {
-        return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(id, pageNumber, rowsNumber), HttpStatus.OK);
+    public ResponseEntity<List<PostWithOwnerDTO>> getAllPostsByUserIdSortByUploadDate(@PathVariable int id,
+                                                                                      @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                                      @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber) {
+        return new ResponseEntity<>(postService.getAllPostsByUserIdSortByUploadDate(id, pageNumber, rowsNumber), HttpStatus.OK);
     }
 
     @PostMapping("/posts/{id}/like")
@@ -83,4 +83,11 @@ public class PostController {
         postService.unlikePost(id, user);
         return new ResponseEntity<>("Your unlike request was successful", HttpStatus.ACCEPTED);
     }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<PostWithOwnerDTO>> getDashboard(@RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                               @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber) {
+        return new ResponseEntity<>(postService.getAllPostsSortByUploadDate(pageNumber, rowsNumber), HttpStatus.OK);
+    }
+
 }

@@ -25,7 +25,7 @@ public class EmailService {
             "please click on the following link: localhost:9999/verify/";
     public static final String REGISTRATION_TOPIC = "Registration";
     public static final String PASSWORD_BODY = "In order to reset your password " +
-            "please click on the following link: localhost:9999/forgottenPassword/";
+            "please click on the following link: http://localhost:9999/forgottenPassword/";
     public static final String PASSWORD_TOPIC = "Forgotten password";
     public static final String INACTIVITY_BODY = "Hello, you have been inactive for last seven days, " +
             "we miss you, come to our awesome site";
