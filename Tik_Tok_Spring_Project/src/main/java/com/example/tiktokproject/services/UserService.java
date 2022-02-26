@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.annotation.ApplicationScope;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -89,7 +91,7 @@ public class UserService {
         return modelMapper.map(user, UserRegisterResponseWithEmailDTO.class);
     }
 
-    //TODO transactional?
+    @Transactional(rollbackForClassName = "SQLException.class")
     public void verifyEmail(String token, User user) {
         Token t = tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found."));
         if (user.getId() != t.getOwner().getId()) {
