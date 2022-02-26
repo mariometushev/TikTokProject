@@ -16,9 +16,6 @@ import javax.validation.constraints.Size;
 @Validated
 public class PostEditRequestDTO {
 
-    @Min(value = 1,message = "Id can not be less than one")
-    @NotNull(message = "ownerId field can't be null")
-    private int ownerId;
     @NotNull(message = "privacy field can't be null")
     private boolean privacy;
     @Size(max = 150, message = "description length should be maximum 150 symbols")

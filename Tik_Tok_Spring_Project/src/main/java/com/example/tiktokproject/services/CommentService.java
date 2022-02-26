@@ -17,8 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +54,7 @@ public class CommentService {
         return response;
     }
 
-    //TODO transactional?
+    @Transactional(rollbackForClassName = "SQLException.class")
     public CommentReplyResponseDTO replyComment(User commentOwner, int commentId, CommentRequestDTO replyComment) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Not found comment"));
         Comment reply = modelMapper.map(replyComment, Comment.class);
@@ -97,6 +99,7 @@ public class CommentService {
         return response;
     }
 
+    @Transactional(rollbackForClassName = "SQLException.class")
     public void deleteComment(User commentOwner, int commentId) {
         Comment c = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("No such comment"));
         if (!commentOwner.getComments().contains(c)) {

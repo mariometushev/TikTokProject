@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ public class PostService {
     private static final long MAX_UPLOAD_SIZE = 50 * 1024 * 1024;
     private static final String UPLOAD_FOLDER = "uploads";
     public static final String HASHTAG_REGEX = "#[A-Za-z0-9_]+";
+    private final Object lock = new Object();
 
     @Autowired
     private PostRepository postRepository;
@@ -47,6 +50,8 @@ public class PostService {
     private ModelMapper modelMapper;
     @Autowired
     private HashtagRepository hashtagRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public PostUploadResponseDTO uploadPostVideo(int postId, MultipartFile file) {
         Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
@@ -65,7 +70,8 @@ public class PostService {
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big video size. The maximum video size is 50MB.");
         }
-        if (!("video/mp4".equals(realFileExtension))) {
+        System.out.println(realFileExtension);
+        if (!("video/quicktime".equals(realFileExtension))) {
             throw new BadRequestException("Wrong video format.You can upload only .mp4.");
         }
         try {
@@ -95,9 +101,16 @@ public class PostService {
         return postUpload;
     }
 
+    @Transactional(rollbackForClassName = "SQLException.class")
     public void deletePost(int postId, HttpSession session) {
         checkUserPrivileges(postId, session);
-        postRepository.delete(postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found")));
+        Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        User u = p.getOwner();
+        if (u.getPosts().size() == 1) {
+            u.setRoleId(UserService.DEFAULT_ROLE_ID);
+            userRepository.save(u);
+        }
+        postRepository.delete(p);
     }
 
     public PostEditResponseDTO editPost(int postId, PostEditRequestDTO postDto, HttpSession session) {
@@ -124,7 +137,9 @@ public class PostService {
         if (!post.isPrivacy()) {
             throw new UnauthorizedException("This video is private!");
         }
-        post.setViews(post.getViews() + 1);//TODO synchronized???
+        synchronized (lock) {
+            post.setViews(post.getViews() + 1);
+        }
         postRepository.save(post);
         UserWithoutPostDTO userDto = modelMapper.map(post.getOwner(), UserWithoutPostDTO.class);
         PostWithOwnerDTO postDto = modelMapper.map(post, PostWithOwnerDTO.class);
@@ -170,7 +185,7 @@ public class PostService {
         postRepository.save(post);
     }
 
-    private List<PostWithOwnerDTO> mappingPostToPostWithOwnerDTO(List<Post> posts){
+    private List<PostWithOwnerDTO> mappingPostToPostWithOwnerDTO(List<Post> posts) {
         List<PostWithOwnerDTO> postsWithOwner = new ArrayList<>();
         for (Post p : posts) {
             PostWithOwnerDTO post = modelMapper.map(p, PostWithOwnerDTO.class);
@@ -219,8 +234,8 @@ public class PostService {
     }
 
     private void checkForNullButNotBlankInput(String text) {
-        if (text.trim().isEmpty()) {
-            throw new BadRequestException("This field can't be only white spaces");
+        if (text == null || text.trim().isEmpty()) {
+            throw new BadRequestException("This field is mandatory");
         }
     }
 }

@@ -22,7 +22,7 @@ public class EmailService {
     @Value(value = "${spring.mail.username}")
     private String adminEmail;
     public static final String REGISTRATION_BODY = "In order to complete your registration " +
-            "please click on the following link: localhost:9999/verify/";
+            "please click on the following link: http://localhost:9999/verify/";
     public static final String REGISTRATION_TOPIC = "Registration";
     public static final String PASSWORD_BODY = "In order to reset your password " +
             "please click on the following link: http://localhost:9999/forgottenPassword/";

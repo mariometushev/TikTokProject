@@ -32,6 +32,7 @@ public class HashtagService {
         Pageable page = PageRequest.of(rowsNumber, pageNumber, Sort.by("views").descending());
         HashtagResponseDTO hashtagDto = modelMapper.map(hashtag, HashtagResponseDTO.class);
         List<Post> hashtagPosts = postRepository.findAllByHashtagId(hashtag.getId(), page);
+
         for (Post post : hashtagPosts) {
             PostWithOwnerDTO postDto = modelMapper.map(post, PostWithOwnerDTO.class);
             postDto.setPostHaveComments(post.getPostComments().size());

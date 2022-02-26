@@ -27,6 +27,9 @@ public class UserController {
     @PostMapping("/loginWithEmail")
     public ResponseEntity<UserLoginResponseWithEmailDTO> login(@Valid @RequestBody UserLoginWithEmailDTO user,
                                                                HttpServletRequest request) {
+        if(sessionManager.isUserLogged(request.getSession())){
+            throw new BadRequestException("You are already logged");
+        }
         UserLoginResponseWithEmailDTO dto = userService.loginWithEmail(user);
         sessionManager.setSession(request, dto.getId());
         return new ResponseEntity<>(dto, HttpStatus.OK);

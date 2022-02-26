@@ -43,6 +43,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
+    public static final int CREATOR_ROLE_ID = 2;
+    public static final int DEFAULT_ROLE_ID = 1;
     private static final long MAX_UPLOAD_SIZE = 250 * 1024 * 1024;
     private static final String UPLOAD_PHOTO_FOLDER = "photos";
     @Autowired
@@ -166,14 +168,14 @@ public class UserService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName = UUID.randomUUID() + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big photo size. The maximum photo size is 50MB.");
         }
         if (!("image/png".equalsIgnoreCase(realFileExtension)) && !("image/jpeg".equalsIgnoreCase(realFileExtension))) {
             throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
         }
+        String extension = "png";
+        String fileName = UUID.randomUUID() + "." + extension;
         try {
             Files.copy(file.getInputStream(), new File(UPLOAD_PHOTO_FOLDER + File.separator + fileName).toPath());
         } catch (IOException e) {
@@ -296,7 +298,7 @@ public class UserService {
     }
 
     public void changeUserRole(User user) {
-        user.setRoleId(PlaylistService.CREATOR_ROLE_ID);
+        user.setRoleId(CREATOR_ROLE_ID);
         userRepository.save(user);
     }
 
@@ -304,6 +306,10 @@ public class UserService {
         User u = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         u.setLastLoginAttempt(LocalDateTime.now());
         userRepository.save(u);
+    }
+
+    public int getUserIdByToken(String token) {
+        return tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found")).getOwner().getId();
     }
 
     private boolean checkForInvalidPassword(String password) {
@@ -325,10 +331,6 @@ public class UserService {
         if (localDate.isAfter(LocalDate.now().minusYears(13))) {
             throw new UnauthorizedException("You should be at least 13 years old");
         }
-    }
-
-    public int getUserIdByToken(String token) {
-        return tokenRepository.getByToken(token).orElseThrow(() -> new NotFoundException("Token not found")).getOwner().getId();
     }
 }
 

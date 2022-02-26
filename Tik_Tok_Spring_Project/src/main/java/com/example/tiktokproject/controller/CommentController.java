@@ -14,7 +14,6 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestScope
 public class CommentController {
 
     @Autowired

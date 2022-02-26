@@ -28,7 +28,6 @@ import java.util.List;
 @Service
 public class PlaylistService {
 
-    public static final int CREATOR_ROLE_ID = 2;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -39,7 +38,7 @@ public class PlaylistService {
     private UserRepository userRepository;
 
     public PlaylistResponseDTO createPlaylist(User user, PlaylistRequestDTO playlistDto) {
-        if (user.getRoleId() != CREATOR_ROLE_ID) {
+        if (user.getRoleId() != UserService.CREATOR_ROLE_ID) {
             throw new UnauthorizedException("Your account have to be creator");
         }
         Playlist playlist = modelMapper.map(playlistDto, Playlist.class);
