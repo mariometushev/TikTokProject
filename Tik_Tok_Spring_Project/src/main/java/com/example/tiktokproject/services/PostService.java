@@ -111,6 +111,7 @@ public class PostService {
             userRepository.save(u);
         }
         postRepository.delete(p);
+        checkForHashtags(p, false);
     }
 
     public PostEditResponseDTO editPost(int postId, PostEditRequestDTO postDto, HttpSession session) {
@@ -207,6 +208,9 @@ public class PostService {
         }
         if (hashtags.size() > 0) {
             for (String hashtag : hashtags) {
+                if (hashtag.length() > 50) {
+                    throw new BadRequestException("Hashtag length should be maximum 50 symbols");
+                }
                 Hashtag hash;
                 if (hashtagRepository.findHashtagByTitle(hashtag).isPresent()) {
                     hash = hashtagRepository.findHashtagByTitle(hashtag).get();
@@ -219,6 +223,9 @@ public class PostService {
                     p.addHashtag(hash);
                 } else {
                     p.removeHashtag(hash);
+                    if (hash.getPosts().size() <= 1) {
+                        hashtagRepository.delete(hash);
+                    }
                 }
             }
         }
