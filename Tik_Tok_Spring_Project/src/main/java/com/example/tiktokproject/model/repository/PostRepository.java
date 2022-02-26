@@ -35,4 +35,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query(value = "SELECT * FROM posts", nativeQuery = true)
     List<Post> findAllPosts(Pageable pageable);
 
+    @Query(value = "SELECT * FROM posts AS p " +
+            "WHERE p.owner_id = :id " +
+            "ORDER BY p.upload_date DESC", nativeQuery = true)
+    List<Post> findAllPostsByOwnerId(@Param("id") Integer id, Pageable pageable);
+
 }

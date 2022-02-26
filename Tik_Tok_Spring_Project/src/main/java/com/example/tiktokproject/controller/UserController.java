@@ -27,7 +27,7 @@ public class UserController {
     @PostMapping("/loginWithEmail")
     public ResponseEntity<UserLoginResponseWithEmailDTO> login(@Valid @RequestBody UserLoginWithEmailDTO user,
                                                                HttpServletRequest request) {
-        if(sessionManager.isUserLogged(request.getSession())){
+        if (sessionManager.isUserLogged(request.getSession())) {
             throw new BadRequestException("You are already logged");
         }
         UserLoginResponseWithEmailDTO dto = userService.loginWithEmail(user);
@@ -58,7 +58,7 @@ public class UserController {
     @PostMapping("/forgottenPassword")
     public ResponseEntity<String> sendEmailForForgottenPassword(@Valid @RequestBody UserForgottenPasswordRequestDTO userDto,
                                                                 HttpSession session) {
-        if(sessionManager.isUserLogged(session)){
+        if (sessionManager.isUserLogged(session)) {
             throw new BadRequestException("You are already logged");
         }
         userService.sendEmailForForgottenPassword(userDto);
@@ -96,15 +96,17 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<UserInformationDTO> getUserByUsername(@RequestParam(value = "username", defaultValue = "") String username) {
-        return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.ACCEPTED);
+    public ResponseEntity<UserInformationDTO> getUserByUsername(@RequestParam(value = "username", defaultValue = "") String username,
+                                                                @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber) {
+        return new ResponseEntity<>(userService.getUserByUsername(username, pageNumber, rowsNumber), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<UserUsernameDTO>> searchUserByUsername(@RequestParam(value = "search", defaultValue = "") String search,
-                                                                      @RequestParam(name = "pageNumber",defaultValue = "0") int pageNumber,
-                                                                      @RequestParam(name = "rowsNumber",defaultValue = "10") int rowsNumber) {
-        return new ResponseEntity<>(userService.getAllUsersByUsername(search,pageNumber,rowsNumber), HttpStatus.ACCEPTED);
+                                                                      @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                      @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber) {
+        return new ResponseEntity<>(userService.getAllUsersByUsername(search, pageNumber, rowsNumber), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/users/{id}/follow")

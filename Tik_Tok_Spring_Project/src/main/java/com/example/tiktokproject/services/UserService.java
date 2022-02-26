@@ -187,7 +187,7 @@ public class UserService {
         return modelMapper.map(oldUser, UserEditProfilePictureResponseDTO.class);
     }
 
-    public UserInformationDTO getUserByUsername(String username) {
+    public UserInformationDTO getUserByUsername(String username, int pageNumber, int rowsNumber) {
         if (username.trim().isEmpty()) {
             throw new BadRequestException("Username is mandatory");
         }
@@ -195,7 +195,9 @@ public class UserService {
         UserInformationDTO userInformationDTO = modelMapper.map(u, UserInformationDTO.class);
         userInformationDTO.setNumberOfFollowers(u.getFollowers().size());
         userInformationDTO.setNumberOfFollowerTo(u.getFollowerTo().size());
-        List<Post> userPosts = u.getPosts();
+
+        Pageable page = PageRequest.of(pageNumber, rowsNumber);
+        List<Post> userPosts = postRepository.findAllPostsByOwnerId(u.getId(), page);
         for (Post p : userPosts) {
             PostWithoutOwnerDTO postDTO = modelMapper.map(p, PostWithoutOwnerDTO.class);
             postDTO.setPostHaveComments(p.getPostComments().size());
