@@ -160,6 +160,38 @@ public class CommentService {
         return commentWithoutOwner;
     }
 
+    public CommentWithRepliesDTO getCommentReplies(int id, int pageNumber, int rowsNumber) {
+        Pageable page = PageRequest.of(pageNumber,rowsNumber, Sort.by("commented_on").descending());
+
+        Comment c = commentRepository.findById(id).orElseThrow(() -> new NotFoundException("Comment not found"));
+        Post p = c.getPost();
+        User u = c.getOwner();
+
+        CommentWithRepliesDTO commentWithReplies = modelMapper.map(c, CommentWithRepliesDTO.class);
+        commentWithReplies.setCommentHasLikes(c.getCommentLikes().size());
+
+        UserWithoutPostDTO user = modelMapper.map(u, UserWithoutPostDTO.class);
+        commentWithReplies.setUserWithoutPost(user);
+
+        PostWithoutOwnerDTO post = modelMapper.map(p, PostWithoutOwnerDTO.class);
+        post.setPostHaveComments(p.getPostComments().size());
+        post.setPostHaveLikes(p.getPostLikes().size());
+        commentWithReplies.setPostWithoutOwner(post);
+
+        List<Comment> commentReplies = commentRepository.findCommentRepliesById(id, page);
+        List<CommentReplyDTO> commentReplyDto = new ArrayList<>();
+        for (Comment commentReply : commentReplies) {
+            CommentReplyDTO reply = modelMapper.map(commentReply, CommentReplyDTO.class);
+            UserWithoutPostDTO replyOwner = modelMapper.map(commentReply.getOwner(), UserWithoutPostDTO.class);
+            reply.setUserWithoutPost(replyOwner);
+            reply.setCommentHasLikes(commentReply.getCommentLikes().size());
+            commentReplyDto.add(reply);
+        }
+
+        commentWithReplies.setCommentReplies(commentReplyDto);
+        return commentWithReplies;
+    }
+
     private void setCommentOwnerCommentPostAndCommentUploadDate(Comment c, User u, Post p, LocalDateTime dateTime) {
         c.setOwner(u);
         c.setPost(p);
