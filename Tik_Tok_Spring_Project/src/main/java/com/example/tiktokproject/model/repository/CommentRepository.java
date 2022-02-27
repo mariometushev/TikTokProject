@@ -27,4 +27,8 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     @Query(value = "SELECT child_id FROM comments_have_comments WHERE parent_id = :commentId", nativeQuery = true)
     List<Integer> findAllCommentRepliesId(@Param("commentId") Integer commentId);
+
+    @Query(value = "SELECT * FROM comments AS c JOIN comments_have_comments as chc ON(c.id = chc.child_id)" +
+            " WHERE chc.parent_id = :id", nativeQuery = true)
+    List<Comment> findCommentRepliesById(@Param("id") Integer id, Pageable pageable);
 }

@@ -93,4 +93,13 @@ public class CommentController {
         return new ResponseEntity<>(commentService.getAllCommentsByPostId(postId, pageNumber, rowsNumber), HttpStatus.OK);
     }
 
+    @GetMapping("/comments/{id}/replies")
+    public ResponseEntity<CommentWithRepliesDTO> getCommentRepliesById(@PathVariable int id,
+                                                                       @RequestParam(name = "pageNumber", defaultValue = "0") int pageNumber,
+                                                                       @RequestParam(name = "rowsNumber", defaultValue = "10") int rowsNumber,
+                                                                       HttpServletRequest request){
+        sessionManager.validateLogin(request);
+        return new ResponseEntity<>(commentService.getCommentReplies(id,pageNumber,rowsNumber), HttpStatus.OK);
+    }
+
 }
