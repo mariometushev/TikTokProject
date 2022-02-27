@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,15 +66,14 @@ public class PostService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String fileName = UUID.randomUUID().toString() + postId + "." + extension;
         if (file.getSize() > MAX_UPLOAD_SIZE) {
             throw new BadRequestException("Too big video size. The maximum video size is 50MB.");
         }
-        System.out.println(realFileExtension);
         if (!("video/quicktime".equals(realFileExtension))) {
             throw new BadRequestException("Wrong video format.You can upload only .mp4.");
         }
+        String extension = "mp4";
+        String fileName = UUID.randomUUID() + "." + extension;
         try {
             Files.copy(file.getInputStream(), new File(UPLOAD_FOLDER + File.separator + fileName).toPath());
         } catch (IOException e) {
@@ -105,6 +105,14 @@ public class PostService {
     public void deletePost(int postId, HttpSession session) {
         checkUserPrivileges(postId, session);
         Post p = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
+        try {
+            String postVideoName = p.getVideoUrl();
+            String pathOfTheVideo = UPLOAD_FOLDER + File.separator + postVideoName;
+            Files.delete(Path.of(pathOfTheVideo));
+        } catch (IOException e) {
+            throw new com.example.tiktokproject.exceptions.IOException("Server file system error.");
+        }
+
         User u = p.getOwner();
         if (u.getPosts().size() == 1) {
             u.setRoleId(UserService.DEFAULT_ROLE_ID);

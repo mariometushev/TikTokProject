@@ -73,8 +73,8 @@ public class CommentService {
         parent.setCommentHasReplies(commentRepository.findRepliesByCommentId(c.getId()));
 
         CommentReplyResponseDTO response = modelMapper.map(reply, CommentReplyResponseDTO.class);
-        UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
         PostWithoutOwnerDTO post = modelMapper.map(p, PostWithoutOwnerDTO.class);
+        UserWithoutPostDTO user = modelMapper.map(c.getOwner(), UserWithoutPostDTO.class);
 
         post.setPostHaveComments(p.getPostComments().size());
         post.setPostHaveLikes(p.getPostLikes().size());
@@ -148,7 +148,7 @@ public class CommentService {
 
     public List<CommentWithoutOwnerDTO> getAllCommentsByPostId(int postId, int pageNumber, int rowsNumber) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NotFoundException("Post not found"));
-        Pageable page = PageRequest.of(pageNumber, rowsNumber, Sort.by("commentedOn").descending());
+        Pageable page = PageRequest.of(pageNumber, rowsNumber, Sort.by("commented_on").descending());
         List<Comment> comments = commentRepository.findAllByPost(post, page);
         List<CommentWithoutOwnerDTO> commentWithoutOwner = new ArrayList<>();
         for (Comment comment : comments) {

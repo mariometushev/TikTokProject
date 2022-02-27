@@ -34,6 +34,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -176,14 +177,25 @@ public class UserService {
         if (!("image/png".equalsIgnoreCase(realFileExtension)) && !("image/jpeg".equalsIgnoreCase(realFileExtension))) {
             throw new BadRequestException("Wrong photo format.You can upload only .png or .jpg.");
         }
-        String extension = "png";
+        String extension;
+        if ("image/png".equalsIgnoreCase(realFileExtension)) {
+            extension = "png";
+        } else {
+            extension = "jpg";
+        }
         String fileName = UUID.randomUUID() + "." + extension;
+        User oldUser;
         try {
+            oldUser = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+            String userPhotoName = oldUser.getPhotoUrl();
+            if (userPhotoName != null) {
+                String photoPath = UPLOAD_PHOTO_FOLDER + File.separator + userPhotoName;
+                Files.delete(Path.of(photoPath));
+            }
             Files.copy(file.getInputStream(), new File(UPLOAD_PHOTO_FOLDER + File.separator + fileName).toPath());
         } catch (IOException e) {
             throw new com.example.tiktokproject.exceptions.IOException("Server file system error.");
         }
-        User oldUser = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Cannot find user with that id"));
         oldUser.setPhotoUrl(fileName);
         userRepository.save(oldUser);
         return modelMapper.map(oldUser, UserEditProfilePictureResponseDTO.class);
